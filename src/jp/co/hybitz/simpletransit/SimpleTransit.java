@@ -19,6 +19,11 @@ package jp.co.hybitz.simpletransit;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -32,5 +37,23 @@ public class SimpleTransit extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        Button search = (Button) findViewById(R.id.search);
+        search.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				SimpleTransit.this.onClick(v);
+			}
+		});
+    }
+    
+    private void onClick(View v) {
+		ArrayAdapter<String> aa = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+		aa.add("検索結果1");
+		aa.add("検索結果2");
+		aa.add("検索結果3");
+		
+		ListView lv = (ListView) findViewById(R.id.results);
+		lv.setAdapter(aa);
     }
 }

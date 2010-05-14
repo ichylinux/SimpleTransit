@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    >
-<TextView  
-    android:layout_width="fill_parent" 
-    android:layout_height="wrap_content" 
-    android:text="@string/hello"
-    />
+<LinearLayout android:id="@+id/LinearLayout01" android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:id="@+id/LinearLayout02" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/TextViewFrom" android:text="出発地">
+        </TextView>
+        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/EditTextFrom" android:minWidth="200px" android:maxLines="1" android:singleLine="true">
+        </EditText>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/LinearLayout03" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/TextViewTo" android:text="到着地">
+        </TextView>
+        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="200px" android:maxLines="1" android:singleLine="true">
+        </EditText>
+    <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="検索" android:id="@+id/search"></Button>
+</LinearLayout>
+
+    
+<ListView android:layout_width="wrap_content" android:layout_height="wrap_content" android:isScrollContainer="true" android:id="@+id/results"></ListView>
 </LinearLayout>
