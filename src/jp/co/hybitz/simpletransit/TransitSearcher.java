@@ -43,7 +43,7 @@ public class TransitSearcher {
 		InputStream in = null;
 
 		try {
-			URL url = new URL(GOOGLE + createQueryString(query.getFrom(), query.getTo()));
+			URL url = new URL(GOOGLE + createQueryString(query));
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setRequestMethod("GET");
 			con.connect();
@@ -71,11 +71,11 @@ public class TransitSearcher {
 		return new TransitParser20100517();
 	}
 	
-	private String createQueryString(String from, String to) {
+	private String createQueryString(TransitQuery query) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("?saddr=").append(URLEncoder.encode(from));
-		sb.append("&daddr=").append(URLEncoder.encode(to));
-		sb.append("&time=&ttype=dep&ie=UTF8&f=d&dirmode=transit&num=1&dirflg=r");
+		sb.append("?saddr=").append(URLEncoder.encode(query.getFrom()));
+		sb.append("&daddr=").append(URLEncoder.encode(query.getTo()));
+		sb.append("&time=&ttype=dep&ie=UTF8&f=d&dirmode=transit&num=3&dirflg=r");
 		return sb.toString();
 	}
 }

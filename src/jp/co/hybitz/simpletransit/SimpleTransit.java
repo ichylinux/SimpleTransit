@@ -68,6 +68,8 @@ public class SimpleTransit extends Activity {
 		ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
 
 		List<Transit> list = new TransitSearcher().search(createQuery());
+		aa.add("検索結果は " + list.size() + " 件です。");
+		
 		for (Iterator<Transit> it = list.iterator(); it.hasNext();) {
 			Transit transit = it.next();
 			aa.add(createResult(transit));
