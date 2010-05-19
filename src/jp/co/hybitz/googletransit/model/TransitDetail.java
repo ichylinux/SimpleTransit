@@ -15,16 +15,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.parser;
+package jp.co.hybitz.googletransit.model;
 
-import java.io.InputStream;
-
-import jp.co.hybitz.simpletransit.model.TransitResult;
+import java.io.Serializable;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public interface TransitParser {
+public class TransitDetail implements Serializable {
 
-	public TransitResult parse(InputStream in) throws Exception;
+	private String route;
+	private TimeAndPlace departure;
+	private TimeAndPlace arrival;
+
+	public String getRoute() {
+		return route;
+	}
+	public void setRoute(String route) {
+		this.route = route;
+	}
+	public TimeAndPlace getDeparture() {
+		return departure;
+	}
+	public void setDeparture(TimeAndPlace departure) {
+		this.departure = departure;
+	}
+	public TimeAndPlace getArrival() {
+		return arrival;
+	}
+	public void setArrival(TimeAndPlace arrival) {
+		this.arrival = arrival;
+	}
+	
+	public boolean isWalking() {
+		return route.startsWith("徒歩");
+	}
 }

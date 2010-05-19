@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.model;
+package jp.co.hybitz.googletransit.model;
+
+import java.io.Serializable;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TimeAndPlace {
+public class TimeAndPlace implements Serializable {
 
     private String time;
     private String place;

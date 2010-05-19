@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit;
+package jp.co.hybitz.googletransit;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +25,10 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 
-import jp.co.hybitz.simpletransit.model.TransitQuery;
-import jp.co.hybitz.simpletransit.model.TransitResult;
-import jp.co.hybitz.simpletransit.parser.TransitParser;
-import jp.co.hybitz.simpletransit.parser.TransitParser20100517;
+import jp.co.hybitz.googletransit.model.TransitQuery;
+import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.googletransit.parser.TransitParser;
+import jp.co.hybitz.googletransit.parser.TransitParser20100517;
 
 import org.xmlpull.v1.XmlPullParserException;
 

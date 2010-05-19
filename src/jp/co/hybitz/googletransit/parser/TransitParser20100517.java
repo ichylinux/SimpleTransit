@@ -15,15 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.parser;
+package jp.co.hybitz.googletransit.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import jp.co.hybitz.simpletransit.model.TimeAndPlace;
-import jp.co.hybitz.simpletransit.model.Transit;
-import jp.co.hybitz.simpletransit.model.TransitDetail;
-import jp.co.hybitz.simpletransit.model.TransitResult;
+import jp.co.hybitz.googletransit.model.TimeAndPlace;
+import jp.co.hybitz.googletransit.model.Transit;
+import jp.co.hybitz.googletransit.model.TransitDetail;
+import jp.co.hybitz.googletransit.model.TransitResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -46,8 +46,6 @@ public class TransitParser20100517 implements TransitParser {
 		do {
 			switch (eventType) {
 			case XmlPullParser.START_TAG :
-//				String tag = parser.getName();
-//				sb.append("<" + tag + ">");
 				break;
 			case XmlPullParser.END_TAG :
 				break;

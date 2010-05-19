@@ -15,39 +15,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.model;
+package jp.co.hybitz.googletransit.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TransitDetail implements Serializable {
+public class TransitResult implements Serializable {
 
-	private String route;
-	private TimeAndPlace departure;
-	private TimeAndPlace arrival;
+    private String title;
+    private List<Transit> transits = new ArrayList<Transit>();
+    
+    public String getTitle() {
+        return title;
+    }
 
-	public String getRoute() {
-		return route;
-	}
-	public void setRoute(String route) {
-		this.route = route;
-	}
-	public TimeAndPlace getDeparture() {
-		return departure;
-	}
-	public void setDeparture(TimeAndPlace departure) {
-		this.departure = departure;
-	}
-	public TimeAndPlace getArrival() {
-		return arrival;
-	}
-	public void setArrival(TimeAndPlace arrival) {
-		this.arrival = arrival;
-	}
-	
-	public boolean isWalking() {
-		return route.startsWith("徒歩");
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<Transit> getTransits() {
+        return transits;
+    }
+    
+    public void addTransit(Transit transit) {
+        transits.add(transit);
+    }
+    
+    public int getTransitCount() {
+        return transits.size();
+    }
 }

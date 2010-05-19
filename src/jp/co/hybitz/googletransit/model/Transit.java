@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.model;
+package jp.co.hybitz.googletransit.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,13 +47,19 @@ public class Transit implements Serializable {
 	
 	public int getTransferCount() {
 		int ret = 0;
+		boolean isFirst = true;
 		for (Iterator<TransitDetail> it = details.iterator(); it.hasNext();) {
 			TransitDetail detail = it.next();
 			if (detail.isWalking()) {
 				continue;
 			}
 			
-			ret ++;
+			// 最初の交通機関の乗車は乗り換え回数には含めない
+			if (isFirst) {
+			    isFirst = false;
+			} else {
+			    ret ++;
+			}
 		}
 		
 		return ret;

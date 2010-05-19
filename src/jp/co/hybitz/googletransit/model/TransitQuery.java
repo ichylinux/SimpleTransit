@@ -15,36 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.model;
+package jp.co.hybitz.googletransit.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TransitResult {
+public class TransitQuery implements Serializable {
 
-    private String title;
-    private List<Transit> transits = new ArrayList<Transit>();
-    
-    public String getTitle() {
-        return title;
-    }
+	private String from;
+	private String to;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<Transit> getTransits() {
-        return transits;
-    }
-    
-    public void addTransit(Transit transit) {
-        transits.add(transit);
-    }
-    
-    public int getTransitCount() {
-        return transits.size();
-    }
+	public String getFrom() {
+		return from;
+	}
+	public void setFrom(String from) {
+		this.from = from;
+	}
+	public String getTo() {
+		return to;
+	}
+	public void setTo(String to) {
+		this.to = to;
+	}
 }

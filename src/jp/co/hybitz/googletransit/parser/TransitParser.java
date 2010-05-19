@@ -15,28 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.model;
+package jp.co.hybitz.googletransit.parser;
 
-import java.io.Serializable;
+import java.io.InputStream;
+
+import jp.co.hybitz.googletransit.model.TransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TransitQuery implements Serializable {
+public interface TransitParser {
 
-	private String from;
-	private String to;
-
-	public String getFrom() {
-		return from;
-	}
-	public void setFrom(String from) {
-		this.from = from;
-	}
-	public String getTo() {
-		return to;
-	}
-	public void setTo(String to) {
-		this.to = to;
-	}
+	public TransitResult parse(InputStream in) throws Exception;
 }

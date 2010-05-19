@@ -19,10 +19,11 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
 
-import jp.co.hybitz.simpletransit.model.Transit;
-import jp.co.hybitz.simpletransit.model.TransitDetail;
-import jp.co.hybitz.simpletransit.model.TransitQuery;
-import jp.co.hybitz.simpletransit.model.TransitResult;
+import jp.co.hybitz.googletransit.TransitSearcher;
+import jp.co.hybitz.googletransit.model.Transit;
+import jp.co.hybitz.googletransit.model.TransitDetail;
+import jp.co.hybitz.googletransit.model.TransitQuery;
+import jp.co.hybitz.googletransit.model.TransitResult;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
