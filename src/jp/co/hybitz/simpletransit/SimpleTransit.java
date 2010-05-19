@@ -19,13 +19,17 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
 
+import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -66,9 +70,12 @@ public class SimpleTransit extends Activity {
     }
     
     private void onClick(View v) {
-		ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
+        TransitResult result = search();
+        if (result == null) {
+            return;
+        }
 
-		TransitResult result = new TransitSearcher().search(createQuery());
+        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
 		aa.add(createSummary(result));
 		
 		for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
@@ -78,6 +85,25 @@ public class SimpleTransit extends Activity {
 		
 		ListView lv = (ListView) findViewById(R.id.results);
 		lv.setAdapter(aa);
+    }
+    
+    private TransitResult search() {
+        try {
+            return new TransitSearcher().search(createQuery());
+        } catch (TransitSearchException e) {
+            Log.e("SimpleTransit", e.getMessage(), e);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("ごめん！！");
+            builder.setMessage("こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage());
+            builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+        
+        return null;
     }
     
     private String createSummary(TransitResult result) {

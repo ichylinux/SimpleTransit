@@ -38,7 +38,7 @@ import org.xmlpull.v1.XmlPullParserException;
 public class TransitSearcher {
 	private static final String GOOGLE = "http://www.google.co.jp/m/directions";
 	
-	public TransitResult search(TransitQuery query) {
+	public TransitResult search(TransitQuery query) throws TransitSearchException {
 		InputStream in = null;
 
 		try {
@@ -50,20 +50,18 @@ public class TransitSearcher {
 			return createParser().parse(in);
 			
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+		    throw new TransitSearchException(e.getMessage(), e);
 		} catch (ProtocolException e) {
-			e.printStackTrace();
+            throw new TransitSearchException(e.getMessage(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+            throw new TransitSearchException(e.getMessage(), e);
 		} catch (XmlPullParserException e) {
-			e.printStackTrace();
+            throw new TransitSearchException(e.getMessage(), e);
 		} catch (Exception e) {
-			e.printStackTrace();
+            throw new TransitSearchException(e.getMessage(), e);
 		} finally {
 			if (in != null) { try {in.close();} catch (IOException e){} }
 		}
-		
-		return null;
 	}
 	
 	private TransitParser createParser() {
