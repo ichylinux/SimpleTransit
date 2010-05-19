@@ -46,4 +46,8 @@ public class TransitDetail implements Serializable {
 	public void setArrival(TimeAndPlace arrival) {
 		this.arrival = arrival;
 	}
+	
+	public boolean isWalking() {
+		return route.startsWith("徒歩");
+	}
 }

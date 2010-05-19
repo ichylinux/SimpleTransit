@@ -91,9 +91,14 @@ public class SimpleTransit extends Activity {
     	for (int i = 0; i < transit.getDetails().size(); i ++) {
     		TransitDetail detail = transit.getDetails().get(i);
     		
-    		sb.append(detail.getRoute()).append("\n");
-    		sb.append(detail.getDeparture().getTime()).append("発　").append(detail.getDeparture().getPlace()).append("\n");
-    		sb.append(detail.getArrival().getTime()).append("着　").append(detail.getArrival().getPlace());
+    		sb.append(detail.getRoute());
+
+    		if (!detail.isWalking()) {
+    			sb.append("\n");
+	    		sb.append(detail.getDeparture().getTime()).append("発　").append(detail.getDeparture().getPlace()).append("\n");
+	    		sb.append(detail.getArrival().getTime()).append("着　").append(detail.getArrival().getPlace());
+    		}
+
     		if (i < transit.getDetails().size() - 1) {
     			sb.append("\n");
     		}

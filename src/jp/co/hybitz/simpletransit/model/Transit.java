@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -45,6 +46,16 @@ public class Transit implements Serializable {
 	}
 	
 	public int getTransferCount() {
-		return details.size() - 1;
+		int ret = 0;
+		for (Iterator<TransitDetail> it = details.iterator(); it.hasNext();) {
+			TransitDetail detail = it.next();
+			if (detail.isWalking()) {
+				continue;
+			}
+			
+			ret ++;
+		}
+		
+		return ret;
 	}
 }
