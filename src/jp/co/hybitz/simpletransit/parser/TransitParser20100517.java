@@ -19,12 +19,11 @@ package jp.co.hybitz.simpletransit.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import jp.co.hybitz.simpletransit.model.TimeAndPlace;
 import jp.co.hybitz.simpletransit.model.Transit;
 import jp.co.hybitz.simpletransit.model.TransitDetail;
+import jp.co.hybitz.simpletransit.model.TransitResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -35,18 +34,16 @@ import android.util.Xml;
  * @author ichy <ichylinux@gmail.com>
  */
 public class TransitParser20100517 implements TransitParser {
+    private TransitResult result = new TransitResult();
 	private Transit transit;
 	private TransitDetail transitDetail;
 
-	public List<Transit> parse(InputStream in) throws XmlPullParserException, IOException {
-		List<Transit> ret = new ArrayList<Transit>();
-		
+	public TransitResult parse(InputStream in) throws XmlPullParserException, IOException {
 		XmlPullParser parser = Xml.newPullParser();
 		parser.setInput(in, null);
 		
 		int eventType = parser.getEventType();
 		do {
-
 			switch (eventType) {
 			case XmlPullParser.START_TAG :
 //				String tag = parser.getName();
@@ -56,46 +53,59 @@ public class TransitParser20100517 implements TransitParser {
 				break;
 			case XmlPullParser.TEXT :
 				String text = parser.getText().trim();
-			
-				if (text.matches(".*[0-9]*円.*")) {
-					if (transit != null) {
-						if (transitDetail != null) {
-							transit.addDetail(transitDetail);
-							transitDetail = null;
-						}
-
-						ret.add(transit);
-					}
-					transit = new Transit();
-					transit.setTitle(text);
-				}
-				else if ("逆方向の経路を表示".equals(text)) {
-					if (transit != null) {
-						if (transitDetail != null) {
-							transit.addDetail(transitDetail);
-							transitDetail = null;
-						}
-						
-						ret.add(transit);
-					}
-					transit = null;
-				} else if (text.length() > 0) {
-					if (text.matches("[0-9]{1,2}:[0-9]{2}発 .*")) {
-					    String[] split = text.split("発 ");
-						transitDetail.setDeparture(new TimeAndPlace(split[0], split[1]));
-					}
-					else if (text.matches("[0-9]{1,2}:[0-9]{2}着 .*")) {
-                        String[] split = text.split("着 ");
-						transitDetail.setArrival(new TimeAndPlace(split[0], split[1]));
-					} else {
-						handleRoute(text);
-					}
-				}
+				handleText(text);
 				break;
 			}
 		} while ((eventType = parser.next()) != XmlPullParser.END_DOCUMENT);
 
-		return ret;
+		return result;
+	}
+	
+	private void handleText(String text) {
+	    if (text.matches(".*～.* [0-9]{1,2}:[0-9]{2}(発|着)")) {
+	        result.setTitle(text);
+	    }
+	    else if (text.matches(".*[0-9]*円.*")) {
+            if (transit != null) {
+                if (transitDetail != null) {
+                    transit.addDetail(transitDetail);
+                    transitDetail = null;
+                }
+
+                result.addTransit(transit);
+            }
+            transit = new Transit();
+            transit.setTimeAndFee(text);
+        }
+        else if ("逆方向の経路を表示".equals(text)) {
+            if (transit != null) {
+                if (transitDetail != null) {
+                    transit.addDetail(transitDetail);
+                    transitDetail = null;
+                }
+                
+                result.addTransit(transit);
+            }
+            transit = null;
+        } else if (text.length() > 0) {
+            if (text.matches("[0-9]{1,2}:[0-9]{2}発 .*")) {
+                handleDeparture(text);            }
+            else if (text.matches("[0-9]{1,2}:[0-9]{2}着 .*")) {
+                handleArrival(text);
+            } else {
+                handleRoute(text);
+            }
+        }
+	}
+	
+	private void handleDeparture(String text) {
+        String[] split = text.split("発 ");
+        transitDetail.setDeparture(new TimeAndPlace(split[0], split[1]));
+	}
+	
+	private void handleArrival(String text) {
+        String[] split = text.split("着 ");
+        transitDetail.setArrival(new TimeAndPlace(split[0], split[1]));
 	}
 	
 	private void handleRoute(String text) {

@@ -18,14 +18,13 @@
 package jp.co.hybitz.simpletransit.parser;
 
 import java.io.InputStream;
-import java.util.List;
 
-import jp.co.hybitz.simpletransit.model.Transit;
+import jp.co.hybitz.simpletransit.model.TransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 public interface TransitParser {
 
-	public List<Transit> parse(InputStream in) throws Exception;
+	public TransitResult parse(InputStream in) throws Exception;
 }

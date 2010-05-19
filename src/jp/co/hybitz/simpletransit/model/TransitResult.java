@@ -17,45 +17,34 @@
  */
 package jp.co.hybitz.simpletransit.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class Transit implements Serializable {
+public class TransitResult {
 
-	private String timeAndFee;
-	private List<TransitDetail> details = new ArrayList<TransitDetail>();
+    private String title;
+    private List<Transit> transits = new ArrayList<Transit>();
+    
+    public String getTitle() {
+        return title;
+    }
 
-	public String getTimeAndFee() {
-		return timeAndFee;
-	}
-	public void setTimeAndFee(String title) {
-		this.timeAndFee = title;
-	}
-	
-	public List<TransitDetail> getDetails() {
-		return details;
-	}
-	
-	public void addDetail(TransitDetail detail) {
-		details.add(detail);
-	}
-	
-	public int getTransferCount() {
-		int ret = 0;
-		for (Iterator<TransitDetail> it = details.iterator(); it.hasNext();) {
-			TransitDetail detail = it.next();
-			if (detail.isWalking()) {
-				continue;
-			}
-			
-			ret ++;
-		}
-		
-		return ret;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<Transit> getTransits() {
+        return transits;
+    }
+    
+    public void addTransit(Transit transit) {
+        transits.add(transit);
+    }
+    
+    public int getTransitCount() {
+        return transits.size();
+    }
 }

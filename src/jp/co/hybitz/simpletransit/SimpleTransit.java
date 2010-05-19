@@ -18,11 +18,11 @@
 package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
-import java.util.List;
 
 import jp.co.hybitz.simpletransit.model.Transit;
 import jp.co.hybitz.simpletransit.model.TransitDetail;
 import jp.co.hybitz.simpletransit.model.TransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitResult;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -67,10 +67,10 @@ public class SimpleTransit extends Activity {
     private void onClick(View v) {
 		ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
 
-		List<Transit> list = new TransitSearcher().search(createQuery());
-		aa.add("検索結果は " + list.size() + " 件です。");
+		TransitResult result = new TransitSearcher().search(createQuery());
+		aa.add(createSummary(result));
 		
-		for (Iterator<Transit> it = list.iterator(); it.hasNext();) {
+		for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
 			Transit transit = it.next();
 			aa.add(createResult(transit));
 		}
@@ -79,10 +79,21 @@ public class SimpleTransit extends Activity {
 		lv.setAdapter(aa);
     }
     
+    private String createSummary(TransitResult result) {
+        StringBuilder sb = new StringBuilder();
+        if (result.getTransitCount() > 0) {
+            sb.append(result.getTitle()).append("\n");
+            sb.append("検索結果は " + result.getTransitCount() + " 件です。");
+        } else {
+            sb.append("該当するルートが見つかりませんでした。");
+        }
+        return sb.toString();
+    }
+    
     private String createResult(Transit transit) {
     	StringBuilder sb = new StringBuilder();
 
-    	sb.append(transit.getTitle());
+    	sb.append(transit.getTimeAndFee());
     	if (transit.getTransferCount() > 0) {
     		sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
     	}

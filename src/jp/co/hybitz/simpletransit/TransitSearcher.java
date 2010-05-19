@@ -24,10 +24,9 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.List;
 
-import jp.co.hybitz.simpletransit.model.Transit;
 import jp.co.hybitz.simpletransit.model.TransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.parser.TransitParser;
 import jp.co.hybitz.simpletransit.parser.TransitParser20100517;
 
@@ -39,7 +38,7 @@ import org.xmlpull.v1.XmlPullParserException;
 public class TransitSearcher {
 	private static final String GOOGLE = "http://www.google.co.jp/m/directions";
 	
-	public List<Transit> search(TransitQuery query) {
+	public TransitResult search(TransitQuery query) {
 		InputStream in = null;
 
 		try {
