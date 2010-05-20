@@ -37,6 +37,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 
@@ -83,12 +84,12 @@ public class SimpleTransit extends Activity {
     private TransitQuery createQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
+        CheckBox last = (CheckBox) findViewById(R.id.last);
 
         TransitQuery query = new TransitQuery();
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
-//        query.setTime(time);
-        query.setTimeType(TimeType.DEPARTURE);
+        query.setTimeType(last.isChecked() ? TimeType.LAST : TimeType.DEPARTURE);
         return query;
     }
     
@@ -98,18 +99,21 @@ public class SimpleTransit extends Activity {
             return searcher.search(createQuery());
         } catch (TransitSearchException e) {
             Log.e("SimpleTransit", e.getMessage(), e);
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("ごめん！！");
-            builder.setMessage("こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage());
-            builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            });
-            builder.show();
+            apologize(e);
         }
         
         return null;
+    }
+    
+    private void apologize(TransitSearchException e) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("ごめん！！");
+        builder.setMessage("こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage());
+        builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
     }
     
     private String createSummary(TransitResult result) {
