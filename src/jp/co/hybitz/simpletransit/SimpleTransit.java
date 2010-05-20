@@ -19,8 +19,11 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
 
+import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
+import jp.co.hybitz.googletransit.TransitSearcherFactory;
+import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.googletransit.model.TransitQuery;
@@ -59,16 +62,6 @@ public class SimpleTransit extends Activity {
 		});
     }
     
-    private TransitQuery createQuery() {
-    	EditText from = (EditText) findViewById(R.id.from);
-    	EditText to = (EditText) findViewById(R.id.to);
-
-    	TransitQuery query = new TransitQuery();
-    	query.setFrom(from.getText().toString());
-    	query.setTo(to.getText().toString());
-    	return query;
-    }
-    
     private void onClick(View v) {
         TransitResult result = search();
         if (result == null) {
@@ -87,9 +80,22 @@ public class SimpleTransit extends Activity {
 		lv.setAdapter(aa);
     }
     
+    private TransitQuery createQuery() {
+        EditText from = (EditText) findViewById(R.id.from);
+        EditText to = (EditText) findViewById(R.id.to);
+
+        TransitQuery query = new TransitQuery();
+        query.setFrom(from.getText().toString());
+        query.setTo(to.getText().toString());
+//        query.setTime(time);
+        query.setTimeType(TimeType.DEPARTURE);
+        return query;
+    }
+    
     private TransitResult search() {
         try {
-            return new TransitSearcher().search(createQuery());
+            TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
+            return searcher.search(createQuery());
         } catch (TransitSearchException e) {
             Log.e("SimpleTransit", e.getMessage(), e);
 
