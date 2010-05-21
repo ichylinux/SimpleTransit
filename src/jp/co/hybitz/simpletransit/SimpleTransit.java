@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.net.HttpURLConnection;
 import java.util.Iterator;
 
 import jp.co.hybitz.googletransit.Platform;
@@ -68,22 +69,16 @@ public class SimpleTransit extends Activity {
     }
     
     private void renderResult(TransitResult result) {
-        ListView lv = (ListView) findViewById(R.id.results);
+        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
+        aa.add(createSummary(result));
         
-        if (result == null) {
-            lv.setAdapter(null);
+        for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
+            Transit transit = it.next();
+            aa.add(createResult(transit));
         }
-        else {
-            ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
-            aa.add(createSummary(result));
-            
-            for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
-                Transit transit = it.next();
-                aa.add(createResult(transit));
-            }
-            
-            lv.setAdapter(aa);
-        }
+        
+        ListView lv = (ListView) findViewById(R.id.results);
+        lv.setAdapter(aa);
     }
     
     private TransitQuery createQuery() {
@@ -99,16 +94,21 @@ public class SimpleTransit extends Activity {
     }
     
     private void search() {
-        TransitResult result = null;
         try {
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-            result = searcher.search(createQuery());
+            TransitResult result = searcher.search(createQuery());
+            
+            if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                renderResult(result);
+            } else {
+                showMessage(String.valueOf(result.getResponseCode()));
+            }
+            
         } catch (TransitSearchException e) {
             Log.e("SimpleTransit", e.getMessage(), e);
             apologize(e);
         }
         
-        renderResult(result);
     }
     
     private void apologize(TransitSearchException e) {
@@ -122,6 +122,17 @@ public class SimpleTransit extends Activity {
         builder.show();
     }
     
+    private void showMessage(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("連絡");
+        builder.setMessage("Googleの応答が「" + message + "」でした。。");
+        builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+    }
+
     private String createSummary(TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
