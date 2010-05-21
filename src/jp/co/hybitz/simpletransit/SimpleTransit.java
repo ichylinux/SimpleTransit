@@ -130,7 +130,7 @@ public class SimpleTransit extends Activity {
     private String createResult(Transit transit) {
     	StringBuilder sb = new StringBuilder();
 
-    	sb.append(transit.getTimeAndFee());
+    	sb.append(transit.getTimeAndFare());
     	if (transit.getTransferCount() > 0) {
     		sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
     	}
