@@ -64,21 +64,26 @@ public class SimpleTransit extends Activity {
     }
     
     private void onClick(View v) {
-        TransitResult result = search();
+        search();
+    }
+    
+    private void renderResult(TransitResult result) {
+        ListView lv = (ListView) findViewById(R.id.results);
+        
         if (result == null) {
-            return;
+            lv.setAdapter(null);
         }
-
-        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
-		aa.add(createSummary(result));
-		
-		for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
-			Transit transit = it.next();
-			aa.add(createResult(transit));
-		}
-		
-		ListView lv = (ListView) findViewById(R.id.results);
-		lv.setAdapter(aa);
+        else {
+            ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
+            aa.add(createSummary(result));
+            
+            for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
+                Transit transit = it.next();
+                aa.add(createResult(transit));
+            }
+            
+            lv.setAdapter(aa);
+        }
     }
     
     private TransitQuery createQuery() {
@@ -93,16 +98,17 @@ public class SimpleTransit extends Activity {
         return query;
     }
     
-    private TransitResult search() {
+    private void search() {
+        TransitResult result = null;
         try {
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-            return searcher.search(createQuery());
+            result = searcher.search(createQuery());
         } catch (TransitSearchException e) {
             Log.e("SimpleTransit", e.getMessage(), e);
             apologize(e);
         }
         
-        return null;
+        renderResult(result);
     }
     
     private void apologize(TransitSearchException e) {
