@@ -18,6 +18,8 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Iterator;
 
 import jp.co.hybitz.googletransit.Platform;
@@ -32,6 +34,7 @@ import jp.co.hybitz.googletransit.model.TransitResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -39,13 +42,19 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends Activity {
+	private TimeType timeType = TimeType.DEPARTURE;
+	private String hour;
+	private String minute;
 
 	/**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -55,20 +64,69 @@ public class SimpleTransit extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        TextView time = (TextView) findViewById(R.id.time);
+        time.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				showTimeDialog();
+			}
+		});
+        
+        CheckBox last = (CheckBox) findViewById(R.id.last);
+        last.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				TextView time = (TextView) findViewById(R.id.time);
+				time.setEnabled(!isChecked);
+			}
+		});
+        
         Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new OnClickListener() {
-			
 			public void onClick(View v) {
-				SimpleTransit.this.onClick(v);
+				search();
 			}
 		});
     }
     
-    private void onClick(View v) {
-        search();
+    private void showTimeDialog() {
+    	final TimeDialog dialog = new TimeDialog(this);
+    	dialog.setOnDismissListener(new OnDismissListener() {
+			public void onDismiss(DialogInterface di) {
+				TextView time = (TextView) findViewById(R.id.time);
+				Integer selectedTime = dialog.getTime();
+				if (selectedTime != null) {
+                    timeType = dialog.getTimeType();
+                    hour = String.valueOf(selectedTime / 100);
+					if (hour.length() == 1) {
+						hour = "0" + hour;
+					}
+					minute = String.valueOf(selectedTime % 100);
+					if (minute.length() == 1) {
+						minute = "0" + minute;
+					}
+				}
+				else {
+				    timeType = null;
+				    hour = null;
+				    minute = null;
+				}
+				
+				if (hour != null && minute != null) {
+	                time.setText(hour + ":" + minute + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
+				}
+				else {
+				    time.setText(null);
+				}
+			}
+		});
+    	
+    	if (hour != null && minute != null) {
+    	    dialog.setTimeType(timeType);
+    		dialog.setTime(Integer.parseInt(hour), Integer.parseInt(minute));
+    	}
+    	dialog.show();
     }
     
-    private void renderResult(TransitResult result) {
+	private void renderResult(TransitResult result) {
         ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
         aa.add(createSummary(result));
         
@@ -89,8 +147,31 @@ public class SimpleTransit extends Activity {
         TransitQuery query = new TransitQuery();
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
-        query.setTimeType(last.isChecked() ? TimeType.LAST : TimeType.DEPARTURE);
+        if (last.isChecked()) {
+            query.setTimeType(TimeType.LAST);
+        } else {
+            query.setTimeType(timeType);
+
+            if (hour != null && minute != null) {
+            	query.setDate(getDate());
+            	query.setTime(hour + minute);
+            }
+        }
+
         return query;
+    }
+    
+    private String getDate() {
+        Calendar c = Calendar.getInstance();
+
+        String now = new SimpleDateFormat("hhmm").format(c.getTime());
+        if (now.compareTo(hour + minute) < 0) {
+        	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
+        }
+        else {
+        	c.add(Calendar.DATE, 1);
+        	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
+        }
     }
     
     private void search() {
