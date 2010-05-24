@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,8 +36,8 @@ import android.widget.TimePicker;
 public class TimeDialog implements DialogInterface {
 	private AlertDialog dialog;
 	private View layout;
-	private Integer time;
 	private TimeType timeType;
+	private Time time;
 	
 	public TimeDialog(Activity activity) {
 		dialog = createInnerDialog(activity);
@@ -67,7 +68,7 @@ public class TimeDialog implements DialogInterface {
         			timeType = TimeType.ARRIVAL;
         		}
         		
-        		time = tp.getCurrentHour() * 100 + tp.getCurrentMinute();
+        		time = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
         		dismiss();
 			}
 		});
@@ -91,16 +92,18 @@ public class TimeDialog implements DialogInterface {
 		return dialog;
 	}
 	
-	public Integer getTime() {
+	public Time getTime() {
 		return time;
 	}
 	
-	public void setTime(int hour, int minute) {
-	    time = hour * 100 + minute;
+	public void setTime(Time time) {
+	    this.time = time;
 	    
-	    TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
-	    tp.setCurrentHour(hour);
-	    tp.setCurrentMinute(minute);
+	    if (time != null) {
+    	    TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
+    	    tp.setCurrentHour(time.getHour());
+    	    tp.setCurrentMinute(time.getMinute());
+	    }
 	}
 	
 	public TimeType getTimeType() {

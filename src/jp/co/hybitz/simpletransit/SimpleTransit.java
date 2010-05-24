@@ -26,6 +26,7 @@ import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
 import jp.co.hybitz.googletransit.TransitSearcherFactory;
+import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
@@ -34,9 +35,13 @@ import jp.co.hybitz.googletransit.model.TransitResult;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -52,15 +57,17 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends Activity {
-	private TimeType timeType = TimeType.DEPARTURE;
-	private String hour;
-	private String minute;
+    private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
+    private static final int MENU_ITEM_QUIT = Menu.FIRST + 2;
+    
+	private TimeType timeType;
+	private Time time;
 
 	/**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
@@ -74,8 +81,16 @@ public class SimpleTransit extends Activity {
         CheckBox last = (CheckBox) findViewById(R.id.last);
         last.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				TextView time = (TextView) findViewById(R.id.time);
-				time.setEnabled(!isChecked);
+				TextView timeView = (TextView) findViewById(R.id.time);
+				timeView.setEnabled(!isChecked);
+				if (timeView.isEnabled()) {
+				    timeView.setTextColor(Color.BLACK);
+                    timeView.setBackgroundResource(R.layout.time_border_enabled);
+				}
+				else {
+                    timeView.setTextColor(Color.GRAY);
+				    timeView.setBackgroundResource(R.layout.time_border_disabled);
+				}
 			}
 		});
         
@@ -87,42 +102,52 @@ public class SimpleTransit extends Activity {
 		});
     }
     
+    /**
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, MENU_ITEM_PREFERENCES, 0, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 1, "終了");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
+     */
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        switch (item.getItemId()) {
+        case MENU_ITEM_PREFERENCES :
+            startActivity(new Intent(this, Preferences.class));
+            return true;
+        case MENU_ITEM_QUIT :
+            finish();
+            return true;
+        default :
+            return super.onMenuItemSelected(featureId, item);
+        }
+    }
+
     private void showTimeDialog() {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
-				TextView time = (TextView) findViewById(R.id.time);
-				Integer selectedTime = dialog.getTime();
-				if (selectedTime != null) {
-                    timeType = dialog.getTimeType();
-                    hour = String.valueOf(selectedTime / 100);
-					if (hour.length() == 1) {
-						hour = "0" + hour;
-					}
-					minute = String.valueOf(selectedTime % 100);
-					if (minute.length() == 1) {
-						minute = "0" + minute;
-					}
-				}
-				else {
-				    timeType = null;
-				    hour = null;
-				    minute = null;
-				}
+				TextView timeView = (TextView) findViewById(R.id.time);
+				time = dialog.getTime();
+                timeType = dialog.getTimeType();
 				
-				if (hour != null && minute != null) {
-	                time.setText(hour + ":" + minute + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
+				if (timeType != null && time != null) {
+				    timeView.setText(time.getTimeAsString(true) + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
 				}
 				else {
-				    time.setText(null);
+				    timeView.setText(null);
 				}
 			}
 		});
     	
-    	if (hour != null && minute != null) {
-    	    dialog.setTimeType(timeType);
-    		dialog.setTime(Integer.parseInt(hour), Integer.parseInt(minute));
-    	}
+	    dialog.setTimeType(timeType);
+		dialog.setTime(time);
     	dialog.show();
     }
     
@@ -149,14 +174,17 @@ public class SimpleTransit extends Activity {
         query.setTo(to.getText().toString());
         if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
-        } else {
+        }
+        else {
             query.setTimeType(timeType);
 
-            if (hour != null && minute != null) {
+            if (time != null) {
             	query.setDate(getDate());
-            	query.setTime(hour + minute);
+            	query.setTime(time.getTimeAsString());
             }
         }
+        query.setUseExpress(Preferences.isUseExpress(this));
+        query.setUseAirline(Preferences.isUseAirline(this));
 
         return query;
     }
@@ -165,7 +193,7 @@ public class SimpleTransit extends Activity {
         Calendar c = Calendar.getInstance();
 
         String now = new SimpleDateFormat("hhmm").format(c.getTime());
-        if (now.compareTo(hour + minute) < 0) {
+        if (now.compareTo(time.getTimeAsString()) < 0) {
         	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
         }
         else {
@@ -182,7 +210,7 @@ public class SimpleTransit extends Activity {
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 renderResult(result);
             } else {
-                showMessage(String.valueOf(result.getResponseCode()));
+                showResponseCode(result.getResponseCode());
             }
             
         } catch (TransitSearchException e) {
@@ -203,10 +231,10 @@ public class SimpleTransit extends Activity {
         builder.show();
     }
     
-    private void showMessage(String message) {
+    private void showResponseCode(int responseCode) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("連絡");
-        builder.setMessage("Googleの応答が「" + message + "」でした。。");
+        builder.setMessage("Googleの応答が「" + responseCode + "」でした。。");
         builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
             }
@@ -241,8 +269,10 @@ public class SimpleTransit extends Activity {
 
     		if (!detail.isWalking()) {
     			sb.append("\n");
-	    		sb.append(detail.getDeparture().getTime()).append("発　").append(detail.getDeparture().getPlace()).append("\n");
-	    		sb.append(detail.getArrival().getTime()).append("着　").append(detail.getArrival().getPlace());
+	    		sb.append(detail.getDeparture().getTime().getTimeAsString(true)).append("発　");
+	    		sb.append(detail.getDeparture().getPlace()).append("\n");
+	    		sb.append(detail.getArrival().getTime().getTimeAsString(true)).append("着　");
+	    		sb.append(detail.getArrival().getPlace());
     		}
 
     		if (i < transit.getDetails().size() - 1) {
