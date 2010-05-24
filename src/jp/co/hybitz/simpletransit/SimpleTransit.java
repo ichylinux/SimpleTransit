@@ -20,7 +20,6 @@ package jp.co.hybitz.simpletransit;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Iterator;
 
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
@@ -28,8 +27,6 @@ import jp.co.hybitz.googletransit.TransitSearcher;
 import jp.co.hybitz.googletransit.TransitSearcherFactory;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.Transit;
-import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import android.app.Activity;
@@ -37,21 +34,16 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -79,20 +71,7 @@ public class SimpleTransit extends Activity {
 		});
         
         CheckBox last = (CheckBox) findViewById(R.id.last);
-        last.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				TextView timeView = (TextView) findViewById(R.id.time);
-				timeView.setEnabled(!isChecked);
-				if (timeView.isEnabled()) {
-				    timeView.setTextColor(Color.BLACK);
-                    timeView.setBackgroundResource(R.layout.time_border_enabled);
-				}
-				else {
-                    timeView.setTextColor(Color.GRAY);
-				    timeView.setBackgroundResource(R.layout.time_border_disabled);
-				}
-			}
-		});
+        last.setOnCheckedChangeListener(new LastCheckBoxListener(this));
         
         Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new OnClickListener() {
@@ -151,19 +130,6 @@ public class SimpleTransit extends Activity {
     	dialog.show();
     }
     
-	private void renderResult(TransitResult result) {
-        ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.listview);
-        aa.add(createSummary(result));
-        
-        for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
-            Transit transit = it.next();
-            aa.add(createResult(transit));
-        }
-        
-        ListView lv = (ListView) findViewById(R.id.results);
-        lv.setAdapter(aa);
-    }
-    
     private TransitQuery createQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
@@ -208,8 +174,9 @@ public class SimpleTransit extends Activity {
             TransitResult result = searcher.search(createQuery());
             
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                renderResult(result);
-            } else {
+                new ResultRenderer(this).render(result);
+            }
+            else {
                 showResponseCode(result.getResponseCode());
             }
             
@@ -242,43 +209,4 @@ public class SimpleTransit extends Activity {
         builder.show();
     }
 
-    private String createSummary(TransitResult result) {
-        StringBuilder sb = new StringBuilder();
-        if (result.getTransitCount() > 0) {
-            sb.append(result.getTitle()).append("\n");
-            sb.append("検索結果は " + result.getTransitCount() + " 件です。");
-        } else {
-            sb.append("該当するルートが見つかりませんでした。");
-        }
-        return sb.toString();
-    }
-    
-    private String createResult(Transit transit) {
-    	StringBuilder sb = new StringBuilder();
-
-    	sb.append(transit.getTimeAndFare());
-    	if (transit.getTransferCount() > 0) {
-    		sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
-    	}
-    	sb.append("\n");
-
-    	for (int i = 0; i < transit.getDetails().size(); i ++) {
-    		TransitDetail detail = transit.getDetails().get(i);
-    		
-    		sb.append(detail.getRoute());
-
-    		if (!detail.isWalking()) {
-    			sb.append("\n");
-	    		sb.append(detail.getDeparture().getTime().getTimeAsString(true)).append("発　");
-	    		sb.append(detail.getDeparture().getPlace()).append("\n");
-	    		sb.append(detail.getArrival().getTime().getTimeAsString(true)).append("着　");
-	    		sb.append(detail.getArrival().getPlace());
-    		}
-
-    		if (i < transit.getDetails().size() - 1) {
-    			sb.append("\n");
-    		}
-    	}
-    	return sb.toString();
-    }
 }
