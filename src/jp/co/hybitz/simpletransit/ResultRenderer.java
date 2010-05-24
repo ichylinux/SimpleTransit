@@ -28,12 +28,19 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
+ * 検索結果を描画するクラス
+ * 
  * @author ichy <ichylinux@gmail.com>
  */
 class ResultRenderer {
     
     private Activity activity;
     
+    /**
+     * コンストラクタ
+     * 
+     * @param activity
+     */
     ResultRenderer(Activity activity) {
         this.activity = activity;
     }
@@ -51,11 +58,29 @@ class ResultRenderer {
         lv.setAdapter(aa);
     }
     
+    private boolean isSamePrefecture(String from, String to) {
+        String[] fromSplit = from.split("（");
+        String[] toSplit = to.split("（");
+        
+        if (fromSplit.length != 2 || toSplit.length != 2) {
+            return false;
+        }
+        
+        return fromSplit[1].equals(toSplit[1]);
+    }
 
     private String createSummary(TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
-            sb.append(result.getFrom() + " ～ " + result.getTo());
+            if (isSamePrefecture(result.getFrom(), result.getTo())) {
+                sb.append(result.getFrom().split("（")[0]);
+                sb.append(" ～ ");
+                sb.append(result.getTo().split("（")[0]);
+            }
+            else {
+                sb.append(result.getFrom() + " ～ " + result.getTo());
+            }
+            
             if (result.getTimeType() == TimeType.DEPARTURE) {
                 sb.append("　" + result.getTime().getTimeAsString(true) + "発\n");
                 
@@ -70,9 +95,10 @@ class ResultRenderer {
             else {
                 throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
             }
+            
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
         } else {
-            sb.append("該当するルートが見つかりませんでした。");
+            sb.append(activity.getString(R.string.no_route_found));
         }
         return sb.toString();
     }
