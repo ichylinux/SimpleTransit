@@ -70,8 +70,11 @@ public class SimpleTransit extends Activity {
 			}
 		});
         
+        FirstAndLastCheckBoxListener flListener = new FirstAndLastCheckBoxListener(this);
+        CheckBox first = (CheckBox) findViewById(R.id.first);
+        first.setOnCheckedChangeListener(flListener);
         CheckBox last = (CheckBox) findViewById(R.id.last);
-        last.setOnCheckedChangeListener(new LastCheckBoxListener(this));
+        last.setOnCheckedChangeListener(flListener);
         
         Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new OnClickListener() {
@@ -112,16 +115,9 @@ public class SimpleTransit extends Activity {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
-				TextView timeView = (TextView) findViewById(R.id.time);
 				time = dialog.getTime();
                 timeType = dialog.getTimeType();
-				
-				if (timeType != null && time != null) {
-				    timeView.setText(time.getTimeAsString(true) + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
-				}
-				else {
-				    timeView.setText(null);
-				}
+                renderSelectedTime();
 			}
 		});
     	
@@ -130,15 +126,30 @@ public class SimpleTransit extends Activity {
     	dialog.show();
     }
     
+    private void renderSelectedTime() {
+        TextView timeView = (TextView) findViewById(R.id.time);
+        if (timeType != null && time != null) {
+            timeView.setText(time.getTimeAsString(true) + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
+        }
+        else {
+            timeView.setText(null);
+        }
+    }
+    
     private TransitQuery createQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
+        CheckBox first = (CheckBox) findViewById(R.id.first);
         CheckBox last = (CheckBox) findViewById(R.id.last);
 
         TransitQuery query = new TransitQuery();
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
-        if (last.isChecked()) {
+        
+        if (first.isChecked()) {
+            query.setTimeType(TimeType.FIRST);
+        }
+        else if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
         }
         else {
@@ -146,7 +157,7 @@ public class SimpleTransit extends Activity {
 
             if (time != null) {
             	query.setDate(getDate());
-            	query.setTime(time.getTimeAsString());
+            	query.setTime(time);
             }
         }
         query.setUseExpress(Preferences.isUseExpress(this));

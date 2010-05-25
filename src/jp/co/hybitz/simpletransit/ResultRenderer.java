@@ -89,6 +89,9 @@ class ResultRenderer {
                 sb.append("　" + result.getTime().getTimeAsString(true) + "着\n");
                 
             }
+            else if (result.getTimeType() == TimeType.FIRST) {
+                sb.append("　始発\n");
+            }
             else if (result.getTimeType() == TimeType.LAST) {
                 sb.append("　終電\n");
             }

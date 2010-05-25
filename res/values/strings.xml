@@ -2,4 +2,6 @@
 <resources>
     <string name="app_name">簡単乗り換え検索</string>
     <string name="no_route_found">該当するルートが見つかりませんでした。</string>
+    <string name="checkbox_first">始発を確認</string>
+    <string name="checkbox_last">終電を確認</string>
 </resources>

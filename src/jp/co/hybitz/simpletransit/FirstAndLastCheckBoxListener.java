@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -26,16 +27,26 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class LastCheckBoxListener implements OnCheckedChangeListener {
+class FirstAndLastCheckBoxListener implements OnCheckedChangeListener {
     private Activity activity;
     
-    LastCheckBoxListener(Activity activity) {
+    FirstAndLastCheckBoxListener(Activity activity) {
         this.activity = activity;
     }
     
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         TextView timeView = (TextView) activity.findViewById(R.id.time);
-        timeView.setEnabled(!isChecked);
+        CheckBox first = (CheckBox) activity.findViewById(R.id.first);
+        CheckBox last = (CheckBox) activity.findViewById(R.id.last);
+
+        if (buttonView.getId() == first.getId() && first.isChecked()) {
+            last.setChecked(false);
+        }
+        else if (buttonView.getId() == last.getId() && last.isChecked()) {
+            first.setChecked(false);
+        }
+        
+        timeView.setEnabled(!first.isChecked() && !last.isChecked());
         if (timeView.isEnabled()) {
             timeView.setTextColor(Color.BLACK);
             timeView.setBackgroundResource(R.layout.time_border_enabled);
