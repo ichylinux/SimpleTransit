@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">簡単乗り換え検索</string>
-    <string name="no_route_found">該当するルートが見つかりませんでした。</string>
+    <string name="button_search">検索</string>
+    <string name="button_previous_time">前の時刻</string>
+    <string name="button_next_time">次の時刻</string>
     <string name="checkbox_first">始発を確認</string>
     <string name="checkbox_last">終電を確認</string>
+    <string name="label_from">出発地</string>
+    <string name="label_time">時刻</string>
+    <string name="label_to">到着地</string>
+    <string name="no_route_found">該当するルートが見つかりませんでした。</string>
 </resources>

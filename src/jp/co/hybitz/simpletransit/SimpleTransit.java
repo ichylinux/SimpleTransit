@@ -18,13 +18,16 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
 import jp.co.hybitz.googletransit.TransitSearcherFactory;
+import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
@@ -51,9 +54,10 @@ import android.widget.TextView;
 public class SimpleTransit extends Activity {
     private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
     private static final int MENU_ITEM_QUIT = Menu.FIRST + 2;
-    
-	private TimeType timeType;
-	private Time time;
+
+    private TransitQuery query = new TransitQuery();
+    private Date previousTime;
+    private Date nextTime;
 
 	/**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -62,6 +66,9 @@ public class SimpleTransit extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        query.setTimeType(TimeType.DEPARTURE);
+        updatePreviousTimeAndNextTimeVisibility();
         
         TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
@@ -82,6 +89,30 @@ public class SimpleTransit extends Activity {
 				search();
 			}
 		});
+        
+        Button previous = (Button) findViewById(R.id.previous_time);
+        previous.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                if (previousTime != null) {
+                    String date = new SimpleDateFormat("yyyyMMddhhmm").format(previousTime);
+                    query.setDate(date.substring(0, 8));
+                    query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
+                    search();
+                }
+            }
+        });
+        
+        Button next = (Button) findViewById(R.id.next_time);
+        next.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                if (nextTime != null) {
+                    String date = new SimpleDateFormat("yyyyMMddhhmm").format(nextTime);
+                    query.setDate(date.substring(0, 8));
+                    query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
+                    search();
+                }
+            }
+        });
     }
     
     /**
@@ -115,58 +146,52 @@ public class SimpleTransit extends Activity {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
-				time = dialog.getTime();
-                timeType = dialog.getTimeType();
+                query.setTimeType(dialog.getTimeType());
+                query.setDate(getDate(dialog.getTime(), true));
+				query.setTime(dialog.getTime());
                 renderSelectedTime();
 			}
 		});
     	
-	    dialog.setTimeType(timeType);
-		dialog.setTime(time);
+	    dialog.setTimeType(query.getTimeType());
+		dialog.setTime(query.getTime());
     	dialog.show();
     }
     
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
-        if (timeType != null && time != null) {
-            timeView.setText(time.getTimeAsString(true) + "に" + (timeType == TimeType.DEPARTURE ? "出発" : "到着"));
+        if (query.getTime() != null) {
+            timeView.setText(query.getTime().getTimeAsString(true) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
         }
         else {
             timeView.setText(null);
         }
     }
     
-    private TransitQuery createQuery() {
+    private void updateQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
         CheckBox first = (CheckBox) findViewById(R.id.first);
         CheckBox last = (CheckBox) findViewById(R.id.last);
 
-        TransitQuery query = new TransitQuery();
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
         
         if (first.isChecked()) {
             query.setTimeType(TimeType.FIRST);
+            query.setDate(null);
+            query.setTime(null);
         }
         else if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
-        }
-        else {
-            query.setTimeType(timeType);
-
-            if (time != null) {
-            	query.setDate(getDate());
-            	query.setTime(time);
-            }
+            query.setDate(null);
+            query.setTime(null);
         }
         query.setUseExpress(Preferences.isUseExpress(this));
         query.setUseAirline(Preferences.isUseAirline(this));
-
-        return query;
     }
     
-    private String getDate() {
+    private String getDate(Time time, boolean incrementDate) {
         Calendar c = Calendar.getInstance();
 
         String now = new SimpleDateFormat("hhmm").format(c.getTime());
@@ -174,18 +199,28 @@ public class SimpleTransit extends Activity {
         	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
         }
         else {
-        	c.add(Calendar.DATE, 1);
-        	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
+            if (incrementDate) {
+            	c.add(Calendar.DATE, 1);
+            	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
+            }
+            else {
+                return null;
+            }
         }
     }
     
     private void search() {
         try {
+            updateQuery();
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-            TransitResult result = searcher.search(createQuery());
+            TransitResult result = searcher.search(query);
             
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // 検索結果を表示
                 new ResultRenderer(this).render(result);
+                
+                // 前の時刻と次の時刻を取得
+                updatePreviousTimeAndNextTime(result);
             }
             else {
                 showResponseCode(result.getResponseCode());
@@ -195,9 +230,52 @@ public class SimpleTransit extends Activity {
             Log.e("SimpleTransit", e.getMessage(), e);
             apologize(e);
         }
-        
     }
     
+    private void updatePreviousTimeAndNextTime(TransitResult result) {
+        nextTime = null;
+        previousTime = null;
+        
+        if (result != null && result.getTransitCount() > 0) {
+            if (query.getTimeType() == TimeType.DEPARTURE) {
+                Time t = TransitUtil.getFirstDepartureTime(result);
+                if (t != null) {
+                    String date = query.getDate();
+                    if (date == null) {
+                        date = getDate(t, true);
+                    }
+                    
+                    try {
+                        Date d = new SimpleDateFormat("yyyyMMddhhmm").parse(date + t.getTimeAsString());
+                        Calendar c = Calendar.getInstance();
+                        c.setTime(d);
+                        c.add(Calendar.MINUTE, 1);
+                        nextTime = c.getTime();
+                        Log.i("SimpleTransit", "次の時刻=" + new SimpleDateFormat("yyyyMMddhhmm").format(nextTime));
+                    }
+                    catch (ParseException e) {
+                        Log.w("SimpleTransit", e.getMessage());
+                    }
+                }
+            }
+        }
+        
+        updatePreviousTimeAndNextTimeVisibility();
+    }
+    
+    private void updatePreviousTimeAndNextTimeVisibility() {
+        Button previous = (Button) findViewById(R.id.previous_time);
+        previous.setVisibility(View.INVISIBLE);
+        
+        Button next = (Button) findViewById(R.id.next_time);
+        next.setVisibility(nextTime != null ? View.VISIBLE : View.INVISIBLE);
+    }
+    
+    /**
+     * エラーが出たので謝ります。。
+     * 
+     * @param e
+     */
     private void apologize(TransitSearchException e) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("ごめん！！");
