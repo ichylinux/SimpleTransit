@@ -94,7 +94,7 @@ public class SimpleTransit extends Activity {
         previous.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 if (previousTime != null) {
-                    String date = new SimpleDateFormat("yyyyMMddhhmm").format(previousTime);
+                    String date = new SimpleDateFormat("yyyyMMddHHmm").format(previousTime);
                     query.setDate(date.substring(0, 8));
                     query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
                     search();
@@ -106,7 +106,7 @@ public class SimpleTransit extends Activity {
         next.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 if (nextTime != null) {
-                    String date = new SimpleDateFormat("yyyyMMddhhmm").format(nextTime);
+                    String date = new SimpleDateFormat("yyyyMMddHHmm").format(nextTime);
                     query.setDate(date.substring(0, 8));
                     query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
                     search();
@@ -194,7 +194,7 @@ public class SimpleTransit extends Activity {
     private String getDate(Time time, boolean incrementDate) {
         Calendar c = Calendar.getInstance();
 
-        String now = new SimpleDateFormat("hhmm").format(c.getTime());
+        String now = new SimpleDateFormat("HHmm").format(c.getTime());
         if (now.compareTo(time.getTimeAsString()) < 0) {
         	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
         }
@@ -245,16 +245,43 @@ public class SimpleTransit extends Activity {
                         date = getDate(t, true);
                     }
                     
-                    try {
-                        Date d = new SimpleDateFormat("yyyyMMddhhmm").parse(date + t.getTimeAsString());
-                        Calendar c = Calendar.getInstance();
-                        c.setTime(d);
-                        c.add(Calendar.MINUTE, 1);
-                        nextTime = c.getTime();
-                        Log.i("SimpleTransit", "次の時刻=" + new SimpleDateFormat("yyyyMMddhhmm").format(nextTime));
+                    if (date != null) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+                            Date d = sdf.parse(date + t.getTimeAsString());
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(d);
+                            c.add(Calendar.MINUTE, 1);
+                            nextTime = c.getTime();
+                            Log.i("SimpleTransit", "次の時刻=" + sdf.format(nextTime));
+                        }
+                        catch (ParseException e) {
+                            Log.w("SimpleTransit", e.getMessage());
+                        }
                     }
-                    catch (ParseException e) {
-                        Log.w("SimpleTransit", e.getMessage());
+                }
+            }
+            else if (query.getTimeType() == TimeType.ARRIVAL) {
+                Time t = TransitUtil.getLastArrivalTime(result);
+                if (t != null) {
+                    String date = query.getDate();
+                    if (date == null) {
+                        date = getDate(t, false);
+                    }
+                    
+                    if (date != null) {
+                        try {
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+                            Date d = sdf.parse(date + t.getTimeAsString());
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(d);
+                            c.add(Calendar.MINUTE, -1);
+                            previousTime = c.getTime();
+                            Log.i("SimpleTransit", "前の時刻=" + sdf.format(previousTime));
+                        }
+                        catch (ParseException e) {
+                            Log.w("SimpleTransit", e.getMessage());
+                        }
                     }
                 }
             }
@@ -265,7 +292,7 @@ public class SimpleTransit extends Activity {
     
     private void updatePreviousTimeAndNextTimeVisibility() {
         Button previous = (Button) findViewById(R.id.previous_time);
-        previous.setVisibility(View.INVISIBLE);
+        previous.setVisibility(previousTime != null ? View.VISIBLE : View.INVISIBLE);
         
         Button next = (Button) findViewById(R.id.next_time);
         next.setVisibility(nextTime != null ? View.VISIBLE : View.INVISIBLE);
