@@ -18,7 +18,6 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -70,49 +69,7 @@ public class SimpleTransit extends Activity {
         query.setTimeType(TimeType.DEPARTURE);
         updatePreviousTimeAndNextTimeVisibility();
         
-        TextView time = (TextView) findViewById(R.id.time);
-        time.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				showTimeDialog();
-			}
-		});
-        
-        FirstAndLastCheckBoxListener flListener = new FirstAndLastCheckBoxListener(this);
-        CheckBox first = (CheckBox) findViewById(R.id.first);
-        first.setOnCheckedChangeListener(flListener);
-        CheckBox last = (CheckBox) findViewById(R.id.last);
-        last.setOnCheckedChangeListener(flListener);
-        
-        Button search = (Button) findViewById(R.id.search);
-        search.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				search();
-			}
-		});
-        
-        Button previous = (Button) findViewById(R.id.previous_time);
-        previous.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (previousTime != null) {
-                    String date = new SimpleDateFormat("yyyyMMddHHmm").format(previousTime);
-                    query.setDate(date.substring(0, 8));
-                    query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
-                    search();
-                }
-            }
-        });
-        
-        Button next = (Button) findViewById(R.id.next_time);
-        next.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (nextTime != null) {
-                    String date = new SimpleDateFormat("yyyyMMddHHmm").format(nextTime);
-                    query.setDate(date.substring(0, 8));
-                    query.setTime(new Time(date.substring(8, 10), date.substring(10, 12)));
-                    search();
-                }
-            }
-        });
+        initActions();
     }
     
     /**
@@ -141,27 +98,65 @@ public class SimpleTransit extends Activity {
             return super.onMenuItemSelected(featureId, item);
         }
     }
+    
+    private void initActions() {
+        TextView time = (TextView) findViewById(R.id.time);
+        time.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                showTimeDialog();
+            }
+        });
+        
+        FirstAndLastCheckBoxListener flListener = new FirstAndLastCheckBoxListener(this);
+        CheckBox first = (CheckBox) findViewById(R.id.first);
+        first.setOnCheckedChangeListener(flListener);
+        CheckBox last = (CheckBox) findViewById(R.id.last);
+        last.setOnCheckedChangeListener(flListener);
+        
+        Button search = (Button) findViewById(R.id.search);
+        search.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                search();
+            }
+        });
+        
+        Button previous = (Button) findViewById(R.id.previous_time);
+        previous.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                searchPrevious();
+            }
+        });
+        
+        Button next = (Button) findViewById(R.id.next_time);
+        next.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                searchNext();
+            }
+        });
+    }
 
     private void showTimeDialog() {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
                 query.setTimeType(dialog.getTimeType());
-                query.setDate(getDate(dialog.getTime(), true));
-				query.setTime(dialog.getTime());
+                query.setDate(TransitUtil.getRelativeDate(dialog.getTime(), true));
                 renderSelectedTime();
 			}
 		});
     	
 	    dialog.setTimeType(query.getTimeType());
-		dialog.setTime(query.getTime());
+	    if (query.getDate() != null) {
+	        dialog.setTime(new Time(new SimpleDateFormat("HHmm").format(query.getDate())));
+	    }
     	dialog.show();
     }
     
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
-        if (query.getTime() != null) {
-            timeView.setText(query.getTime().getTimeAsString(true) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
+        if (query.getDate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+            timeView.setText(sdf.format(query.getDate()) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
         }
         else {
             timeView.setText(null);
@@ -180,33 +175,23 @@ public class SimpleTransit extends Activity {
         if (first.isChecked()) {
             query.setTimeType(TimeType.FIRST);
             query.setDate(null);
-            query.setTime(null);
         }
         else if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
             query.setDate(null);
-            query.setTime(null);
         }
         query.setUseExpress(Preferences.isUseExpress(this));
         query.setUseAirline(Preferences.isUseAirline(this));
     }
     
-    private String getDate(Time time, boolean incrementDate) {
-        Calendar c = Calendar.getInstance();
-
-        String now = new SimpleDateFormat("HHmm").format(c.getTime());
-        if (now.compareTo(time.getTimeAsString()) < 0) {
-        	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
-        }
-        else {
-            if (incrementDate) {
-            	c.add(Calendar.DATE, 1);
-            	return new SimpleDateFormat("yyyyMMdd").format(c.getTime());
-            }
-            else {
-                return null;
-            }
-        }
+    private void searchPrevious() {
+        query.setDate(previousTime);
+        search();
+    }
+    
+    private void searchNext() {
+        query.setDate(nextTime);
+        search();
     }
     
     private void search() {
@@ -240,49 +225,23 @@ public class SimpleTransit extends Activity {
             if (query.getTimeType() == TimeType.DEPARTURE) {
                 Time t = TransitUtil.getFirstDepartureTime(result);
                 if (t != null) {
-                    String date = query.getDate();
-                    if (date == null) {
-                        date = getDate(t, true);
-                    }
-                    
-                    if (date != null) {
-                        try {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-                            Date d = sdf.parse(date + t.getTimeAsString());
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(d);
-                            c.add(Calendar.MINUTE, 1);
-                            nextTime = c.getTime();
-                            Log.i("SimpleTransit", "次の時刻=" + sdf.format(nextTime));
-                        }
-                        catch (ParseException e) {
-                            Log.w("SimpleTransit", e.getMessage());
-                        }
-                    }
+                    Date date = TransitUtil.getRelativeDate(t, true);
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(date);
+                    c.add(Calendar.MINUTE, 1);
+                    nextTime = c.getTime();
+                    Log.i("SimpleTransit", "次の時刻=" + new SimpleDateFormat("yyyyMMddHHmm").format(nextTime));
                 }
             }
             else if (query.getTimeType() == TimeType.ARRIVAL) {
                 Time t = TransitUtil.getLastArrivalTime(result);
                 if (t != null) {
-                    String date = query.getDate();
-                    if (date == null) {
-                        date = getDate(t, false);
-                    }
-                    
-                    if (date != null) {
-                        try {
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
-                            Date d = sdf.parse(date + t.getTimeAsString());
-                            Calendar c = Calendar.getInstance();
-                            c.setTime(d);
-                            c.add(Calendar.MINUTE, -1);
-                            previousTime = c.getTime();
-                            Log.i("SimpleTransit", "前の時刻=" + sdf.format(previousTime));
-                        }
-                        catch (ParseException e) {
-                            Log.w("SimpleTransit", e.getMessage());
-                        }
-                    }
+                    Date date = TransitUtil.getRelativeDate(t, false);
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(date);
+                    c.add(Calendar.MINUTE, -1);
+                    previousTime = c.getTime();
+                    Log.i("SimpleTransit", "前の時刻=" + new SimpleDateFormat("yyyyMMddHHmm").format(previousTime));
                 }
             }
         }
@@ -292,7 +251,13 @@ public class SimpleTransit extends Activity {
     
     private void updatePreviousTimeAndNextTimeVisibility() {
         Button previous = (Button) findViewById(R.id.previous_time);
-        previous.setVisibility(previousTime != null ? View.VISIBLE : View.INVISIBLE);
+        if (previousTime == null) {
+            previous.setVisibility(View.INVISIBLE);
+        }
+        else {
+            previous.setVisibility(View.VISIBLE);
+            previous.setEnabled(previousTime.after(new Date()));
+        }
         
         Button next = (Button) findViewById(R.id.next_time);
         next.setVisibility(nextTime != null ? View.VISIBLE : View.INVISIBLE);
@@ -318,7 +283,7 @@ public class SimpleTransit extends Activity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("連絡");
         builder.setMessage("Googleの応答が「" + responseCode + "」でした。。");
-        builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("しかたないね", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
             }
         });
