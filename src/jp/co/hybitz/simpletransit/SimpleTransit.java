@@ -20,7 +20,9 @@ package jp.co.hybitz.simpletransit;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
@@ -117,7 +119,7 @@ public class SimpleTransit extends Activity {
         Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                search();
+                searchNew();
             }
         });
         
@@ -141,7 +143,9 @@ public class SimpleTransit extends Activity {
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
                 query.setTimeType(dialog.getTimeType());
-                query.setDate(TransitUtil.getRelativeDate(dialog.getTime(), true));
+                if (dialog.getTime() != null) {
+                    query.setDate(TransitUtil.getRelativeDate(dialog.getTime(), true));
+                }
                 renderSelectedTime();
 			}
 		});
@@ -180,6 +184,12 @@ public class SimpleTransit extends Activity {
             query.setTimeType(TimeType.LAST);
             query.setDate(null);
         }
+        else {
+            TextView time = (TextView) findViewById(R.id.time);
+            if (time.getText() == null | time.getText().length() == 0) {
+                query.setDate(null);
+            }
+        }
         query.setUseExpress(Preferences.isUseExpress(this));
         query.setUseAirline(Preferences.isUseAirline(this));
     }
@@ -194,9 +204,13 @@ public class SimpleTransit extends Activity {
         search();
     }
     
+    private void searchNew() {
+        updateQuery();
+        search();
+    }
+    
     private void search() {
         try {
-            updateQuery();
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
             TransitResult result = searcher.search(query);
             
@@ -231,6 +245,12 @@ public class SimpleTransit extends Activity {
                     c.add(Calendar.MINUTE, 1);
                     nextTime = c.getTime();
                     Log.i("SimpleTransit", "次の時刻=" + new SimpleDateFormat("yyyyMMddHHmm").format(nextTime));
+                }
+                
+                List<Time> times = TransitUtil.getDepartureTimes(result);
+                Collections.sort(times);
+                if (times.size() > 2) {
+                    
                 }
             }
             else if (query.getTimeType() == TimeType.ARRIVAL) {

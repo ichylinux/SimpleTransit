@@ -76,7 +76,7 @@ public class TimeDialog implements DialogInterface {
 		Button clear = (Button) layout.findViewById(R.id.time_clear);
         clear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				timeType = null;
+				timeType = TimeType.DEPARTURE;
 				time = null;
 				cancel();
 			}
