@@ -46,12 +46,17 @@ class ResultRenderer {
     }
 
     void render(TransitResult result) {
+        String prefecture = "";
+        if (isSamePrefecture(result.getFrom(), result.getTo())) {
+            prefecture = "（" + result.getFrom().split("（")[1];
+        }
+        
         ArrayAdapter<String> aa = new ArrayAdapter<String>(activity, R.layout.listview);
-        aa.add(createSummary(result));
+        aa.add(createSummary(prefecture, result));
         
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
             Transit transit = it.next();
-            aa.add(createResult(transit));
+            aa.add(createResult(prefecture, transit));
         }
         
         ListView lv = (ListView) activity.findViewById(R.id.results);
@@ -69,36 +74,33 @@ class ResultRenderer {
         return fromSplit[1].equals(toSplit[1]);
     }
 
-    private String createSummary(TransitResult result) {
+    private String createSummary(String prefecture, TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
-            if (isSamePrefecture(result.getFrom(), result.getTo())) {
-                sb.append(result.getFrom().split("（")[0]);
-                sb.append(" ～ ");
-                sb.append(result.getTo().split("（")[0]);
-            }
-            else {
-                sb.append(result.getFrom() + " ～ " + result.getTo());
-            }
+            sb.append(result.getFrom().replaceAll(prefecture, ""));
+            sb.append(" ～ ");
+            sb.append(result.getTo().replaceAll(prefecture, ""));
+            sb.append("　");
             
             if (result.getTimeType() == TimeType.DEPARTURE) {
-                sb.append("　" + result.getTime().getTimeAsString(true) + "発\n");
+                sb.append(result.getTime() + "発");
                 
             }
             else if (result.getTimeType() == TimeType.ARRIVAL) {
-                sb.append("　" + result.getTime().getTimeAsString(true) + "着\n");
+                sb.append(result.getTime() + "着");
                 
             }
             else if (result.getTimeType() == TimeType.FIRST) {
-                sb.append("　始発\n");
+                sb.append("始発");
             }
             else if (result.getTimeType() == TimeType.LAST) {
-                sb.append("　終電\n");
+                sb.append("終電");
             }
             else {
                 throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
             }
             
+            sb.append("\n");
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
         } else {
             sb.append(activity.getString(R.string.no_route_found));
@@ -106,7 +108,7 @@ class ResultRenderer {
         return sb.toString();
     }
     
-    private String createResult(Transit transit) {
+    private String createResult(String prefecture, Transit transit) {
         StringBuilder sb = new StringBuilder();
 
         sb.append(transit.getTimeAndFare());
@@ -122,10 +124,10 @@ class ResultRenderer {
 
             if (!detail.isWalking()) {
                 sb.append("\n");
-                sb.append(detail.getDeparture().getTime().getTimeAsString(true)).append("発　");
-                sb.append(detail.getDeparture().getPlace()).append("\n");
-                sb.append(detail.getArrival().getTime().getTimeAsString(true)).append("着　");
-                sb.append(detail.getArrival().getPlace());
+                sb.append(detail.getDeparture().getTime()).append("発　");
+                sb.append(detail.getDeparture().getPlace().replaceAll(prefecture, "")).append("\n");
+                sb.append(detail.getArrival().getTime()).append("着　");
+                sb.append(detail.getArrival().getPlace().replaceAll(prefecture, ""));
             }
 
             if (i < transit.getDetails().size() - 1) {

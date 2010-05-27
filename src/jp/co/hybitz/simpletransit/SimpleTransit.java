@@ -55,6 +55,7 @@ public class SimpleTransit extends Activity {
     private static final int MENU_ITEM_QUIT = Menu.FIRST + 2;
 
     private TransitQuery query = new TransitQuery();
+    private ResultRenderer resultRenderer = new ResultRenderer(this);
     private Date previousTime;
     private Date nextTime;
 
@@ -147,7 +148,7 @@ public class SimpleTransit extends Activity {
     	
 	    dialog.setTimeType(query.getTimeType());
 	    if (query.getDate() != null) {
-	        dialog.setTime(new Time(new SimpleDateFormat("HHmm").format(query.getDate())));
+	        dialog.setTime(TransitUtil.getTime(query.getDate()));
 	    }
     	dialog.show();
     }
@@ -155,8 +156,7 @@ public class SimpleTransit extends Activity {
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
         if (query.getDate() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-            timeView.setText(sdf.format(query.getDate()) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
+            timeView.setText(TransitUtil.getTime(query.getDate()) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
         }
         else {
             timeView.setText(null);
@@ -202,7 +202,7 @@ public class SimpleTransit extends Activity {
             
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // 検索結果を表示
-                new ResultRenderer(this).render(result);
+                resultRenderer.render(result);
                 
                 // 前の時刻と次の時刻を取得
                 updatePreviousTimeAndNextTime(result);
