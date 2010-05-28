@@ -18,12 +18,14 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
@@ -33,8 +35,8 @@ import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
@@ -58,6 +60,7 @@ public class SimpleTransit extends Activity {
 
     private TransitQuery query = new TransitQuery();
     private ResultRenderer resultRenderer = new ResultRenderer(this);
+    private Date currentTime;
     private Date previousTime;
     private Date nextTime;
 
@@ -143,24 +146,20 @@ public class SimpleTransit extends Activity {
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
                 query.setTimeType(dialog.getTimeType());
-                if (dialog.getTime() != null) {
-                    query.setDate(TransitUtil.getRelativeDate(dialog.getTime(), true));
-                }
+                currentTime = TransitUtil.getRelativeDate(dialog.getTime(), true);
                 renderSelectedTime();
 			}
 		});
     	
 	    dialog.setTimeType(query.getTimeType());
-	    if (query.getDate() != null) {
-	        dialog.setTime(TransitUtil.getTime(query.getDate()));
-	    }
+	    dialog.setTime(TransitUtil.getTime(currentTime));
     	dialog.show();
     }
     
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
-        if (query.getDate() != null) {
-            timeView.setText(TransitUtil.getTime(query.getDate()) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
+        if (currentTime != null) {
+            timeView.setText(TransitUtil.getTime(currentTime) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
         }
         else {
             timeView.setText(null);
@@ -185,11 +184,9 @@ public class SimpleTransit extends Activity {
             query.setDate(null);
         }
         else {
-            TextView time = (TextView) findViewById(R.id.time);
-            if (time.getText() == null | time.getText().length() == 0) {
-                query.setDate(null);
-            }
+            query.setDate(currentTime);
         }
+
         query.setUseExpress(Preferences.isUseExpress(this));
         query.setUseAirline(Preferences.isUseAirline(this));
     }
@@ -209,7 +206,25 @@ public class SimpleTransit extends Activity {
         search();
     }
     
+    private boolean validateQuery() {
+        if (StringUtils.isEmpty(query.getFrom())) {
+            DialogUtils.showMessage(this, R.string.error_from_required);
+            return false;
+        }
+        
+        if (StringUtils.isEmpty(query.getTo())) {
+            DialogUtils.showMessage(this, R.string.error_to_required);
+            return false;
+        }
+        
+        return true;
+    }
+    
     private void search() {
+        if (!validateQuery()) {
+            return;
+        }
+
         try {
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
             TransitResult result = searcher.search(query);
@@ -226,7 +241,17 @@ public class SimpleTransit extends Activity {
             }
             
         } catch (TransitSearchException e) {
-            Log.e("SimpleTransit", e.getMessage(), e);
+            handleException(e);
+        }
+    }
+    
+    private void handleException(TransitSearchException e) {
+        Log.e("SimpleTransit", e.getMessage(), e);
+        
+        if (e.getCause() instanceof UnknownHostException) {
+            DialogUtils.showMessage(this, R.string.error_unknow_host_exception);
+        }
+        else {
             apologize(e);
         }
     }
@@ -289,25 +314,14 @@ public class SimpleTransit extends Activity {
      * @param e
      */
     private void apologize(TransitSearchException e) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("ごめん！！");
-        builder.setMessage("こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage());
-        builder.setPositiveButton("許す", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        builder.show();
+        DialogUtils.showMessage(
+                this,
+                "ごめん！！",
+                "こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage(),
+                "許す");
     }
     
     private void showResponseCode(int responseCode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("連絡");
-        builder.setMessage("Googleの応答が「" + responseCode + "」でした。。");
-        builder.setPositiveButton("しかたないね", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        builder.show();
+        DialogUtils.showMessage(this, "連絡", "Googleの応答が「" + responseCode + "」でした。。", "しかたないね");
     }
-
 }

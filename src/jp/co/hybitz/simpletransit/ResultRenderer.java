@@ -64,6 +64,10 @@ class ResultRenderer {
     }
     
     private boolean isSamePrefecture(String from, String to) {
+        if (from == null || to == null) {
+            return false;
+        }
+
         String[] fromSplit = from.split("（");
         String[] toSplit = to.split("（");
         
