@@ -11,4 +11,17 @@
       android:title="飛行機を使用する"
       android:summary="飛行機を使用する場合はチェックを入れます。"/>
   </PreferenceCategory>
+  <PreferenceCategory android:title="アラームの設定">
+    <jp.co.hybitz.simpletransit.alarm.AlarmSoundPreference
+      android:key="alarm_sound_file"
+      android:title="アラームの曲"
+      android:dialogTitle="アラームの曲"
+      android:summary="アラームを設定した時に再生する曲を指定します。"
+      android:negativeButtonText="キャンセル"
+      android:positiveButtonText="OK"/>
+    <CheckBoxPreference
+      android:key="no_sound_but_vibration"
+      android:title="バイブレーションで通知"
+      android:summary="曲の再生ではなくバイブレーションを利用する場合はチェックを入れます。"/>
+  </PreferenceCategory>
 </PreferenceScreen>

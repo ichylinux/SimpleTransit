@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
 
+import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
@@ -46,9 +47,12 @@ class ResultRenderer {
     }
 
     void render(TransitResult result) {
-        String prefecture = "";
-        if (isSamePrefecture(result.getFrom(), result.getTo())) {
-            prefecture = "（" + result.getFrom().split("（")[1];
+        String prefecture = TransitUtil.isSamePrefecture(result.getFrom(), result.getTo());
+        if (prefecture == null) {
+            prefecture = "";
+        }
+        else {
+            prefecture = "（" + prefecture + "）";
         }
         
         ArrayAdapter<String> aa = new ArrayAdapter<String>(activity, R.layout.listview);
@@ -63,21 +67,6 @@ class ResultRenderer {
         lv.setAdapter(aa);
     }
     
-    private boolean isSamePrefecture(String from, String to) {
-        if (from == null || to == null) {
-            return false;
-        }
-
-        String[] fromSplit = from.split("（");
-        String[] toSplit = to.split("（");
-        
-        if (fromSplit.length != 2 || toSplit.length != 2) {
-            return false;
-        }
-        
-        return fromSplit[1].equals(toSplit[1]);
-    }
-
     private String createSummary(String prefecture, TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {

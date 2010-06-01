@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:padding="4dip"
+    android:gravity="center_horizontal"
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+    <TimePicker android:id="@+id/alarm_time_select" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+
+    <Button android:id="@+id/alarm_set"
+        android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        android:text="@string/alart_set">
+        <requestFocus />
+    </Button>
+
+</LinearLayout>
+

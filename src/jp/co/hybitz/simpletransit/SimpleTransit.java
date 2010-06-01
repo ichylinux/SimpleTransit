@@ -18,7 +18,6 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -35,6 +34,7 @@ import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.simpletransit.alarm.AlarmSettingActivity;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -46,10 +46,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -58,8 +61,9 @@ public class SimpleTransit extends Activity {
     private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
     private static final int MENU_ITEM_QUIT = Menu.FIRST + 2;
 
-    private TransitQuery query = new TransitQuery();
+    private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
+    private TransitQuery query = new TransitQuery();
     private Date currentTime;
     private Date previousTime;
     private Date nextTime;
@@ -137,6 +141,16 @@ public class SimpleTransit extends Activity {
         next.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 searchNext();
+            }
+        });
+        
+        ListView lv = (ListView) findViewById(R.id.results);
+        lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent();
+                intent.setClass(SimpleTransit.this, AlarmSettingActivity.class);
+                startActivity(intent);
+                return false;
             }
         });
     }
@@ -241,18 +255,7 @@ public class SimpleTransit extends Activity {
             }
             
         } catch (TransitSearchException e) {
-            handleException(e);
-        }
-    }
-    
-    private void handleException(TransitSearchException e) {
-        Log.e("SimpleTransit", e.getMessage(), e);
-        
-        if (e.getCause() instanceof UnknownHostException) {
-            DialogUtils.showMessage(this, R.string.error_unknow_host_exception);
-        }
-        else {
-            apologize(e);
+            exceptionHandler.handleException(e);
         }
     }
     
@@ -308,20 +311,8 @@ public class SimpleTransit extends Activity {
         next.setVisibility(nextTime != null ? View.VISIBLE : View.INVISIBLE);
     }
     
-    /**
-     * エラーが出たので謝ります。。
-     * 
-     * @param e
-     */
-    private void apologize(TransitSearchException e) {
-        DialogUtils.showMessage(
-                this,
-                "ごめん！！",
-                "こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage(),
-                "許す");
-    }
-    
     private void showResponseCode(int responseCode) {
         DialogUtils.showMessage(this, "連絡", "Googleの応答が「" + responseCode + "」でした。。", "しかたないね");
     }
+    
 }

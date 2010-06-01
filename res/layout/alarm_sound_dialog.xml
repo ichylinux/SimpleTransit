@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/alarm_sound_dialog_root" 
+              android:orientation="vertical" 
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:padding="10dp" 
+              xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:id="@+id/selected_sound"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@layout/alarm_sound_border"
+        android:textColor="#000000"/>
+    <ListView android:id="@+id/sound_files" android:isScrollContainer="true" 
+            android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+</LinearLayout>
