@@ -19,21 +19,21 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Iterator;
 
-import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
-import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.app.Activity;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 /**
  * 検索結果を描画するクラス
  * 
  * @author ichy <ichylinux@gmail.com>
  */
-class ResultRenderer {
+public class ResultRenderer {
     
     private Activity activity;
     
@@ -47,85 +47,60 @@ class ResultRenderer {
     }
 
     void render(TransitResult result) {
-        String prefecture = TransitUtil.isSamePrefecture(result.getFrom(), result.getTo());
-        if (prefecture == null) {
-            prefecture = "";
-        }
-        else {
-            prefecture = "（" + prefecture + "）";
-        }
-        
-        ArrayAdapter<String> aa = new ArrayAdapter<String>(activity, R.layout.listview);
-        aa.add(createSummary(prefecture, result));
-        
+        String title = createTitle(result);
+
+        TextView summary = (TextView) activity.findViewById(R.id.tv_summary);
+        summary.setText(createSummary(title, result));
+
+        ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, R.layout.listview);
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
             Transit transit = it.next();
-            aa.add(createResult(prefecture, transit));
+            aa.add(new TransitItem(result, transit));
         }
         
         ListView lv = (ListView) activity.findViewById(R.id.results);
         lv.setAdapter(aa);
     }
     
-    private String createSummary(String prefecture, TransitResult result) {
+    public static String createTitle(TransitResult result) {
+        String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
+
         StringBuilder sb = new StringBuilder();
-        if (result.getTransitCount() > 0) {
-            sb.append(result.getFrom().replaceAll(prefecture, ""));
-            sb.append(" ～ ");
-            sb.append(result.getTo().replaceAll(prefecture, ""));
-            sb.append("　");
+        sb.append(result.getFrom().replaceAll(prefecture, ""));
+        sb.append(" ～ ");
+        sb.append(result.getTo().replaceAll(prefecture, ""));
+        sb.append("　");
+        
+        if (result.getTimeType() == TimeType.DEPARTURE) {
+            sb.append(result.getTime() + "発");
             
-            if (result.getTimeType() == TimeType.DEPARTURE) {
-                sb.append(result.getTime() + "発");
-                
-            }
-            else if (result.getTimeType() == TimeType.ARRIVAL) {
-                sb.append(result.getTime() + "着");
-                
-            }
-            else if (result.getTimeType() == TimeType.FIRST) {
-                sb.append("始発");
-            }
-            else if (result.getTimeType() == TimeType.LAST) {
-                sb.append("終電");
-            }
-            else {
-                throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
-            }
-            
-            sb.append("\n");
-            sb.append("検索結果は " + result.getTransitCount() + " 件です。");
-        } else {
-            sb.append(activity.getString(R.string.no_route_found));
         }
+        else if (result.getTimeType() == TimeType.ARRIVAL) {
+            sb.append(result.getTime() + "着");
+            
+        }
+        else if (result.getTimeType() == TimeType.FIRST) {
+            sb.append("始発");
+        }
+        else if (result.getTimeType() == TimeType.LAST) {
+            sb.append("終電");
+        }
+        else {
+            throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
+        }
+
         return sb.toString();
     }
     
-    private String createResult(String prefecture, Transit transit) {
+    private String createSummary(String title, TransitResult result) {
         StringBuilder sb = new StringBuilder();
-
-        sb.append(transit.getTimeAndFare());
-        if (transit.getTransferCount() > 0) {
-            sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
-        }
-        sb.append("\n");
-
-        for (int i = 0; i < transit.getDetails().size(); i ++) {
-            TransitDetail detail = transit.getDetails().get(i);
-            
-            sb.append(detail.getRoute());
-
-            if (!detail.isWalking()) {
-                sb.append("\n");
-                sb.append(detail.getDeparture().getTime()).append("発　");
-                sb.append(detail.getDeparture().getPlace().replaceAll(prefecture, "")).append("\n");
-                sb.append(detail.getArrival().getTime()).append("着　");
-                sb.append(detail.getArrival().getPlace().replaceAll(prefecture, ""));
-            }
-
-            if (i < transit.getDetails().size() - 1) {
-                sb.append("\n");
-            }
+        if (result.getTransitCount() > 0) {
+            sb.append(title);
+            sb.append("\n");
+            sb.append("検索結果は " + result.getTransitCount() + " 件です。");
+            sb.append("\n");
+        } else {
+            sb.append(activity.getString(R.string.no_route_found));
         }
         return sb.toString();
     }

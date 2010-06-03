@@ -19,9 +19,14 @@ package jp.co.hybitz.simpletransit.alarm;
 
 import java.io.IOException;
 
+import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
+import jp.co.hybitz.simpletransit.ResultRenderer;
+import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
+import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
+import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.media.AudioManager;
@@ -34,30 +39,56 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class AlarmPlayActivity extends Activity {
-    MediaPlayer mediaPlayer;
-    Vibrator vibrator;
+public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
+    private MediaPlayer mediaPlayer;
+    private Vibrator vibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.alarm_play);
+        
+        TextView tvTitle = (TextView) findViewById(R.id.tv_title);
+        TextView tvRoute = (TextView) findViewById(R.id.tv_route);
 
         Button button = (Button)findViewById(R.id.alarm_stop);
         button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                finish();
+                stopAlarm();
             }
         });
-        
-        startAlarm();
+
+        TransitResult tr = loadTransitResult();
+        if (tr != null) {
+            tvTitle.setText(ResultRenderer.createTitle(tr));
+            tvRoute.setText(new TransitItem(tr, tr.getTransits().get(0)).toString());
+            startAlarm();
+        }
+        else {
+            tvTitle.setText(getString(R.string.tv_alarm_title_alarm_not_set));
+            tvRoute.setVisibility(View.INVISIBLE);
+            button.setVisibility(View.INVISIBLE);
+        }
+
     }
     
+    private TransitResult loadTransitResult() {
+        long id = getIntent().getLongExtra(EXTRA_KEY_TRANSIT, -1);
+        if (id < 0) {
+            return null;
+        }
+        
+        return new SimpleTransitDao(this).getTransitResult(id);
+    }
+    
+    /**
+     * @see android.app.Activity#onDestroy()
+     */
     @Override
     protected void onDestroy() {
         stopAlarm();
@@ -75,13 +106,18 @@ public class AlarmPlayActivity extends Activity {
     }
     
     private void startAlarm() {
-        boolean playSound = ! Preferences.isNoSoundButVibration(this);
+        boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
-        if (playSound) {
-            playAudio();
-        }
-        else {
-            vibrate();
+        TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
+        tvAlarmNotice.setVisibility(startAlarm ? View.VISIBLE : View.INVISIBLE);
+
+        if (startAlarm) {
+            if (Preferences.isNoSoundButVibration(this)) {
+                vibrate();
+            }
+            else {
+                playAudio();
+            }
         }
     }
     

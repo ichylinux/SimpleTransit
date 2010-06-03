@@ -28,8 +28,8 @@ public class OneTimeAlarm extends BroadcastReceiver {
     
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent alarm = new Intent();
-        alarm.setClass(context, AlarmPlayActivity.class);
+        Intent alarm = new Intent(context, AlarmPlayActivity.class);
+        alarm.putExtras(intent.getExtras());
         alarm.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(alarm);
     }

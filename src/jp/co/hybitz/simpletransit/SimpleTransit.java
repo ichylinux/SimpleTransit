@@ -34,7 +34,9 @@ import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
-import jp.co.hybitz.simpletransit.alarm.AlarmSettingActivity;
+import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
+import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
+import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -57,9 +59,10 @@ import android.widget.AdapterView.OnItemLongClickListener;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransit extends Activity {
+public class SimpleTransit extends Activity implements SimpleTransitConst {
     private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
-    private static final int MENU_ITEM_QUIT = Menu.FIRST + 2;
+    private static final int MENU_ITEM_ALARM = Menu.FIRST + 2;
+    private static final int MENU_ITEM_QUIT = Menu.FIRST + 3;
 
     private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
@@ -88,6 +91,7 @@ public class SimpleTransit extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_ITEM_PREFERENCES, 0, "設定");
+        menu.add(0, MENU_ITEM_ALARM, 1, "アラーム");
         menu.add(0, MENU_ITEM_QUIT, 1, "終了");
         return super.onCreateOptionsMenu(menu);
     }
@@ -100,6 +104,9 @@ public class SimpleTransit extends Activity {
         switch (item.getItemId()) {
         case MENU_ITEM_PREFERENCES :
             startActivity(new Intent(this, Preferences.class));
+            return true;
+        case MENU_ITEM_ALARM :
+            startActivity(new Intent(this, AlarmPlayActivity.class));
             return true;
         case MENU_ITEM_QUIT :
             finish();
@@ -147,9 +154,9 @@ public class SimpleTransit extends Activity {
         ListView lv = (ListView) findViewById(R.id.results);
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent();
-                intent.setClass(SimpleTransit.this, AlarmSettingActivity.class);
-                startActivity(intent);
+                TransitItem ti = (TransitItem) parent.getItemAtPosition(position);
+                AlarmSettingDialog dialog = new AlarmSettingDialog(SimpleTransit.this, ti.getTransitResult(), ti.getTransit());
+                dialog.show();
                 return false;
             }
         });
