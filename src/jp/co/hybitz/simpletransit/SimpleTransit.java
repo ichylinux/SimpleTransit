@@ -36,6 +36,7 @@ import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
+import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
@@ -106,7 +107,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             startActivity(new Intent(this, Preferences.class));
             return true;
         case MENU_ITEM_ALARM :
-            startActivity(new Intent(this, AlarmPlayActivity.class));
+            Intent intent = new Intent(this, AlarmPlayActivity.class);
+            intent.putExtra(EXTRA_KEY_TRANSIT, new SimpleTransitDao(this).getTransitResultIdForAlarm());
+            startActivity(intent);
             return true;
         case MENU_ITEM_QUIT :
             finish();

@@ -3,13 +3,21 @@
     android:id="@+id/alart_setting_root"
     android:layout_width="wrap_content" android:layout_height="wrap_content">
 
-    <TimePicker android:id="@+id/alarm_time_select" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <TimePicker android:id="@+id/alarm_time_select" 
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
 
-    <Button android:id="@+id/alarm_set"
-        android:layout_width="wrap_content" android:layout_height="wrap_content" 
-        android:text="@string/alart_set">
-        <requestFocus />
-    </Button>
+    <LinearLayout android:orientation="horizontal" android:layout_gravity="center_horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	    <Button android:id="@+id/alarm_set"
+	        android:layout_width="wrap_content" android:layout_height="wrap_content" 
+	        android:text="@string/alart_set">
+	        <requestFocus />
+	    </Button>
+	    <Button android:id="@+id/alarm_set_cancel"
+	        android:layout_width="wrap_content" android:layout_height="wrap_content" 
+	        android:text="@string/cancel">
+	    </Button>
+    </LinearLayout>
 
 </LinearLayout>
 

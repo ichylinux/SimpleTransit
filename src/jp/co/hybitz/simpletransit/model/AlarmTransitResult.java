@@ -15,17 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit;
+package jp.co.hybitz.simpletransit.model;
+
+import jp.co.hybitz.googletransit.model.TransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public interface SimpleTransitConst {
+public class AlarmTransitResult extends TransitResult {
 
-    public static final int ALARM_STATUS_NONE = 0;
-    public static final int ALARM_STATUS_SET = 1;
-    public static final int ALARM_STATUS_FINISHED = 2;
+    private long id;
+    private int alarmStatus;
 
-    public static final String EXTRA_KEY_START_ALARM = "startAlarm";
-    public static final String EXTRA_KEY_TRANSIT = "transit";
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getAlarmStatus() {
+        return alarmStatus;
+    }
+
+    public void setAlarmStatus(int alarmStatus) {
+        this.alarmStatus = alarmStatus;
+    }
+    
 }

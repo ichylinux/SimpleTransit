@@ -6,6 +6,7 @@
     <string name="button_search">検索</string>
     <string name="button_previous_time">前の時刻</string>
     <string name="button_next_time">次の時刻</string>
+    <string name="cancel">キャンセル</string>
     <string name="error_alarm_sound_required">アラームとして使用する曲を設定画面で指定してください。</string>
     <string name="error_from_required">出発地を入力してください。</string>
     <string name="error_to_required">到着地を入力してください。</string>

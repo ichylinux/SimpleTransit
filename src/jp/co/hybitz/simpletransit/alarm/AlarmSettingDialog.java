@@ -82,6 +82,13 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
             }
         });
         
+        Button cancel = (Button) layout.findViewById(R.id.alarm_set_cancel);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                cancel();
+            }
+        });
+
         return dialog;
     }
     

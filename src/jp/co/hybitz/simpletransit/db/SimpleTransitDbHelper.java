@@ -37,6 +37,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         StringBuilder tr = new StringBuilder();
         tr.append("create table transit_result ( ");
         tr.append("_id integer primary key autoincrement, ");
+        tr.append("alarm_status integer not null default 0, ");
         tr.append("time_type text not null, ");
         tr.append("time text, ");
         tr.append("transit_from text not null, ");
@@ -67,7 +68,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
+    public void onUpgrade(SQLiteDatabase db, int arg1, int arg2) {
         
     }
 

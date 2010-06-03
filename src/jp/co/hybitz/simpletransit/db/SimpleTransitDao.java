@@ -18,13 +18,17 @@
 package jp.co.hybitz.simpletransit.db;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import jp.co.hybitz.googletransit.model.Time;
+import jp.co.hybitz.googletransit.model.TimeAndPlace;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.simpletransit.SimpleTransitConst;
+import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
 import jp.co.hybitz.util.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
@@ -34,7 +38,7 @@ import android.database.sqlite.SQLiteDatabase;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransitDao {
+public class SimpleTransitDao implements SimpleTransitConst {
 
     private Context context;
 
@@ -77,92 +81,168 @@ public class SimpleTransitDao {
             throw new IllegalArgumentException("予期していないTimeTypeです。" + tt);
         }
     }
-
-    public TransitResult getTransitResult(long id) {
+    
+    public long getTransitResultIdForAlarm() {
         SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
-        Cursor c = db.query("transit_result", null, "_id=" + String.valueOf(id), null, null, null, null);
-        if (c.getCount() != 1) {
+        try {
+            Cursor c = db.query("transit_result", new String[]{"_id"}, 
+                    "alarm_status=?", new String[]{String.valueOf(ALARM_STATUS_SET)}, null, null, "_id", "1");
+            if (c.getCount() != 1) {
+                return -1;
+            }
+            
+            c.moveToFirst();
+            return c.getLong(c.getColumnIndex("_id"));
+        }
+        finally {
             db.close();
-            return null;
         }
         
-        c.moveToFirst();
-        
-        TransitResult ret = new TransitResult();
-        ret.setTimeType(toTimeType(c.getString(c.getColumnIndex("time_type"))));
+    }
 
-        String time = c.getString(c.getColumnIndex("time"));
-        if (StringUtils.isNotEmpty(time)) {
-            ret.setTime(new Time(time));
+    public AlarmTransitResult getTransitResult(long id) {
+        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        try {
+            Cursor c = db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
+            if (c.getCount() != 1) {
+                db.close();
+                return null;
+            }
+            
+            c.moveToFirst();
+            
+            AlarmTransitResult ret = new AlarmTransitResult();
+            ret.setId(c.getLong(c.getColumnIndex("_id")));
+            ret.setAlarmStatus(c.getInt(c.getColumnIndex("alarm_status")));
+            ret.setTimeType(toTimeType(c.getString(c.getColumnIndex("time_type"))));
+    
+            String time = c.getString(c.getColumnIndex("time"));
+            if (StringUtils.isNotEmpty(time)) {
+                ret.setTime(new Time(time));
+            }
+            
+            ret.setFrom(c.getString(c.getColumnIndex("transit_from")));
+            ret.setTo(c.getString(c.getColumnIndex("transit_to")));
+            ret.setPrefecture(c.getString(c.getColumnIndex("prefecture")));
+            ret.setTransits(getTransits(db, id));
+            
+            return ret;
+        }
+        finally {
+            db.close();
+        }
+    }
+    
+    private List<Transit> getTransits(SQLiteDatabase db, long transitResultId) {
+        List<Transit> ret = new ArrayList<Transit>();
+        
+        Cursor c = db.query("transit", null, "transit_result_id=?", new String[]{String.valueOf(transitResultId)}, null, null, null);
+        while (c.moveToNext()) {
+            Transit t = new Transit();
+            long transitId = c.getLong(c.getColumnIndex("_id"));
+            t.setDurationAndFare(c.getString(c.getColumnIndex("duration_and_fare")));
+            for (Iterator<TransitDetail> it = getTransitDetails(db, transitId).iterator(); it.hasNext();) {
+                TransitDetail td = it.next();
+                t.addDetail(td);
+            }
+            ret.add(t);
         }
         
-        ret.setFrom(c.getString(c.getColumnIndex("transit_from")));
-        ret.setTo(c.getString(c.getColumnIndex("transit_to")));
-        ret.setPrefecture(c.getString(c.getColumnIndex("prefecture")));
-        ret.setTransits(getTransitsByTransitResultId(db, id));
-        
-        db.close();
         return ret;
     }
     
-    private List<Transit> getTransitsByTransitResultId(SQLiteDatabase db, long transitResultId) {
-        List<Transit> ret = new ArrayList<Transit>();
+    private List<TransitDetail> getTransitDetails(SQLiteDatabase db, long transitId) {
+        List<TransitDetail> ret = new ArrayList<TransitDetail>();
+        
+        Cursor c = db.query("transit_detail", null, "transit_id=?", new String[]{String.valueOf(transitId)}, null, null, "detail_no");
+        while (c.moveToNext()) {
+            TransitDetail td = new TransitDetail();
+            td.setRoute(c.getString(c.getColumnIndex("route")));
+            String dTime = c.getString(c.getColumnIndex("departure_time"));
+            String dPlace = c.getString(c.getColumnIndex("departure_place"));
+            if (StringUtils.isNotEmpty(dTime) && StringUtils.isNotEmpty(dPlace)) {
+                TimeAndPlace departure = new TimeAndPlace(new Time(dTime), dPlace);
+                td.setDeparture(departure);
+            }
+            String aTime = c.getString(c.getColumnIndex("arrival_time"));
+            String aPlace = c.getString(c.getColumnIndex("arrival_place"));
+            if (StringUtils.isNotEmpty(aTime) && StringUtils.isNotEmpty(aPlace)) {
+                TimeAndPlace arrival = new TimeAndPlace(new Time(aTime), aPlace);
+                td.setArrival(arrival);
+            }
+            ret.add(td);
+        }
+        
         return ret;
+    }
+    
+    public int updateAlarmStatus(long transitResultId, int alarmStatus) {
+        SQLiteDatabase db = new SimpleTransitDbHelper(context).getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("alarm_status", ALARM_STATUS_FINISHED);
+            return db.update("transit_result", values, "_id=?", new String[]{String.valueOf(transitResultId)});
+        }
+        finally {
+            db.close();
+        }
+        
     }
     
     public long createTransitResult(TransitResult tr, Transit t) {
         SQLiteDatabase db = new SimpleTransitDbHelper(context).getWritableDatabase();
         db.beginTransaction();
-        
-        // transit_result
-        ContentValues trv = new ContentValues();
-        trv.put("time_type", toTimeTypeString(tr.getTimeType()));
-        if (tr.getTime() != null) {
-            trv.put("time", tr.getTime().getTimeAsString());
-        }
-        trv.put("transit_from", tr.getFrom());
-        trv.put("transit_to", tr.getTo());
-        trv.put("prefecture", tr.getPrefecture());
-        long trId = db.insertOrThrow("transit_result", null, trv);
-        if (trId < 0) {
-            db.endTransaction();
-            db.close();
-            return -1;
-        }
-        
-        // transit
-        ContentValues tv = new ContentValues();
-        tv.put("transit_result_id", trId);
-        tv.put("duration_and_fare", t.getDurationAndFare());
-        long tId = db.insertOrThrow("transit", null, tv);
-        if (tId < 0) {
-            db.endTransaction();
-            db.close();
-            return -1;
-        }
-        
-        // transit_details
-        for (int i = 0; i < t.getDetails().size(); i ++) {
-            TransitDetail td = t.getDetails().get(i);
-            
-            ContentValues tdv = new ContentValues();
-            tdv.put("transit_id", tId);
-            tdv.put("detail_no", i + 1);
-            tdv.put("route", td.getRoute());
-            if (!td.isWalking()) {
-                tdv.put("departure_time", td.getDeparture().getTime().getTimeAsString());
-                tdv.put("departure_place", td.getDeparture().getPlace());
-                tdv.put("arrival_time", td.getArrival().getTime().getTimeAsString());
-                tdv.put("arrival_place", td.getArrival().getPlace());
+        try {
+            // transit_result
+            ContentValues trv = new ContentValues();
+            trv.put("alarm_status", ALARM_STATUS_SET);
+            trv.put("time_type", toTimeTypeString(tr.getTimeType()));
+            if (tr.getTime() != null) {
+                trv.put("time", tr.getTime().getTimeAsString());
+            }
+            trv.put("transit_from", tr.getFrom());
+            trv.put("transit_to", tr.getTo());
+            trv.put("prefecture", tr.getPrefecture());
+            long trId = db.insertOrThrow("transit_result", null, trv);
+            if (trId < 0) {
+                return -1;
             }
             
-            db.insertOrThrow("transit_detail", null, tdv);
+            // transit
+            ContentValues tv = new ContentValues();
+            tv.put("transit_result_id", trId);
+            tv.put("duration_and_fare", t.getDurationAndFare());
+            long tId = db.insertOrThrow("transit", null, tv);
+            if (tId < 0) {
+                return -1;
+            }
+            
+            // transit_details
+            for (int i = 0; i < t.getDetails().size(); i ++) {
+                TransitDetail td = t.getDetails().get(i);
+                
+                ContentValues tdv = new ContentValues();
+                tdv.put("transit_id", tId);
+                tdv.put("detail_no", i + 1);
+                tdv.put("route", td.getRoute());
+                if (!td.isWalking()) {
+                    tdv.put("departure_time", td.getDeparture().getTime().getTimeAsString());
+                    tdv.put("departure_place", td.getDeparture().getPlace());
+                    tdv.put("arrival_time", td.getArrival().getTime().getTimeAsString());
+                    tdv.put("arrival_place", td.getArrival().getPlace());
+                }
+                
+                db.insertOrThrow("transit_detail", null, tdv);
+            }
+            
+            db.setTransactionSuccessful();
+            return trId;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
         }
         
-        db.endTransaction();
-        db.close();
-        
-        return trId;
     }
     
 }
