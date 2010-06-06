@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import jp.co.hybitz.android.CursorEx;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeAndPlace;
 import jp.co.hybitz.googletransit.model.TimeType;
@@ -32,7 +33,6 @@ import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
 import jp.co.hybitz.util.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 /**
@@ -85,14 +85,14 @@ public class SimpleTransitDao implements SimpleTransitConst {
     public long getTransitResultIdForAlarm() {
         SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
         try {
-            Cursor c = db.query("transit_result", new String[]{"_id"}, 
+            CursorEx c = (CursorEx) db.query("transit_result", new String[]{"_id"}, 
                     "alarm_status=?", new String[]{String.valueOf(ALARM_STATUS_SET)}, null, null, "_id", "1");
             if (c.getCount() != 1) {
                 return -1;
             }
             
             c.moveToFirst();
-            return c.getLong(c.getColumnIndex("_id"));
+            return c.getLong("_id");
         }
         finally {
             db.close();
@@ -103,7 +103,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
     public AlarmTransitResult getTransitResult(long id) {
         SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
         try {
-            Cursor c = db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
+            CursorEx c = (CursorEx) db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
             if (c.getCount() != 1) {
                 db.close();
                 return null;
@@ -112,18 +112,18 @@ public class SimpleTransitDao implements SimpleTransitConst {
             c.moveToFirst();
             
             AlarmTransitResult ret = new AlarmTransitResult();
-            ret.setId(c.getLong(c.getColumnIndex("_id")));
-            ret.setAlarmStatus(c.getInt(c.getColumnIndex("alarm_status")));
-            ret.setTimeType(toTimeType(c.getString(c.getColumnIndex("time_type"))));
+            ret.setId(c.getLong("_id"));
+            ret.setAlarmStatus(c.getInt("alarm_status"));
+            ret.setTimeType(toTimeType(c.getString("time_type")));
     
-            String time = c.getString(c.getColumnIndex("time"));
+            String time = c.getString("time");
             if (StringUtils.isNotEmpty(time)) {
                 ret.setTime(new Time(time));
             }
             
-            ret.setFrom(c.getString(c.getColumnIndex("transit_from")));
-            ret.setTo(c.getString(c.getColumnIndex("transit_to")));
-            ret.setPrefecture(c.getString(c.getColumnIndex("prefecture")));
+            ret.setFrom(c.getString("transit_from"));
+            ret.setTo(c.getString("transit_to"));
+            ret.setPrefecture(c.getString("prefecture"));
             ret.setTransits(getTransits(db, id));
             
             return ret;
@@ -136,11 +136,11 @@ public class SimpleTransitDao implements SimpleTransitConst {
     private List<Transit> getTransits(SQLiteDatabase db, long transitResultId) {
         List<Transit> ret = new ArrayList<Transit>();
         
-        Cursor c = db.query("transit", null, "transit_result_id=?", new String[]{String.valueOf(transitResultId)}, null, null, null);
+        CursorEx c = (CursorEx) db.query("transit", null, "transit_result_id=?", new String[]{String.valueOf(transitResultId)}, null, null, null);
         while (c.moveToNext()) {
             Transit t = new Transit();
-            long transitId = c.getLong(c.getColumnIndex("_id"));
-            t.setDurationAndFare(c.getString(c.getColumnIndex("duration_and_fare")));
+            long transitId = c.getLong("_id");
+            t.setDurationAndFare(c.getString("duration_and_fare"));
             for (Iterator<TransitDetail> it = getTransitDetails(db, transitId).iterator(); it.hasNext();) {
                 TransitDetail td = it.next();
                 t.addDetail(td);
@@ -154,18 +154,18 @@ public class SimpleTransitDao implements SimpleTransitConst {
     private List<TransitDetail> getTransitDetails(SQLiteDatabase db, long transitId) {
         List<TransitDetail> ret = new ArrayList<TransitDetail>();
         
-        Cursor c = db.query("transit_detail", null, "transit_id=?", new String[]{String.valueOf(transitId)}, null, null, "detail_no");
+        CursorEx c = (CursorEx) db.query("transit_detail", null, "transit_id=?", new String[]{String.valueOf(transitId)}, null, null, "detail_no");
         while (c.moveToNext()) {
             TransitDetail td = new TransitDetail();
-            td.setRoute(c.getString(c.getColumnIndex("route")));
-            String dTime = c.getString(c.getColumnIndex("departure_time"));
-            String dPlace = c.getString(c.getColumnIndex("departure_place"));
+            td.setRoute(c.getString("route"));
+            String dTime = c.getString("departure_time");
+            String dPlace = c.getString("departure_place");
             if (StringUtils.isNotEmpty(dTime) && StringUtils.isNotEmpty(dPlace)) {
                 TimeAndPlace departure = new TimeAndPlace(new Time(dTime), dPlace);
                 td.setDeparture(departure);
             }
-            String aTime = c.getString(c.getColumnIndex("arrival_time"));
-            String aPlace = c.getString(c.getColumnIndex("arrival_place"));
+            String aTime = c.getString("arrival_time");
+            String aPlace = c.getString("arrival_place");
             if (StringUtils.isNotEmpty(aTime) && StringUtils.isNotEmpty(aPlace)) {
                 TimeAndPlace arrival = new TimeAndPlace(new Time(aTime), aPlace);
                 td.setArrival(arrival);

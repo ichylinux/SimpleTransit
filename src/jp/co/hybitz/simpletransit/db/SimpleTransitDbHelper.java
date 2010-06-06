@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit.db;
 
+import jp.co.hybitz.android.CursorFactoryEx;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -29,7 +30,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final int DB_VERSION = 1;
 
     public SimpleTransitDbHelper(Context context) {
-        super(context, DB_NAME, null, DB_VERSION);
+        super(context, DB_NAME, new CursorFactoryEx(), DB_VERSION);
     }
 
     @Override
