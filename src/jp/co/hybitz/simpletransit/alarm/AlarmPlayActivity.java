@@ -53,7 +53,6 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_play);
-        
 
         Button button = (Button)findViewById(R.id.alarm_stop);
         button.setOnClickListener(new OnClickListener() {

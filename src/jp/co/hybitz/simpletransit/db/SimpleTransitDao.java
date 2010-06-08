@@ -92,12 +92,66 @@ public class SimpleTransitDao implements SimpleTransitConst {
             }
             
             c.moveToFirst();
-            return c.getLong("_id");
+            long ret = c.getLong("_id");
+            c.close();
+            return ret;
         }
         finally {
             db.close();
         }
         
+    }
+    
+    public int getTransitResultCountByAlarmStatus(int alarmStatus) {
+        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        try {
+            CursorEx c = (CursorEx) db.query("transit_result", new String[]{"_id"}, 
+                    "alarm_status=?", new String[]{String.valueOf(alarmStatus)}, null, null, null);
+            int ret = c.getCount();
+            c.close();
+            return ret;
+        }
+        finally {
+            db.close();
+        }
+    }
+
+    public List<AlarmTransitResult> getTransitResultsByAlarmStatus(int alarmStatus) {
+        List<AlarmTransitResult> ret = new ArrayList<AlarmTransitResult>();
+        
+        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        try {
+            CursorEx c = (CursorEx) db.query("transit_result", null, 
+                    "alarm_status=?", new String[]{String.valueOf(alarmStatus)}, null, null, "_id");
+            while (c.moveToNext()) {
+                ret.add(loadAlarmTransitResult(db, c));
+            }
+            c.close();
+        }
+        finally {
+            db.close();
+        }
+        
+        return ret;
+    }
+    
+    private AlarmTransitResult loadAlarmTransitResult(SQLiteDatabase db, CursorEx c) {
+        AlarmTransitResult ret = new AlarmTransitResult();
+        ret.setId(c.getLong("_id"));
+        ret.setAlarmStatus(c.getInt("alarm_status"));
+        ret.setTimeType(toTimeType(c.getString("time_type")));
+
+        String time = c.getString("time");
+        if (StringUtils.isNotEmpty(time)) {
+            ret.setTime(new Time(time));
+        }
+        
+        ret.setFrom(c.getString("transit_from"));
+        ret.setTo(c.getString("transit_to"));
+        ret.setPrefecture(c.getString("prefecture"));
+        ret.setTransits(getTransits(db, ret.getId()));
+        
+        return ret;
     }
 
     public AlarmTransitResult getTransitResult(long id) {
@@ -105,27 +159,12 @@ public class SimpleTransitDao implements SimpleTransitConst {
         try {
             CursorEx c = (CursorEx) db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
             if (c.getCount() != 1) {
-                db.close();
                 return null;
             }
             
             c.moveToFirst();
-            
-            AlarmTransitResult ret = new AlarmTransitResult();
-            ret.setId(c.getLong("_id"));
-            ret.setAlarmStatus(c.getInt("alarm_status"));
-            ret.setTimeType(toTimeType(c.getString("time_type")));
-    
-            String time = c.getString("time");
-            if (StringUtils.isNotEmpty(time)) {
-                ret.setTime(new Time(time));
-            }
-            
-            ret.setFrom(c.getString("transit_from"));
-            ret.setTo(c.getString("transit_to"));
-            ret.setPrefecture(c.getString("prefecture"));
-            ret.setTransits(getTransits(db, id));
-            
+            AlarmTransitResult ret = loadAlarmTransitResult(db, c);
+            c.close();
             return ret;
         }
         finally {
@@ -147,6 +186,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
             }
             ret.add(t);
         }
+        c.close();
         
         return ret;
     }
@@ -172,6 +212,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
             }
             ret.add(td);
         }
+        c.close();
         
         return ret;
     }

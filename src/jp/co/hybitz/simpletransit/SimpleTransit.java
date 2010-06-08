@@ -34,6 +34,7 @@ import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.simpletransit.alarm.AlarmListActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
@@ -107,15 +108,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             startActivity(new Intent(this, Preferences.class));
             return true;
         case MENU_ITEM_ALARM :
-            Intent intent = new Intent(this, AlarmPlayActivity.class);
-            intent.putExtra(EXTRA_KEY_TRANSIT, new SimpleTransitDao(this).getTransitResultIdForAlarm());
-            startActivity(intent);
+            showAlarmList();
             return true;
         case MENU_ITEM_QUIT :
             finish();
             return true;
         default :
             return super.onMenuItemSelected(featureId, item);
+        }
+    }
+    
+    private void showAlarmList() {
+        SimpleTransitDao dao = new SimpleTransitDao(this);
+        int count = dao.getTransitResultCountByAlarmStatus(ALARM_STATUS_SET);
+        if (count == 1) {
+            Intent intent = new Intent(this, AlarmPlayActivity.class);
+            intent.putExtra(EXTRA_KEY_TRANSIT, dao.getTransitResultIdForAlarm());
+            startActivity(intent);
+        }
+        else {
+            Intent intent = new Intent(this, AlarmListActivity.class);
+            startActivity(intent);
         }
     }
     
@@ -158,11 +171,15 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         lv.setOnItemLongClickListener(new OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 TransitItem ti = (TransitItem) parent.getItemAtPosition(position);
-                AlarmSettingDialog dialog = new AlarmSettingDialog(SimpleTransit.this, ti.getTransitResult(), ti.getTransit());
-                dialog.show();
+                showAlarmSettingDialog(ti);
                 return false;
             }
         });
+    }
+    
+    private void showAlarmSettingDialog(TransitItem ti) {
+        AlarmSettingDialog dialog = new AlarmSettingDialog(SimpleTransit.this, ti.getTransitResult(), ti.getTransit());
+        dialog.show();
     }
 
     private void showTimeDialog() {
