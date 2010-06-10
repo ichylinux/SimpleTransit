@@ -67,11 +67,17 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         }
         else {
             TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
-            TextView tvTitle = (TextView) findViewById(R.id.tv_title);
-            TextView tvRoute = (TextView) findViewById(R.id.tv_route);
-            tvTitle.setText(getString(R.string.tv_alarm_title_alarm_not_set));
             tvAlarmNotice.setVisibility(View.INVISIBLE);
+
+            TextView tvTitle = (TextView) findViewById(R.id.tv_title);
+            tvTitle.setText(getString(R.string.tv_alarm_title_alarm_not_set));
+
+            TextView tvRoute = (TextView) findViewById(R.id.tv_route);
             tvRoute.setVisibility(View.INVISIBLE);
+
+            TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
+            tvAlarmAt.setVisibility(View.INVISIBLE);
+
             button.setVisibility(View.INVISIBLE);
         }
 
@@ -116,21 +122,23 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         }
     }
     
-    private void startAlarm(AlarmTransitResult tr) {
+    private void startAlarm(AlarmTransitResult atr) {
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
         TextView tvTitle = (TextView) findViewById(R.id.tv_title);
-        tvTitle.setText(ResultRenderer.createTitle(tr));
+        tvTitle.setText(ResultRenderer.createTitle(atr.getTransitResult()));
 
         TextView tvRoute = (TextView) findViewById(R.id.tv_route);
-        tvRoute.setText(new TransitItem(tr, tr.getTransits().get(0)).toString());
-
+        tvRoute.setText(new TransitItem(atr.getTransitResult(), atr.getTransits().get(0)).toString());
 
         TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
         tvAlarmNotice.setVisibility(startAlarm ? View.VISIBLE : View.INVISIBLE);
 
+        TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
+        tvAlarmAt.setText("アラーム： " + AlarmUtils.toDateTimeString(atr.getAlarmAt()));
+
         if (startAlarm) {
-            if (tr.getAlarmStatus() != ALARM_STATUS_SET) {
+            if (atr.getAlarmStatus() != ALARM_STATUS_SET) {
                 finish();
             }
             else {

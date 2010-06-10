@@ -19,7 +19,9 @@ package jp.co.hybitz.simpletransit.alarm;
 
 import java.util.Date;
 
+import jp.co.hybitz.android.DateUtils;
 import jp.co.hybitz.android.DialogUtils;
+import jp.co.hybitz.android.ToastUtils;
 import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.Transit;
@@ -29,6 +31,7 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
+import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -41,7 +44,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -103,24 +105,23 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
     }
     
     private void startIntent() {
-        SimpleTransitDao dao = new SimpleTransitDao(activity);
-        long id = dao.createTransitResult(transitResult, transit);
+        TimePicker tp = (TimePicker) layout.findViewById(R.id.alarm_time_select);
+        Time selected = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
+        Date alarmTime = TransitUtil.getRelativeDate(selected, true);
+
+        AlarmTransitResult atr = new AlarmTransitResult(transitResult);
+        atr.setAlarmStatus(ALARM_STATUS_SET);
+        atr.setAlarmAt(DateUtils.toLong(alarmTime));
+        long id = new SimpleTransitDao(activity).createTransitResult(atr, transit);
 
         Intent intent = new Intent(activity, OneTimeAlarm.class);
         intent.putExtra(EXTRA_KEY_START_ALARM, true);
         intent.putExtra(EXTRA_KEY_TRANSIT, id);
         PendingIntent sender = PendingIntent.getBroadcast(activity, 0, intent, 0);
-
-        TimePicker tp = (TimePicker) layout.findViewById(R.id.alarm_time_select);
-        Time selected = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
-
-        Date alarmTime = TransitUtil.getRelativeDate(selected, true);
-
         AlarmManager am = (AlarmManager)activity.getSystemService(Activity.ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, alarmTime.getTime(), sender);
 
-        Toast toast = Toast.makeText(activity, "アラームを" + selected + "に設定しました。", Toast.LENGTH_LONG);
-        toast.show();
+        ToastUtils.toastLong(activity, "アラームを" + selected + "に設定しました。");
     }
     
     public void show() {

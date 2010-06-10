@@ -27,8 +27,13 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
+    /**
+     * コンストラクタ
+     * 
+     * @param context
+     */
     public SimpleTransitDbHelper(Context context) {
         super(context, DB_NAME, new CursorFactoryEx(), DB_VERSION);
     }
@@ -38,12 +43,14 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         StringBuilder tr = new StringBuilder();
         tr.append("create table transit_result ( ");
         tr.append("_id integer primary key autoincrement, ");
-        tr.append("alarm_status integer not null default 0, ");
         tr.append("time_type text not null, ");
         tr.append("time text, ");
         tr.append("transit_from text not null, ");
         tr.append("transit_to text not null, ");
-        tr.append("prefecture text ");
+        tr.append("prefecture text, ");
+        tr.append("alarm_status integer not null default 0, ");
+        tr.append("alarm_at integer not null default 0, ");
+        tr.append("created_at integer not null default 0 ");
         tr.append(") ");
         db.execSQL(tr.toString());
 
@@ -69,8 +76,14 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int arg1, int arg2) {
-        
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion == 1 && newVersion == 2) {
+            upgradeFrom1To2(db);
+        }
     }
 
+    private void upgradeFrom1To2(SQLiteDatabase db) {
+        db.execSQL("alter table transit_result add column alarm_at integer not null default 0 ");
+        db.execSQL("alter table transit_result add column created_at integer not null default 0 ");
+    }
 }

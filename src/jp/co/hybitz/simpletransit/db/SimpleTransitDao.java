@@ -17,7 +17,9 @@
  */
 package jp.co.hybitz.simpletransit.db;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +29,6 @@ import jp.co.hybitz.googletransit.model.TimeAndPlace;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
-import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
 import jp.co.hybitz.util.StringUtils;
@@ -138,8 +139,10 @@ public class SimpleTransitDao implements SimpleTransitConst {
     private AlarmTransitResult loadAlarmTransitResult(SQLiteDatabase db, CursorEx c) {
         AlarmTransitResult ret = new AlarmTransitResult();
         ret.setId(c.getLong("_id"));
-        ret.setAlarmStatus(c.getInt("alarm_status"));
         ret.setTimeType(toTimeType(c.getString("time_type")));
+        ret.setAlarmStatus(c.getInt("alarm_status"));
+        ret.setAlarmAt(c.getLong("alarm_at"));
+        ret.setCreatedAt(c.getLong("created_at"));
 
         String time = c.getString("time");
         if (StringUtils.isNotEmpty(time)) {
@@ -230,13 +233,17 @@ public class SimpleTransitDao implements SimpleTransitConst {
         
     }
     
-    public long createTransitResult(TransitResult tr, Transit t) {
+    private long getCurrentDateTime() {
+        String now = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        return Long.parseLong(now);
+    }
+    
+    public long createTransitResult(AlarmTransitResult tr, Transit t) {
         SQLiteDatabase db = new SimpleTransitDbHelper(context).getWritableDatabase();
         db.beginTransaction();
         try {
             // transit_result
             ContentValues trv = new ContentValues();
-            trv.put("alarm_status", ALARM_STATUS_SET);
             trv.put("time_type", toTimeTypeString(tr.getTimeType()));
             if (tr.getTime() != null) {
                 trv.put("time", tr.getTime().getTimeAsString());
@@ -244,6 +251,9 @@ public class SimpleTransitDao implements SimpleTransitConst {
             trv.put("transit_from", tr.getFrom());
             trv.put("transit_to", tr.getTo());
             trv.put("prefecture", tr.getPrefecture());
+            trv.put("alarm_status", tr.getAlarmStatus());
+            trv.put("alarm_at", tr.getAlarmAt());
+            trv.put("created_at", getCurrentDateTime());
             long trId = db.insertOrThrow("transit_result", null, trv);
             if (trId < 0) {
                 return -1;

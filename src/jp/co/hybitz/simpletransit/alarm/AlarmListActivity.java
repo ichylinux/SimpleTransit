@@ -88,13 +88,12 @@ public class AlarmListActivity extends ListActivity implements SimpleTransitCons
             for (Iterator<AlarmTransitResult> it = list.iterator(); it.hasNext();) {
                 AlarmTransitResult atr = it.next();
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("title", ResultRenderer.createTitle(atr));
+                map.put("title", ResultRenderer.createTitle(atr.getTransitResult()) + "\nアラーム： " + AlarmUtils.toDateTimeString(atr.getAlarmAt()));
                 map.put("transit_result", atr);
                 ret.add(map);
             }
         }
         
         return ret;
-        
     }
 }
