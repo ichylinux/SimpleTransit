@@ -32,12 +32,14 @@ import jp.co.hybitz.googletransit.TransitSearcherFactory;
 import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.alarm.AlarmListActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
-import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
+import jp.co.hybitz.simpletransit.db.TransitResultDao;
+import jp.co.hybitz.simpletransit.history.QueryHistoryListActivity;
+import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
+import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
@@ -63,12 +65,13 @@ import android.widget.AdapterView.OnItemLongClickListener;
  */
 public class SimpleTransit extends Activity implements SimpleTransitConst {
     private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
-    private static final int MENU_ITEM_ALARM = Menu.FIRST + 2;
-    private static final int MENU_ITEM_QUIT = Menu.FIRST + 3;
+    private static final int MENU_ITEM_QUERY_HISTORY = Menu.FIRST + 2;
+    private static final int MENU_ITEM_ALARM = Menu.FIRST + 3;
+    private static final int MENU_ITEM_QUIT = Menu.FIRST + 4;
 
     private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
-    private TransitQuery query = new TransitQuery();
+    private SimpleTransitQuery query = new SimpleTransitQuery();
     private Date currentTime;
     private Date previousTime;
     private Date nextTime;
@@ -93,8 +96,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_ITEM_PREFERENCES, 0, "設定");
-        menu.add(0, MENU_ITEM_ALARM, 1, "アラーム");
-        menu.add(0, MENU_ITEM_QUIT, 1, "終了");
+        menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
+        menu.add(0, MENU_ITEM_ALARM, 2, "アラーム");
+        menu.add(0, MENU_ITEM_QUIT, 3, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -107,6 +111,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         case MENU_ITEM_PREFERENCES :
             startActivity(new Intent(this, Preferences.class));
             return true;
+        case MENU_ITEM_QUERY_HISTORY :
+            showQueryHistoryList();
+            return true;
         case MENU_ITEM_ALARM :
             showAlarmList();
             return true;
@@ -118,8 +125,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
+    /**
+     * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
+            if (resultCode == RESULT_OK) {
+                query = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
+                updateQueryView();
+            }
+        }
+    }
+
+    private void showQueryHistoryList() {
+        Intent intent = new Intent(this, QueryHistoryListActivity.class);
+        intent.putExtra(EXTRA_KEY_TRANSIT_QUERY, query);
+        startActivityForResult(intent, REQUEST_CODE_SELECT_TRANSIT_QUERY);
+    }
+    
     private void showAlarmList() {
-        SimpleTransitDao dao = new SimpleTransitDao(this);
+        TransitResultDao dao = new TransitResultDao(this);
         int count = dao.getTransitResultCountByAlarmStatus(ALARM_STATUS_SET);
         if (count == 1) {
             Intent intent = new Intent(this, AlarmPlayActivity.class);
@@ -207,6 +233,20 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
+    private void updateQueryView() {
+        EditText from = (EditText) findViewById(R.id.from);
+        EditText to = (EditText) findViewById(R.id.to);
+        CheckBox first = (CheckBox) findViewById(R.id.first);
+        CheckBox last = (CheckBox) findViewById(R.id.last);
+        TextView time = (TextView) findViewById(R.id.time);
+
+        from.setText(query.getFrom());
+        to.setText(query.getTo());
+        first.setChecked(false);
+        last.setChecked(false);
+        time.setText(null);
+    }
+
     private void updateQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
@@ -268,7 +308,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
 
         try {
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-            TransitResult result = searcher.search(query);
+            TransitResult result = searcher.search(query.getTransitQuery());
             
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 // 検索結果を表示
@@ -279,6 +319,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             }
             else {
                 showResponseCode(result.getResponseCode());
+            }
+            
+            // 検索条件を履歴として保存
+            if (result.getTransitCount() > 0) {
+                new Thread(new QueryHistoryWorker(this, query)).start();
             }
             
         } catch (TransitSearchException e) {

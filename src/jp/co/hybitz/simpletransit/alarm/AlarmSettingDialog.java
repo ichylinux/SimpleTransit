@@ -30,8 +30,8 @@ import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
-import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
-import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
+import jp.co.hybitz.simpletransit.db.TransitResultDao;
+import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -109,10 +109,10 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         Time selected = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
         Date alarmTime = TransitUtil.getRelativeDate(selected, true);
 
-        AlarmTransitResult atr = new AlarmTransitResult(transitResult);
+        SimpleTransitResult atr = new SimpleTransitResult(transitResult);
         atr.setAlarmStatus(ALARM_STATUS_SET);
         atr.setAlarmAt(DateUtils.toLong(alarmTime));
-        long id = new SimpleTransitDao(activity).createTransitResult(atr, transit);
+        long id = new TransitResultDao(activity).createTransitResult(atr, transit);
 
         Intent intent = new Intent(activity, OneTimeAlarm.class);
         intent.putExtra(EXTRA_KEY_START_ALARM, true);

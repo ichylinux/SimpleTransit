@@ -17,9 +17,7 @@
  */
 package jp.co.hybitz.simpletransit.db;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,7 +28,7 @@ import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
-import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
+import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.util.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
@@ -39,12 +37,10 @@ import android.database.sqlite.SQLiteDatabase;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransitDao implements SimpleTransitConst {
+public class TransitResultDao extends AbstractDao implements SimpleTransitConst {
 
-    private Context context;
-
-    public SimpleTransitDao(Context context) {
-        this.context = context;
+    public TransitResultDao(Context context) {
+        super(context);
     }
     
     private String toTimeTypeString(TimeType tt) {
@@ -84,7 +80,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
     }
     
     public long getTransitResultIdForAlarm() {
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_result", new String[]{"_id"}, 
                     "alarm_status=?", new String[]{String.valueOf(ALARM_STATUS_SET)}, null, null, "_id", "1");
@@ -104,7 +100,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
     }
     
     public int getTransitResultCountByAlarmStatus(int alarmStatus) {
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_result", new String[]{"_id"}, 
                     "alarm_status=?", new String[]{String.valueOf(alarmStatus)}, null, null, null);
@@ -117,10 +113,10 @@ public class SimpleTransitDao implements SimpleTransitConst {
         }
     }
 
-    public List<AlarmTransitResult> getTransitResultsByAlarmStatus(int alarmStatus) {
-        List<AlarmTransitResult> ret = new ArrayList<AlarmTransitResult>();
+    public List<SimpleTransitResult> getTransitResultsByAlarmStatus(int alarmStatus) {
+        List<SimpleTransitResult> ret = new ArrayList<SimpleTransitResult>();
         
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_result", null, 
                     "alarm_status=?", new String[]{String.valueOf(alarmStatus)}, null, null, "_id");
@@ -136,8 +132,8 @@ public class SimpleTransitDao implements SimpleTransitConst {
         return ret;
     }
     
-    private AlarmTransitResult loadAlarmTransitResult(SQLiteDatabase db, CursorEx c) {
-        AlarmTransitResult ret = new AlarmTransitResult();
+    private SimpleTransitResult loadAlarmTransitResult(SQLiteDatabase db, CursorEx c) {
+        SimpleTransitResult ret = new SimpleTransitResult();
         ret.setId(c.getLong("_id"));
         ret.setTimeType(toTimeType(c.getString("time_type")));
         ret.setAlarmStatus(c.getInt("alarm_status"));
@@ -157,8 +153,8 @@ public class SimpleTransitDao implements SimpleTransitConst {
         return ret;
     }
 
-    public AlarmTransitResult getTransitResult(long id) {
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getReadableDatabase();
+    public SimpleTransitResult getTransitResult(long id) {
+        SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
             if (c.getCount() != 1) {
@@ -166,7 +162,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
             }
             
             c.moveToFirst();
-            AlarmTransitResult ret = loadAlarmTransitResult(db, c);
+            SimpleTransitResult ret = loadAlarmTransitResult(db, c);
             c.close();
             return ret;
         }
@@ -221,7 +217,7 @@ public class SimpleTransitDao implements SimpleTransitConst {
     }
     
     public int updateAlarmStatus(long transitResultId, int alarmStatus) {
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
             values.put("alarm_status", ALARM_STATUS_FINISHED);
@@ -230,16 +226,10 @@ public class SimpleTransitDao implements SimpleTransitConst {
         finally {
             db.close();
         }
-        
     }
     
-    private long getCurrentDateTime() {
-        String now = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        return Long.parseLong(now);
-    }
-    
-    public long createTransitResult(AlarmTransitResult tr, Transit t) {
-        SQLiteDatabase db = new SimpleTransitDbHelper(context).getWritableDatabase();
+    public long createTransitResult(SimpleTransitResult tr, Transit t) {
+        SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
             // transit_result
@@ -293,7 +283,6 @@ public class SimpleTransitDao implements SimpleTransitConst {
             db.endTransaction();
             db.close();
         }
-        
     }
     
 }

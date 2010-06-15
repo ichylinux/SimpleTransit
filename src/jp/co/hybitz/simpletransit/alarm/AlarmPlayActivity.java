@@ -24,8 +24,8 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.ResultRenderer;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
-import jp.co.hybitz.simpletransit.db.SimpleTransitDao;
-import jp.co.hybitz.simpletransit.model.AlarmTransitResult;
+import jp.co.hybitz.simpletransit.db.TransitResultDao;
+import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.app.Activity;
 import android.content.ContentUris;
@@ -47,7 +47,7 @@ import android.widget.TextView;
 public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     private MediaPlayer mediaPlayer;
     private Vibrator vibrator;
-    private AlarmTransitResult alarmTransitResult;
+    private SimpleTransitResult alarmTransitResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,13 +83,13 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
 
     }
     
-    private AlarmTransitResult loadTransitResult() {
+    private SimpleTransitResult loadTransitResult() {
         long id = getTransitResultId();
         if (id < 0) {
             return null;
         }
         
-        return new SimpleTransitDao(this).getTransitResult(id);
+        return new TransitResultDao(this).getTransitResult(id);
     }
     
     private long getTransitResultId() {
@@ -117,12 +117,12 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
         if (startAlarm || force) {
             if (alarmTransitResult != null) {
-                new SimpleTransitDao(this).updateAlarmStatus(getTransitResultId(), ALARM_STATUS_FINISHED);
+                new TransitResultDao(this).updateAlarmStatus(getTransitResultId(), ALARM_STATUS_FINISHED);
             }
         }
     }
     
-    private void startAlarm(AlarmTransitResult atr) {
+    private void startAlarm(SimpleTransitResult atr) {
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
         TextView tvTitle = (TextView) findViewById(R.id.tv_title);

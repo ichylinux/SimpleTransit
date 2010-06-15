@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.alarm;
+package jp.co.hybitz.simpletransit.history;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,11 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import jp.co.hybitz.simpletransit.R;
-import jp.co.hybitz.simpletransit.ResultRenderer;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
-import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.db.TransitQueryDao;
+import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,7 +36,7 @@ import android.widget.SimpleAdapter;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class AlarmListActivity extends ListActivity implements SimpleTransitConst {
+public class QueryHistoryListActivity extends ListActivity implements SimpleTransitConst {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,42 +54,31 @@ public class AlarmListActivity extends ListActivity implements SimpleTransitCons
     @SuppressWarnings("unchecked")
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Map<String, Object> map = (Map<String, Object>) l.getItemAtPosition(position);
-        SimpleTransitResult atr = (SimpleTransitResult) map.get("transit_result");
-
-        // アラーム設定なし表示が選択された場合
-        if (atr == null) {
-            return;
-        }
-
-        Intent intent = new Intent(this, AlarmPlayActivity.class);
-        intent.putExtra(EXTRA_KEY_TRANSIT, atr.getId());
-        startActivity(intent);
+        SimpleTransitQuery query = (SimpleTransitQuery) map.get("transit_query");
+        
+        Intent result = new Intent();
+        result.putExtra(EXTRA_KEY_TRANSIT_QUERY, query);
+        setResult(RESULT_OK, result);
+        finish();
     }
     
     private void showList() {
         setListAdapter(new SimpleAdapter(this, getData(),
-                android.R.layout.simple_list_item_1, new String[] { "title" },
+                android.R.layout.simple_list_item_1, new String[] { "from_to" },
                 new int[] { android.R.id.text1 }));
     }
 
     private List<Map<String, Object>> getData() {
         List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
         
-        TransitResultDao dao = new TransitResultDao(this);
-        List<SimpleTransitResult> list = dao.getTransitResultsByAlarmStatus(ALARM_STATUS_SET);
-        if (list.isEmpty()) {
+        TransitQueryDao dao = new TransitQueryDao(this);
+        List<SimpleTransitQuery> list = dao.getTransitQueries();
+        for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
+            SimpleTransitQuery query = it.next();
             Map<String, Object> map = new HashMap<String, Object>();
-            map.put("title", getString(R.string.tv_alarm_title_alarm_not_set));
+            map.put("from_to", query.getFrom() + " ～ " + query.getTo());
+            map.put("transit_query", query);
             ret.add(map);
-        }
-        else {
-            for (Iterator<SimpleTransitResult> it = list.iterator(); it.hasNext();) {
-                SimpleTransitResult atr = it.next();
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("title", ResultRenderer.createTitle(atr.getTransitResult()) + "\nアラーム： " + AlarmUtils.toDateTimeString(atr.getAlarmAt()));
-                map.put("transit_result", atr);
-                ret.add(map);
-            }
         }
         
         return ret;

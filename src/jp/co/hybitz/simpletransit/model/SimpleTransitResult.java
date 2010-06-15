@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import jp.co.hybitz.googletransit.model.Time;
@@ -27,7 +28,7 @@ import jp.co.hybitz.googletransit.model.TransitResult;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class AlarmTransitResult {
+public class SimpleTransitResult implements Serializable {
 
     private long id;
     private int alarmStatus;
@@ -35,11 +36,11 @@ public class AlarmTransitResult {
     private long createdAt;
     private TransitResult transitResult;
 
-    public AlarmTransitResult() {
+    public SimpleTransitResult() {
         this(new TransitResult());
     }
     
-    public AlarmTransitResult(TransitResult transitResult) {
+    public SimpleTransitResult(TransitResult transitResult) {
         this.transitResult = transitResult;
     }
     

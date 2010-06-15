@@ -28,4 +28,7 @@ public interface SimpleTransitConst {
 
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";
+    public static final String EXTRA_KEY_TRANSIT_QUERY = "transit_query";
+    
+    public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
 }
