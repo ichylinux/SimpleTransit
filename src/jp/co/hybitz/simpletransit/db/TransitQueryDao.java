@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.hybitz.android.CursorEx;
+import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.content.ContentValues;
 import android.content.Context;
@@ -58,6 +59,7 @@ public class TransitQueryDao extends AbstractDao {
         ret.setId(c.getLong("_id"));
         ret.setFrom(c.getString("transit_from"));
         ret.setTo(c.getString("transit_to"));
+        ret.setTimeType(TimeType.DEPARTURE);
         ret.setUseCount(c.getInt("use_count"));
         ret.setCreatedAt(c.getLong("created_at"));
         return ret;
