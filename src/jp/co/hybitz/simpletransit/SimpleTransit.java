@@ -64,11 +64,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends Activity implements SimpleTransitConst {
-    private static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
-    private static final int MENU_ITEM_QUERY_HISTORY = Menu.FIRST + 2;
-    private static final int MENU_ITEM_ALARM = Menu.FIRST + 3;
-    private static final int MENU_ITEM_QUIT = Menu.FIRST + 4;
-
     private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
     private SimpleTransitQuery query = new SimpleTransitQuery();

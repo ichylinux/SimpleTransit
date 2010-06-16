@@ -86,26 +86,28 @@ public class TransitQueryDao extends AbstractDao {
     
     public long createTransitQuery(SimpleTransitQuery tq) {
         SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             values.put("transit_from", tq.getFrom());
             values.put("transit_to", tq.getTo());
             values.put("created_at", getCurrentDateTime());
-            long id = db.insertOrThrow("transit_query", null, values);
-            if (id < 0) {
-                return -1;
-            }
-            
-            db.setTransactionSuccessful();
-            return id;
+            return db.insertOrThrow("transit_query", null, values);
         }
         finally {
-            db.endTransaction();
             db.close();
         }
     }
     
+    public int deleteTransitQuery(long id) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            return db.delete("transit_query", "_id=?", new String[]{String.valueOf(id)});
+        }
+        finally {
+            db.close();
+        }
+    }
+
     public int updateUseCount(long id, int useCount) {
         SQLiteDatabase db = getWritableDatabase();
         try {
