@@ -1,51 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/layout_main" android:layout_width="wrap_content" android:layout_height="wrap_content" xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:id="@+id/layout_top" android:orientation="vertical" android:layout_width="wrap_content" android:layout_above="@+id/layout_search_options" android:layout_height="fill_parent">
+<RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_above="@+id/layout_search_options" android:layout_height="fill_parent">
 	    <!-- 検索条件 -->
-	    <TableLayout android:id="@+id/layout_search_condition" android:layout_width="wrap_content" android:layout_height="wrap_content">
-	        <TableRow android:id="@+id/TableRow01" android:layout_width="wrap_content" android:layout_height="wrap_content">
-		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/TextViewFrom" android:text="@+string/label_from">
-		        </TextView>
-		        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="200px" android:maxLines="1" android:singleLine="true" android:id="@+id/from">
-		        </EditText>
-	            <CheckBox android:text="@+string/checkbox_first" android:layout_marginLeft="20px" android:id="@+id/first" android:layout_width="wrap_content" android:layout_height="wrap_content"></CheckBox>
+	    <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+	        <TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
+		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_from"/>
+		        <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
+		                  android:maxLines="1" android:singleLine="true" android:id="@+id/from" android:layout_width="fill_parent"/>
+	            <CheckBox android:text="@+string/checkbox_first" android:layout_marginLeft="20sp" android:layout_marginRight="20sp" android:id="@+id/first" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	        </TableRow>
-	        <TableRow android:id="@+id/TableRow02" android:layout_width="wrap_content" android:layout_height="wrap_content">
-		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/TextViewTo" android:text="@+string/label_to"/>
-		        <EditText android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="200px" android:maxLines="1" android:singleLine="true" android:id="@+id/to"/>
-	            <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="20px" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"></CheckBox>
+	        <TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
+		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_to"/>
+		        <EditText android:layout_height="wrap_content"
+		                  android:maxLines="1" android:singleLine="true" android:id="@+id/to" android:layout_width="fill_parent"/>
+	            <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="20sp" android:layout_marginRight="20sp" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	        </TableRow>
-	        <TableRow android:id="@+id/TableRow03" android:layout_width="wrap_content" android:layout_height="wrap_content">
-			        <TextView android:text="@+string/label_time"
-			                  android:layout_width="wrap_content" 
-			                  android:layout_height="wrap_content" 
-			                  android:id="@+id/TextViewTime">
-			        </TextView>
-	            <TextView android:layout_height="wrap_content"
-	                      android:id="@+id/time"
+	        <TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
+		        <TextView android:text="@+string/label_time"
+		                  android:layout_width="wrap_content" 
+		                  android:layout_height="wrap_content"/>
+	            <TextView android:id="@+id/time"
 	                      android:background="@layout/time_border_enabled"
 	                      android:textSize="18sp"
 	                      android:textColor="#000000"
-	                      android:layout_marginLeft="3px"
-	                      android:layout_marginRight="3px">
-	            </TextView>
-	            <Button android:layout_marginLeft="20px"
+	                      android:layout_marginLeft="3sp" android:layout_marginRight="3sp" android:layout_width="fill_parent"/>
+	            <Button android:layout_marginLeft="5sp"
 	                    android:layout_height="wrap_content"
 	                    android:text="@+string/button_search"
 	                    android:id="@+id/search"
-	                    android:textSize="16sp">
-	            </Button>
+	                    android:textSize="16sp"/>
 	        </TableRow>
 	    </TableLayout>
 
 	    <!-- 検索結果 -->
-	    <TextView android:id="@+id/tv_summary" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	    <TextView android:id="@+id/tv_summary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5sp"/>
 	    <ListView android:id="@+id/results" android:layout_width="fill_parent" android:isScrollContainer="true" android:layout_height="wrap_content" android:longClickable="true"/>
     </LinearLayout>
     
     <!-- 検索オプション -->
     <RelativeLayout android:id="@+id/layout_search_options" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignParentBottom="true">
-	    <Button android:text="@+string/button_previous_time" android:id="@+id/previous_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"></Button>
-	    <Button android:text="@+string/button_next_time" android:id="@+id/next_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"></Button>
+	    <Button android:text="@+string/button_previous_time" android:id="@+id/previous_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"/>
+	    <Button android:text="@+string/button_next_time" android:id="@+id/next_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
     </RelativeLayout>
 </RelativeLayout>

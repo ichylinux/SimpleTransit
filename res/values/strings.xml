@@ -11,8 +11,8 @@
     <string name="error_from_required">出発地を入力してください。</string>
     <string name="error_to_required">到着地を入力してください。</string>
     <string name="error_unknow_host_exception">Googleに接続できませんでした。</string>
-    <string name="checkbox_first">始発を確認</string>
-    <string name="checkbox_last">終電を確認</string>
+    <string name="checkbox_first">始発</string>
+    <string name="checkbox_last">終電</string>
     <string name="label_from">出発地</string>
     <string name="label_time">時刻</string>
     <string name="label_to">到着地</string>

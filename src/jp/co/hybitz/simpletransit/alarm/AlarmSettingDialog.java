@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit.alarm;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import jp.co.hybitz.android.DateUtils;
@@ -73,6 +74,9 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         
         TimePicker tp = (TimePicker) layout.findViewById(R.id.alarm_time_select);
         tp.setIs24HourView(true);
+        Time time = getDefaultTime();
+        tp.setCurrentHour(time.getHour());
+        tp.setCurrentMinute(time.getMinute());
         
         Button button = (Button) layout.findViewById(R.id.alarm_set);
         button.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +96,12 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         });
 
         return dialog;
+    }
+    
+    private Time getDefaultTime() {
+        Calendar c = Calendar.getInstance();
+        c.add(Calendar.MINUTE, 1);
+        return TransitUtil.getTime(c.getTime());
     }
     
     private boolean validate() {

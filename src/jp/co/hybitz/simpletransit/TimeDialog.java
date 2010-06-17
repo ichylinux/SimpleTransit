@@ -17,6 +17,9 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.util.Calendar;
+
+import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import android.app.Activity;
@@ -98,12 +101,19 @@ public class TimeDialog implements DialogInterface {
 	
 	public void setTime(Time time) {
 	    this.time = time;
-	    
-	    if (time != null) {
-    	    TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
-    	    tp.setCurrentHour(time.getHour());
-    	    tp.setCurrentMinute(time.getMinute());
+	    if (time == null) {
+	        Calendar c = Calendar.getInstance();
+	        c.add(Calendar.MINUTE, 1);
+	        this.time = TransitUtil.getTime(c.getTime());
 	    }
+	 
+	    updateTimeView();
+	}
+	
+	private void updateTimeView() {
+        TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
+        tp.setCurrentHour(this.time.getHour());
+        tp.setCurrentMinute(this.time.getMinute());
 	}
 	
 	public TimeType getTimeType() {

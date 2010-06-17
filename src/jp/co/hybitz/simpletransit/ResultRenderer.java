@@ -98,7 +98,6 @@ public class ResultRenderer {
             sb.append(title);
             sb.append("\n");
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
-            sb.append("\n");
         } else {
             sb.append(activity.getString(R.string.no_route_found));
         }
