@@ -17,8 +17,8 @@
  */
 package jp.co.hybitz.android;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 
 /**
@@ -27,8 +27,8 @@ import android.content.DialogInterface;
  */
 public class DialogUtils {
 
-    public static void showMessage(Activity activity, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+    public static void showMessage(Context context, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(message);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -37,12 +37,12 @@ public class DialogUtils {
         builder.show();
     }
 
-    public static void showMessage(Activity activity, int stringId) {
-        showMessage(activity, activity.getString(stringId));
+    public static void showMessage(Context context, int stringId) {
+        showMessage(context, context.getString(stringId));
     }
 
-    public static void showMessage(Activity activity, String title, String message, String buttonLabel) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+    public static void showMessage(Context context, String title, String message, String buttonLabel) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setPositiveButton(buttonLabel, new DialogInterface.OnClickListener() {

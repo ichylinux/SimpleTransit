@@ -23,6 +23,7 @@ import android.view.Menu;
  * @author ichy <ichylinux@gmail.com>
  */
 public interface SimpleTransitConst {
+    public static final String APP_ID = "cecab237-aa57-46cd-ad26-3cc3a6135da4";
 
     public static final int ALARM_STATUS_NONE = 0;
     public static final int ALARM_STATUS_SET = 1;

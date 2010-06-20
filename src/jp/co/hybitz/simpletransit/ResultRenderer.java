@@ -47,10 +47,8 @@ public class ResultRenderer {
     }
 
     void render(TransitResult result) {
-        String title = createTitle(result);
-
         TextView summary = (TextView) activity.findViewById(R.id.tv_summary);
-        summary.setText(createSummary(title, result));
+        summary.setText(createSummary(result));
 
         ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, R.layout.listview);
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
@@ -92,10 +90,10 @@ public class ResultRenderer {
         return sb.toString();
     }
     
-    private String createSummary(String title, TransitResult result) {
+    private String createSummary(TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
-            sb.append(title);
+            sb.append(createTitle(result));
             sb.append("\n");
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
         } else {

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
@@ -77,11 +78,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
-        query.setTimeType(TimeType.DEPARTURE);
-        updatePreviousTimeAndNextTimeVisibility();
-        
+        AndroidExceptionHandler.bind(this, APP_ID);
+        initView();
         initActions();
     }
     
@@ -131,6 +129,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 updateQueryView();
             }
         }
+    }
+    
+    private void initView() {
+        setContentView(R.layout.main);
+        query.setTimeType(TimeType.DEPARTURE);
+        updatePreviousTimeAndNextTimeVisibility();
     }
 
     private void showQueryHistoryList() {

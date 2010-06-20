@@ -21,41 +21,28 @@ import java.net.UnknownHostException;
 
 import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.TransitSearchException;
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 public class ExceptionHandler {
-    private Activity activity;
+    private Context context;
     
-    public ExceptionHandler(Activity activity) {
-        this.activity = activity;
+    public ExceptionHandler(Context context) {
+        this.context = context;
     }
 
     public void handleException(TransitSearchException e) {
         Log.e("SimpleTransit", e.getMessage(), e);
         
         if (e.getCause() instanceof UnknownHostException) {
-            DialogUtils.showMessage(activity, R.string.error_unknow_host_exception);
+            DialogUtils.showMessage(context, R.string.error_unknow_host_exception);
         }
         else {
-            apologize(e);
+            throw new IllegalStateException(e);
         }
-    }
-    
-    /**
-     * エラーが出たので謝ります。。
-     * 
-     * @param e
-     */
-    private void apologize(TransitSearchException e) {
-        DialogUtils.showMessage(
-                activity,
-                "ごめん！！",
-                "こんなエラー出た。。\n" + e.getCause().getClass().getSimpleName() + "\n" + e.getMessage(),
-                "許す");
     }
     
 }
