@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import jp.co.hybitz.android.DialogUtils;
@@ -39,6 +40,14 @@ public class ExceptionHandler {
         
         if (e.getCause() instanceof UnknownHostException) {
             DialogUtils.showMessage(context, R.string.error_unknow_host_exception);
+        }
+        else if (e.getCause() instanceof SocketException) {
+            if ("The operation timed out".equals(e.getCause().getMessage())) {
+                DialogUtils.showMessage(context, R.string.error_operation_timed_out);
+            }
+            else {
+                DialogUtils.showMessage(context, R.string.error_socket_exception);
+            }
         }
         else {
             throw new IllegalStateException(e);
