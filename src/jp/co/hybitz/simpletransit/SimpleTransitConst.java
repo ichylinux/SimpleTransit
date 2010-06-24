@@ -38,6 +38,8 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_ALARM = Menu.FIRST + 3;
     public static final int MENU_ITEM_QUIT = Menu.FIRST + 4;
     public static final int MENU_ITEM_DELETE = Menu.FIRST + 5;
+    public static final int MENU_ITEM_VOICE = Menu.FIRST + 6;
 
     public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
+    public static final int REQUEST_CODE_VOICE_INPUT = 2;
 }

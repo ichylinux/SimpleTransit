@@ -26,6 +26,7 @@ import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.DialogUtils;
+import jp.co.hybitz.android.ToastUtils;
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
@@ -44,10 +45,12 @@ import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -89,9 +92,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_ITEM_PREFERENCES, 0, "設定");
-        menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
-        menu.add(0, MENU_ITEM_ALARM, 2, "アラーム");
-        menu.add(0, MENU_ITEM_QUIT, 3, "終了");
+        menu.add(0, MENU_ITEM_VOICE, 1, "音声入力");
+        menu.add(0, MENU_ITEM_QUERY_HISTORY, 2, "検索履歴");
+        menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
+        menu.add(0, MENU_ITEM_QUIT, 4, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -109,6 +113,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             return true;
         case MENU_ITEM_ALARM :
             showAlarmList();
+            return true;
+        case MENU_ITEM_VOICE :
+            voiceInput();
             return true;
         case MENU_ITEM_QUIT :
             finish();
@@ -129,6 +136,48 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 updateQueryView();
             }
         }
+        else if (requestCode == REQUEST_CODE_VOICE_INPUT) {
+            if (resultCode == RESULT_OK) {
+            	String from = null;
+            	String to = null;
+                List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                for (int i = 0; i < results.size(); i ++) {
+                	String result = results.get(i);
+                	String[] split = result.split(" ");
+                	for (int j = 0; j < split.length; j ++) {
+                		if (from == null) {
+                			from = split[j];
+                		}
+                		else if (to == null) {
+                			to = split[j];
+                		}
+                		else {
+                			break;
+                		}
+                	}
+                	
+                	if (from != null && to != null) {
+                		break;
+                	}
+                }
+                
+                query.setFrom(from);
+                query.setTo(to);
+                updateQueryView();
+            }
+        }
+    }
+    
+    private void voiceInput() {
+        try {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "出発地・到着地を叫んでください！");
+            startActivityForResult(intent, REQUEST_CODE_VOICE_INPUT);
+        }
+        catch (ActivityNotFoundException e) {
+            ToastUtils.toastLong(this, "音声入力に対応していません。");
+        }        
     }
     
     private void initView() {
