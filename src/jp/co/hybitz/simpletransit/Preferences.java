@@ -79,6 +79,11 @@ public class Preferences extends PreferenceActivity {
         }
     }
     
+    /**
+     * バイブレーションで通知するかどうか
+     * @param context
+     * @return
+     */
     public static boolean isNoSoundButVibration(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("no_sound_but_vibration", false);

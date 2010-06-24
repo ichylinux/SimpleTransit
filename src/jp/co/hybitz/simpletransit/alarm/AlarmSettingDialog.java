@@ -105,10 +105,13 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
     }
     
     private boolean validate() {
-        AlarmSoundItem item = Preferences.getAlarmSoundFile(activity);
-        if (item == null) {
-            DialogUtils.showMessage(activity, R.string.error_alarm_sound_required);
-            return false;
+        // 曲を再生する場合
+        if (!Preferences.isNoSoundButVibration(activity)) {
+            AlarmSoundItem item = Preferences.getAlarmSoundFile(activity);
+            if (item == null) {
+                DialogUtils.showMessage(activity, R.string.error_alarm_sound_required);
+                return false;
+            }
         }
         
         return true;
