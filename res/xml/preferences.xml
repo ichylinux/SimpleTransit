@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="画面設定">
+    <ListPreference
+            android:key="font_size"
+            android:title="文字サイズ"
+            android:summary="検索結果表示などの文字の大きさを選択します。"
+            android:dialogTitle="文字サイズ"
+            android:entries="@array/font_size_entries"
+            android:entryValues="@array/font_size_values" />
+  </PreferenceCategory>
   <PreferenceCategory android:title="検索条件詳細">
     <CheckBoxPreference
       android:key="use_express"

@@ -108,7 +108,7 @@ public class AlarmSoundPreference extends DialogPreference {
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 projection, null, null, null);
 
-        ArrayAdapter<AlarmSoundItem> aa = new ArrayAdapter<AlarmSoundItem>(getContext(), R.layout.listview);
+        ArrayAdapter<AlarmSoundItem> aa = new ArrayAdapter<AlarmSoundItem>(getContext(), R.layout.listview_1);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
             String artist = null;

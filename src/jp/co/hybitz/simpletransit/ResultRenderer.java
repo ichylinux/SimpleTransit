@@ -33,7 +33,7 @@ import android.widget.TextView;
  * 
  * @author ichy <ichylinux@gmail.com>
  */
-public class ResultRenderer {
+public class ResultRenderer implements SimpleTransitConst {
     
     private Activity activity;
     
@@ -48,9 +48,10 @@ public class ResultRenderer {
 
     void render(TransitResult result) {
         TextView summary = (TextView) activity.findViewById(R.id.tv_summary);
+        summary.setTextSize(getFontSize());
         summary.setText(createSummary(result));
 
-        ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, R.layout.listview);
+        ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, getListViewResourceId());
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
             Transit transit = it.next();
             aa.add(new TransitItem(result, transit));
@@ -60,6 +61,34 @@ public class ResultRenderer {
         lv.setAdapter(aa);
     }
     
+    private int getListViewResourceId() {
+        int fontSize = Preferences.getFontSize(activity);
+        switch (fontSize) {
+        case FONT_SIZE_SMALL :
+            return R.layout.listview_1;
+        case FONT_SIZE_MEDIUM :
+            return R.layout.listview_2;
+        case FONT_SIZE_LARGE :
+            return R.layout.listview_3;
+        default :
+            return R.layout.listview_1;
+        }
+    }
+    
+    private int getFontSize() {
+        int fontSize = Preferences.getFontSize(activity);
+        switch (fontSize) {
+        case FONT_SIZE_SMALL :
+            return 14;
+        case FONT_SIZE_MEDIUM :
+            return 16;
+        case FONT_SIZE_LARGE :
+            return 18;
+        default :
+            return 14;
+        }
+    }
+
     public static String createTitle(TransitResult result) {
         String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
 

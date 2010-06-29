@@ -34,7 +34,7 @@ import android.util.Log;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class Preferences extends PreferenceActivity {
+public class Preferences extends PreferenceActivity implements SimpleTransitConst {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +50,12 @@ public class Preferences extends PreferenceActivity {
     public static boolean isUseAirline(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("use_airline", false);
+    }
+    
+    public static int getFontSize(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String fontSize = sp.getString("font_size", String.valueOf(FONT_SIZE_SMALL));
+        return Integer.parseInt(fontSize);
     }
     
     public static AlarmSoundItem getAlarmSoundFile(Context context) {

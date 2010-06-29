@@ -33,6 +33,10 @@ public interface SimpleTransitConst {
     public static final String EXTRA_KEY_TRANSIT = "transit";
     public static final String EXTRA_KEY_TRANSIT_QUERY = "transit_query";
     
+    public static final int FONT_SIZE_SMALL = 1;
+    public static final int FONT_SIZE_MEDIUM = 2;
+    public static final int FONT_SIZE_LARGE = 3;
+
     public static final int MENU_ITEM_PREFERENCES = Menu.FIRST + 1;
     public static final int MENU_ITEM_QUERY_HISTORY = Menu.FIRST + 2;
     public static final int MENU_ITEM_ALARM = Menu.FIRST + 3;
@@ -42,4 +46,5 @@ public interface SimpleTransitConst {
 
     public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
     public static final int REQUEST_CODE_VOICE_INPUT = 2;
+    
 }
