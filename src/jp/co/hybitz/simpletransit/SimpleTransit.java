@@ -18,7 +18,6 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -42,6 +41,7 @@ import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryListActivity;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
@@ -51,7 +51,6 @@ import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,9 +70,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
     private SimpleTransitQuery query = new SimpleTransitQuery();
-    private Date currentTime;
-    private Date previousTime;
-    private Date nextTime;
+    private TimeTypeAndDate currentTime;
+    private TimeTypeAndDate previousTime;
+    private TimeTypeAndDate nextTime;
 
 	/**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -260,21 +259,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
-                query.setTimeType(dialog.getTimeType());
-                currentTime = TransitUtil.getRelativeDate(dialog.getTime(), true);
+			    Date selected = TransitUtil.getRelativeDate(dialog.getTime(), true);
+			    if (selected != null) {
+	                currentTime = new TimeTypeAndDate(dialog.getTimeType(), selected);
+			    } else {
+			        currentTime = null;
+			    }
                 renderSelectedTime();
 			}
 		});
     	
-	    dialog.setTimeType(query.getTimeType());
-	    dialog.setTime(TransitUtil.getTime(currentTime));
+    	if (currentTime != null) {
+    	    dialog.setTimeType(currentTime.getTimeType());
+    	    dialog.setTime(TransitUtil.getTime(currentTime.getDate()));
+    	}
     	dialog.show();
     }
     
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
         if (currentTime != null) {
-            timeView.setText(TransitUtil.getTime(currentTime) + "に" + (query.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
+            timeView.setText(TransitUtil.getTime(currentTime.getDate()) + "に" + (currentTime.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
         }
         else {
             timeView.setText(null);
@@ -313,7 +318,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             query.setDate(null);
         }
         else {
-            query.setDate(currentTime);
+            if (currentTime != null) {
+                query.setTimeType(currentTime.getTimeType());
+                query.setDate(currentTime.getDate());
+            } else {
+                query.setTimeType(TimeType.DEPARTURE);
+                query.setDate(null);
+            }
         }
 
         query.setUseExpress(Preferences.isUseExpress(this));
@@ -321,12 +332,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
     
     private void searchPrevious() {
-        query.setDate(previousTime);
+        query.setDate(previousTime.getDate());
         search();
     }
     
     private void searchNext() {
-        query.setDate(nextTime);
+        query.setDate(nextTime.getDate());
         search();
     }
     
@@ -391,8 +402,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                     Calendar c = Calendar.getInstance();
                     c.setTime(date);
                     c.add(Calendar.MINUTE, 1);
-                    nextTime = c.getTime();
-                    Log.i("SimpleTransit", "次の時刻=" + new SimpleDateFormat("yyyyMMddHHmm").format(nextTime));
+                    nextTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
                 }
                 
                 List<Time> times = TransitUtil.getDepartureTimes(result);
@@ -408,8 +418,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                     Calendar c = Calendar.getInstance();
                     c.setTime(date);
                     c.add(Calendar.MINUTE, -1);
-                    previousTime = c.getTime();
-                    Log.i("SimpleTransit", "前の時刻=" + new SimpleDateFormat("yyyyMMddHHmm").format(previousTime));
+                    previousTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
                 }
             }
         }
@@ -424,7 +433,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else {
             previous.setVisibility(View.VISIBLE);
-            previous.setEnabled(previousTime.after(new Date()));
+            previous.setEnabled(previousTime.getDate().after(new Date()));
         }
         
         Button next = (Button) findViewById(R.id.next_time);
