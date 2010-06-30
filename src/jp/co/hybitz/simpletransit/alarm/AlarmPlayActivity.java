@@ -123,18 +123,23 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     }
     
     private void startAlarm(SimpleTransitResult atr) {
+        int textSize = Preferences.getTextSize(this);
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
         TextView tvTitle = (TextView) findViewById(R.id.tv_title);
+        tvTitle.setTextSize(textSize);
         tvTitle.setText(ResultRenderer.createTitle(atr.getTransitResult()));
 
         TextView tvRoute = (TextView) findViewById(R.id.tv_route);
+        tvRoute.setTextSize(textSize);
         tvRoute.setText(new TransitItem(atr.getTransitResult(), atr.getTransits().get(0)).toString());
 
         TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
+        tvAlarmNotice.setTextSize(textSize);
         tvAlarmNotice.setVisibility(startAlarm ? View.VISIBLE : View.INVISIBLE);
 
         TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
+        tvAlarmAt.setTextSize(textSize);
         tvAlarmAt.setText("アラーム： " + AlarmUtils.toDateTimeString(atr.getAlarmAt()));
 
         if (startAlarm) {

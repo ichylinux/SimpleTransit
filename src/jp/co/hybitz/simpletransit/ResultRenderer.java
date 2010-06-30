@@ -48,7 +48,7 @@ public class ResultRenderer implements SimpleTransitConst {
 
     void render(TransitResult result) {
         TextView summary = (TextView) activity.findViewById(R.id.tv_summary);
-        summary.setTextSize(getFontSize());
+        summary.setTextSize(Preferences.getTextSize(activity));
         summary.setText(createSummary(result));
 
         ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, getListViewResourceId());
@@ -75,20 +75,6 @@ public class ResultRenderer implements SimpleTransitConst {
         }
     }
     
-    private int getFontSize() {
-        int fontSize = Preferences.getFontSize(activity);
-        switch (fontSize) {
-        case FONT_SIZE_SMALL :
-            return 14;
-        case FONT_SIZE_MEDIUM :
-            return 16;
-        case FONT_SIZE_LARGE :
-            return 18;
-        default :
-            return 14;
-        }
-    }
-
     public static String createTitle(TransitResult result) {
         String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
 

@@ -58,6 +58,20 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return Integer.parseInt(fontSize);
     }
     
+    public static int getTextSize(Context context) {
+        int fontSize = Preferences.getFontSize(context);
+        switch (fontSize) {
+        case FONT_SIZE_SMALL :
+            return 14;
+        case FONT_SIZE_MEDIUM :
+            return 16;
+        case FONT_SIZE_LARGE :
+            return 18;
+        default :
+            return 14;
+        }
+    }
+
     public static AlarmSoundItem getAlarmSoundFile(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String s = sp.getString("alarm_sound_file", null);

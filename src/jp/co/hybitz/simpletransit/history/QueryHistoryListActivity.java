@@ -18,11 +18,10 @@
 package jp.co.hybitz.simpletransit.history;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
+import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
@@ -35,7 +34,6 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -65,16 +63,11 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
      * @see android.app.ListActivity#onListItemClick(android.widget.ListView, android.view.View, int, long)
      */
     @Override
-    @SuppressWarnings("unchecked")
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        Map<String, Object> map = (Map<String, Object>) l.getItemAtPosition(position);
-        SimpleTransitQuery query = (SimpleTransitQuery) map.get("transit_query");
-        if (query == null) {
-            return;
-        }
+        QueryHistoryListItem item = (QueryHistoryListItem) l.getItemAtPosition(position);
         
         Intent result = new Intent();
-        result.putExtra(EXTRA_KEY_TRANSIT_QUERY, query);
+        result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
         setResult(RESULT_OK, result);
         finish();
     }
@@ -91,39 +84,31 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
      * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
      */
     @Override
-    @SuppressWarnings("unchecked")
-    public boolean onContextItemSelected(MenuItem item) {
-        if (item.getItemId() == MENU_ITEM_DELETE) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo(); 
+    public boolean onContextItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == MENU_ITEM_DELETE) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
             
-            Map<String, Object> map = (Map<String, Object>) getListView().getItemAtPosition(info.position);
-            SimpleTransitQuery query = (SimpleTransitQuery) map.get("transit_query");
-            
-            int count = new TransitQueryDao(this).deleteTransitQuery(query.getId());
+            QueryHistoryListItem item = (QueryHistoryListItem) getListView().getItemAtPosition(info.position);
+            int count = new TransitQueryDao(this).deleteTransitQuery(item.getQuery().getId());
             if (count == 1) {
                 showList();
             }
         }
 
-        return super.onContextItemSelected(item);
+        return super.onContextItemSelected(menuItem);
     }
     
     private void showList() {
-        setListAdapter(new SimpleAdapter(this, getData(),
-                android.R.layout.simple_list_item_1, new String[] { "from_to" },
-                new int[] { android.R.id.text1 }));
+        setListAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems()));
     }
 
-    private List<Map<String, Object>> getData() {
-        List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>();
+    private List<QueryHistoryListItem> getItems() {
+        List<QueryHistoryListItem> ret = new ArrayList<QueryHistoryListItem>();
         
         List<SimpleTransitQuery> list = new TransitQueryDao(this).getTransitQueries();
         for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
             SimpleTransitQuery query = it.next();
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("from_to", query.getFrom() + " ～ " + query.getTo());
-            map.put("transit_query", query);
-            ret.add(map);
+            ret.add(new QueryHistoryListItem(query));
         }
         
         return ret;
