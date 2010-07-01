@@ -15,17 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.alarm;
+package jp.co.hybitz.simpletransit.memo;
 
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class AlarmListItem {
+class MemoListItem {
     SimpleTransitResult result;
     
-    public AlarmListItem(SimpleTransitResult result) {
+    public MemoListItem(SimpleTransitResult result) {
         this.result = result;
     }
     

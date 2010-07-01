@@ -15,23 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.android;
+package jp.co.hybitz.simpletransit;
 
+import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.content.Context;
-import android.widget.Toast;
+import android.util.AttributeSet;
+import android.widget.ListView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class ToastUtils {
+class ResultListView extends ListView {
 
-    public static void toastLong(Context context, String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
-        toast.show();
+    public ResultListView(Context context) {
+        super(context);
+    }
+
+    public ResultListView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+    }
+
+    public ResultListView(Context context, AttributeSet attrs) {
+        super(context, attrs);
     }
     
-    public static void toast(Context context, String message) {
-        Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-        toast.show();
+    public TransitItem getTransitItem(int position) {
+        return (TransitItem) getItemAtPosition(position);
     }
+
 }

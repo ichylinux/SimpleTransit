@@ -15,12 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.alarm;
+package jp.co.hybitz.simpletransit.memo;
 
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.ResultRenderer;
+import jp.co.hybitz.simpletransit.SimpleTransitConst;
+import jp.co.hybitz.simpletransit.alarm.AlarmUtils;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
@@ -28,17 +30,20 @@ import android.widget.TextView;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class AlarmArrayAdapter extends ArrayAdapterEx<AlarmListItem> {
+class MemoArrayAdapter extends ArrayAdapterEx<MemoListItem> implements SimpleTransitConst {
 
-    public AlarmArrayAdapter(Context context, int textViewResourceId, List<AlarmListItem> items) {
+    public MemoArrayAdapter(Context context, int textViewResourceId, List<MemoListItem> items) {
         super(context, textViewResourceId, items);
     }
 
     @Override
-    protected void updateView(View view, AlarmListItem item) {
+    protected void updateView(View view, MemoListItem item) {
         TextView title = (TextView) view.findViewWithTag("title");
         title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult()));
-        TextView alarmAt = (TextView) view.findViewWithTag("alarm_at");
-        alarmAt.setText("アラーム時刻： " + AlarmUtils.toDateTimeString(item.getResult().getAlarmAt()));
+        
+        if (item.getResult().getAlarmStatus() == ALARM_STATUS_BEING_SET) {
+            TextView alarmAt = (TextView) view.findViewWithTag("alarm_at");
+            alarmAt.setText("アラーム時刻： " + AlarmUtils.toDateTimeString(item.getResult().getAlarmAt()));
+        }
     }
 }

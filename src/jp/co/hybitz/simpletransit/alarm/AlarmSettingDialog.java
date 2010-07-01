@@ -122,10 +122,10 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         Time selected = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
         Date alarmTime = TransitUtil.getRelativeDate(selected, true);
 
-        SimpleTransitResult atr = new SimpleTransitResult(transitResult);
-        atr.setAlarmStatus(ALARM_STATUS_SET);
-        atr.setAlarmAt(DateUtils.toLong(alarmTime));
-        long id = new TransitResultDao(activity).createTransitResult(atr, transit);
+        SimpleTransitResult str = new SimpleTransitResult(transitResult);
+        str.setAlarmStatus(ALARM_STATUS_BEING_SET);
+        str.setAlarmAt(DateUtils.toLong(alarmTime));
+        long id = new TransitResultDao(activity).createTransitResult(str, transit);
 
         Intent intent = new Intent(activity, OneTimeAlarm.class);
         intent.putExtra(EXTRA_KEY_START_ALARM, true);

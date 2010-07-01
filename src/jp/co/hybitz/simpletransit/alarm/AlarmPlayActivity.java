@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit.alarm;
 
 import java.io.IOException;
 
+import jp.co.hybitz.android.ToastUtils;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.ResultRenderer;
@@ -53,17 +54,23 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_play);
-
+        initActions();
+        initView();
+    }
+    
+    private void initActions() {
         Button button = (Button)findViewById(R.id.alarm_stop);
         button.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 stopAlarm(true);
             }
         });
-
+    }
+    
+    private void initView() {
         alarmTransitResult = loadTransitResult();
         if (alarmTransitResult != null) {
-            startAlarm(alarmTransitResult);
+            showAlarm(alarmTransitResult);
         }
         else {
             TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
@@ -78,9 +85,9 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
             TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
             tvAlarmAt.setVisibility(View.INVISIBLE);
 
+            Button button = (Button)findViewById(R.id.alarm_stop);
             button.setVisibility(View.INVISIBLE);
         }
-
     }
     
     private SimpleTransitResult loadTransitResult() {
@@ -118,11 +125,19 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         if (startAlarm || force) {
             if (alarmTransitResult != null) {
                 new TransitResultDao(this).updateAlarmStatus(getTransitResultId(), ALARM_STATUS_FINISHED);
+
+                TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
+                tvAlarmAt.setVisibility(View.INVISIBLE);
+
+                Button button = (Button)findViewById(R.id.alarm_stop);
+                button.setVisibility(View.INVISIBLE);
+                
+                ToastUtils.toast(this, "アラームを停止しました。");
             }
         }
     }
     
-    private void startAlarm(SimpleTransitResult atr) {
+    private void showAlarm(SimpleTransitResult atr) {
         int textSize = Preferences.getTextSize(this);
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
@@ -141,9 +156,13 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
         tvAlarmAt.setTextSize(textSize);
         tvAlarmAt.setText("アラーム： " + AlarmUtils.toDateTimeString(atr.getAlarmAt()));
+        tvAlarmAt.setVisibility(atr.getAlarmStatus() == ALARM_STATUS_BEING_SET ? View.VISIBLE : View.INVISIBLE);
+
+        Button button = (Button)findViewById(R.id.alarm_stop);
+        button.setVisibility(atr.getAlarmStatus() == ALARM_STATUS_BEING_SET ? View.VISIBLE : View.INVISIBLE);
 
         if (startAlarm) {
-            if (atr.getAlarmStatus() != ALARM_STATUS_SET) {
+            if (atr.getAlarmStatus() != ALARM_STATUS_BEING_SET) {
                 finish();
             }
             else {

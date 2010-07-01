@@ -34,13 +34,14 @@ import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
-import jp.co.hybitz.simpletransit.alarm.AlarmListActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryListActivity;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
+import jp.co.hybitz.simpletransit.memo.MemoListActivity;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.util.StringUtils;
@@ -51,9 +52,11 @@ import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -61,7 +64,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemLongClickListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -90,11 +92,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_ITEM_PREFERENCES, 0, "設定");
-        menu.add(0, MENU_ITEM_VOICE, 1, "音声入力");
-        menu.add(0, MENU_ITEM_QUERY_HISTORY, 2, "検索履歴");
+        menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
+        menu.add(0, MENU_ITEM_VOICE, 2, "音声入力");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
-        menu.add(0, MENU_ITEM_QUIT, 4, "終了");
+        menu.add(0, MENU_ITEM_MEMO, 4, "メモ");
+        menu.add(0, MENU_ITEM_PREFERENCES, 5, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 6, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -111,7 +114,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             showQueryHistoryList();
             return true;
         case MENU_ITEM_ALARM :
-            showAlarmList();
+            showMemoList(true);
+            return true;
+        case MENU_ITEM_MEMO :
+            showMemoList(false);
             return true;
         case MENU_ITEM_VOICE :
             voiceInput();
@@ -191,20 +197,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         startActivityForResult(intent, REQUEST_CODE_SELECT_TRANSIT_QUERY);
     }
     
-    private void showAlarmList() {
-        TransitResultDao dao = new TransitResultDao(this);
-        int count = dao.getTransitResultCountByAlarmStatus(ALARM_STATUS_SET);
-        if (count == 1) {
-            Intent intent = new Intent(this, AlarmPlayActivity.class);
-            intent.putExtra(EXTRA_KEY_TRANSIT, dao.getTransitResultIdForAlarm());
-            startActivity(intent);
+    private void showMemoList(boolean alarmOnly) {
+        if (alarmOnly) {
+            TransitResultDao dao = new TransitResultDao(this);
+            int count = dao.getTransitResultCountByAlarmStatus(ALARM_STATUS_BEING_SET);
+            if (count == 0) {
+                ToastUtils.toast(this, "アラームは設定されていません。");
+                return;
+            }
+            else if (count == 1) {
+                Intent intent = new Intent(this, AlarmPlayActivity.class);
+                intent.putExtra(EXTRA_KEY_TRANSIT, dao.getTransitResultIdForAlarm());
+                startActivity(intent);
+                return;
+            }
         }
-        else {
-            Intent intent = new Intent(this, AlarmListActivity.class);
-            startActivity(intent);
-        }
+
+        Intent intent = new Intent(this, MemoListActivity.class);
+        intent.putExtra(EXTRA_KEY_ALARM_ONLY, alarmOnly);
+        startActivity(intent);
     }
-    
+
     private void initActions() {
         TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
@@ -241,18 +254,38 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         });
         
         ListView lv = (ListView) findViewById(R.id.results);
-        lv.setOnItemLongClickListener(new OnItemLongClickListener() {
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                TransitItem ti = (TransitItem) parent.getItemAtPosition(position);
-                showAlarmSettingDialog(ti);
-                return false;
-            }
-        });
+        registerForContextMenu(lv);
     }
     
-    private void showAlarmSettingDialog(TransitItem ti) {
-        AlarmSettingDialog dialog = new AlarmSettingDialog(SimpleTransit.this, ti.getTransitResult(), ti.getTransit());
-        dialog.show();
+    /**
+     * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        menu.add(0, MENU_ITEM_MEMO_CREATE, 1, "メモとして保存");
+        menu.add(0, MENU_ITEM_ALARM_CREATE, 2, "アラームをセット");
+    }
+
+    /**
+     * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem menuItem) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+        ResultListView lv = (ResultListView) findViewById(R.id.results);
+        TransitItem ti = lv.getTransitItem(info.position);
+
+        if (menuItem.getItemId() == MENU_ITEM_ALARM_CREATE) {
+            AlarmSettingDialog dialog = new AlarmSettingDialog(this, ti.getTransitResult(), ti.getTransit());
+            dialog.show();
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_MEMO_CREATE) {
+            SimpleTransitResult str = new SimpleTransitResult(ti.getTransitResult());
+            new TransitResultDao(this).createTransitResult(str, ti.getTransit());
+            ToastUtils.toast(this, "メモに保存しました。");
+        }
+
+        return super.onContextItemSelected(menuItem);
     }
 
     private void showTimeDialog() {
