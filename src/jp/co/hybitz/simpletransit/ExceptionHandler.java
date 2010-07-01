@@ -50,7 +50,7 @@ public class ExceptionHandler {
             }
         }
         else {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(e.getMessage() + "\n[\n" + e.getHtml() + "\n]", e);
         }
     }
     
