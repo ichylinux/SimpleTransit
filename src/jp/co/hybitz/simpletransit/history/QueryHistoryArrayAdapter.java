@@ -19,39 +19,25 @@ package jp.co.hybitz.simpletransit.history;
 
 import java.util.List;
 
+import jp.co.hybitz.android.ArrayAdapterEx;
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class QueryHistoryArrayAdapter extends ArrayAdapter<QueryHistoryListItem> {
-    private LayoutInflater inflater;
-    private int textViewResourceId;
+class QueryHistoryArrayAdapter extends ArrayAdapterEx<QueryHistoryListItem> {
 
     public QueryHistoryArrayAdapter(Context context, int textViewResourceId, List<QueryHistoryListItem> items) {
         super(context, textViewResourceId, items);
-        this.textViewResourceId = textViewResourceId;
-        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
-        View view = convertView;
-        if (view == null) {
-            view = inflater.inflate(textViewResourceId, null);
-        }
-
-        QueryHistoryListItem item = getItem(position);
+    protected void updateView(View view, QueryHistoryListItem item) {
         TextView fromTo = (TextView) view.findViewWithTag("from_to");
         fromTo.setText(item.getQuery().getFrom() + " ～ " + item.getQuery().getTo());
         TextView useCount = (TextView) view.findViewWithTag("use_count");
         useCount.setText("利用回数： " + item.getQuery().getUseCount() + "回");
-
-        return view;
     }
 }
