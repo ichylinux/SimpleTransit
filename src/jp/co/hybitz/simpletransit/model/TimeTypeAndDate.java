@@ -18,6 +18,8 @@
 package jp.co.hybitz.simpletransit.model;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import jp.co.hybitz.googletransit.model.TimeType;
@@ -37,8 +39,38 @@ public class TimeTypeAndDate implements Serializable {
     public TimeType getTimeType() {
         return timeType;
     }
+    
+    public Calendar getCalendar() {
+    	Calendar c = Calendar.getInstance();
+    	c.setTime(date);
+    	return c;
+    }
 
     public Date getDate() {
         return date;
+    }
+    
+    public int getYear() {
+    	return getCalendar().get(Calendar.YEAR);
+    }
+
+    public int getMonth() {
+    	return getCalendar().get(Calendar.MONTH);
+    }
+
+    public int getDay() {
+    	return getCalendar().get(Calendar.DAY_OF_MONTH);
+    }
+
+    public int getHour() {
+    	return getCalendar().get(Calendar.HOUR_OF_DAY);
+    }
+    
+    public int getMinute() {
+    	return getCalendar().get(Calendar.MINUTE);
+    }
+    
+    public String toString() {
+    	return new SimpleDateFormat("yyyy/MM/dd HH:mm").format(date) + (timeType == TimeType.DEPARTURE ? "発" : "着");
     }
 }

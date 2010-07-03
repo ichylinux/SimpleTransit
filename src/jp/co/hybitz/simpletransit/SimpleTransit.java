@@ -137,23 +137,29 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_OK) {
-                query = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
+            	SimpleTransitQuery q = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
+                query.setFrom(q.getFrom());
+                query.setTo(q.getTo());
                 updateQueryView();
             }
         }
         else if (requestCode == REQUEST_CODE_VOICE_INPUT) {
             if (resultCode == RESULT_OK) {
-            	String from = null;
-            	String to = null;
+            	String from = query.getFrom();
+            	String to = query.getTo();
+            	if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
+            		from = to = null;
+            	}
+            	
                 List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 for (int i = 0; i < results.size(); i ++) {
                 	String result = results.get(i);
                 	String[] split = result.split(" ");
                 	for (int j = 0; j < split.length; j ++) {
-                		if (from == null) {
+                		if (StringUtils.isEmpty(from)) {
                 			from = split[j];
                 		}
-                		else if (to == null) {
+                		else if (StringUtils.isEmpty(to)) {
                 			to = split[j];
                 		}
                 		else {
@@ -161,7 +167,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 		}
                 	}
                 	
-                	if (from != null && to != null) {
+                	if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
                 		break;
                 	}
                 }
@@ -187,6 +193,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     private void initView() {
         setContentView(R.layout.main);
+
+        TextView timeView = (TextView) findViewById(R.id.time);
+        timeView.setTextSize(16);
+
         query.setTimeType(TimeType.DEPARTURE);
         updatePreviousTimeAndNextTimeVisibility();
     }
@@ -219,7 +229,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
 
     private void initActions() {
-        TextView time = (TextView) findViewById(R.id.time);
+    	TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 showTimeDialog();
@@ -292,45 +302,25 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     	final TimeDialog dialog = new TimeDialog(this);
     	dialog.setOnDismissListener(new OnDismissListener() {
 			public void onDismiss(DialogInterface di) {
-			    Date selected = TransitUtil.getRelativeDate(dialog.getTime(), true);
-			    if (selected != null) {
-	                currentTime = new TimeTypeAndDate(dialog.getTimeType(), selected);
-			    } else {
-			        currentTime = null;
-			    }
+				currentTime = dialog.getTimeTypeAndDate();
                 renderSelectedTime();
 			}
 		});
     	
-    	if (currentTime != null) {
-    	    dialog.setTimeType(currentTime.getTimeType());
-    	    dialog.setTime(TransitUtil.getTime(currentTime.getDate()));
-    	}
+   	    dialog.setTimeTypeAndDate(currentTime);
     	dialog.show();
     }
     
     private void renderSelectedTime() {
         TextView timeView = (TextView) findViewById(R.id.time);
-        if (currentTime != null) {
-            timeView.setText(TransitUtil.getTime(currentTime.getDate()) + "に" + (currentTime.getTimeType() == TimeType.DEPARTURE ? "出発" : "到着"));
-        }
-        else {
-            timeView.setText(null);
-        }
+        timeView.setText(currentTime != null ? currentTime.toString() : null);
     }
     
     private void updateQueryView() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
-        CheckBox first = (CheckBox) findViewById(R.id.first);
-        CheckBox last = (CheckBox) findViewById(R.id.last);
-        TextView time = (TextView) findViewById(R.id.time);
-
         from.setText(query.getFrom());
         to.setText(query.getTo());
-        first.setChecked(false);
-        last.setChecked(false);
-        time.setText(null);
     }
 
     private void updateQuery() {

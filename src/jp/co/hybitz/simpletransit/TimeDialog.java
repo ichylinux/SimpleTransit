@@ -19,9 +19,8 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Calendar;
 
-import jp.co.hybitz.googletransit.TransitUtil;
-import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
+import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -30,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
 
@@ -39,8 +39,7 @@ import android.widget.TimePicker;
 public class TimeDialog implements DialogInterface {
 	private AlertDialog dialog;
 	private View layout;
-	private TimeType timeType;
-	private Time time;
+	private TimeTypeAndDate timeTypeAndDate;
 	
 	public TimeDialog(Activity activity) {
 		dialog = createInnerDialog(activity);
@@ -58,20 +57,32 @@ public class TimeDialog implements DialogInterface {
 		final RadioGroup timeTypeRadioGroup = (RadioGroup) layout.findViewById(R.id.time_type);
 		timeTypeRadioGroup.check(R.id.departure);
 		
+		final DatePicker dp = (DatePicker) layout.findViewById(R.id.date_select);
+
 		final TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
 		tp.setIs24HourView(true);
 		
 		Button ok = (Button) layout.findViewById(R.id.time_ok);
         ok.setOnClickListener(new View.OnClickListener() {
         	public void onClick(View v) {
+        		TimeType tt;
         		if (timeTypeRadioGroup.getCheckedRadioButtonId() == R.id.departure) {
-        			timeType = TimeType.DEPARTURE;
+        			tt = TimeType.DEPARTURE;
         		}
         		else if (timeTypeRadioGroup.getCheckedRadioButtonId() == R.id.arrival) {
-        			timeType = TimeType.ARRIVAL;
+        			tt = TimeType.ARRIVAL;
         		}
-        		
-        		time = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
+        		else {
+        			throw new IllegalStateException("出発・到着が正しく指定されませんでした。");
+        		}
+
+        		Calendar c = Calendar.getInstance();
+        		c.set(Calendar.YEAR, dp.getYear());
+        		c.set(Calendar.MONTH, dp.getMonth());
+        		c.set(Calendar.DAY_OF_MONTH, dp.getDayOfMonth());
+        		c.set(Calendar.HOUR_OF_DAY, tp.getCurrentHour());
+        		c.set(Calendar.MINUTE, tp.getCurrentMinute());
+        		timeTypeAndDate = new TimeTypeAndDate(tt, c.getTime());
         		dismiss();
 			}
 		});
@@ -79,8 +90,7 @@ public class TimeDialog implements DialogInterface {
 		Button clear = (Button) layout.findViewById(R.id.time_clear);
         clear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				timeType = TimeType.DEPARTURE;
-				time = null;
+				timeTypeAndDate = null;
 				cancel();
 			}
 		});
@@ -95,41 +105,36 @@ public class TimeDialog implements DialogInterface {
 		return dialog;
 	}
 	
-	public Time getTime() {
-		return time;
+	public TimeTypeAndDate getTimeTypeAndDate() {
+		return timeTypeAndDate;
 	}
 	
-	public void setTime(Time time) {
-	    this.time = time;
-	    if (time == null) {
+	public void setTimeTypeAndDate(TimeTypeAndDate timeTypeAndDate) {
+	    this.timeTypeAndDate = timeTypeAndDate;
+	    if (this.timeTypeAndDate == null) {
 	        Calendar c = Calendar.getInstance();
 	        c.add(Calendar.MINUTE, 1);
-	        this.time = TransitUtil.getTime(c.getTime());
+	        this.timeTypeAndDate = new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime());
 	    }
 	 
 	    updateTimeView();
 	}
 	
 	private void updateTimeView() {
-        TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
-        tp.setCurrentHour(this.time.getHour());
-        tp.setCurrentMinute(this.time.getMinute());
-	}
-	
-	public TimeType getTimeType() {
-		return timeType;
-	}
-	
-	public void setTimeType(TimeType timeType) {
-	    this.timeType = timeType;
-	    
 	    RadioGroup rg = (RadioGroup) layout.findViewById(R.id.time_type);
-	    if (timeType == TimeType.DEPARTURE) {
+	    if (timeTypeAndDate.getTimeType() == TimeType.DEPARTURE) {
 	        rg.check(R.id.departure);
 	    }
-	    else if (timeType == TimeType.ARRIVAL) {
+	    else if (timeTypeAndDate.getTimeType() == TimeType.ARRIVAL) {
 	        rg.check(R.id.arrival);
 	    }
+
+	    DatePicker dp = (DatePicker) layout.findViewById(R.id.date_select);
+	    dp.updateDate(timeTypeAndDate.getYear(), timeTypeAndDate.getMonth(), timeTypeAndDate.getDay());
+
+	    TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
+        tp.setCurrentHour(timeTypeAndDate.getHour());
+        tp.setCurrentMinute(timeTypeAndDate.getMinute());
 	}
 	
 	public void show() {
