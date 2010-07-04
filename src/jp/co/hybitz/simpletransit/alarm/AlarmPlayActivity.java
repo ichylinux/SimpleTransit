@@ -53,6 +53,7 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    	Preferences.initTheme(this);
         setContentView(R.layout.alarm_play);
         initActions();
         initView();

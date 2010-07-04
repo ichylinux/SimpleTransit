@@ -29,6 +29,9 @@ public interface SimpleTransitConst {
     public static final int ALARM_STATUS_BEING_SET = 1;
     public static final int ALARM_STATUS_FINISHED = 2;
 
+    public static final int COLOR_BLACK = 1;
+    public static final int COLOR_WHITE = 2;
+
     public static final String EXTRA_KEY_ALARM_ONLY = "alarmOnly";
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";

@@ -52,14 +52,31 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return sp.getBoolean("use_airline", false);
     }
     
-    public static int getFontSize(Context context) {
+    public static int getColorSetting(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String fontSize = sp.getString("color", String.valueOf(COLOR_BLACK));
+        return Integer.parseInt(fontSize);
+    }
+
+    public static void initTheme(Context context) {
+    	
+        int color = getColorSetting(context);
+        if (color == COLOR_BLACK) {
+        	context.setTheme(R.style.black);
+        }
+        else if (color == COLOR_WHITE) {
+        	context.setTheme(R.style.white);
+        }
+    }
+
+    public static int getFontSizeSetting(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String fontSize = sp.getString("font_size", String.valueOf(FONT_SIZE_SMALL));
         return Integer.parseInt(fontSize);
     }
     
     public static int getTextSize(Context context) {
-        int fontSize = Preferences.getFontSize(context);
+        int fontSize = Preferences.getFontSizeSetting(context);
         switch (fontSize) {
         case FONT_SIZE_SMALL :
             return 14;

@@ -5,10 +5,17 @@
     <ListPreference
             android:key="font_size"
             android:title="文字サイズ"
-            android:summary="検索結果表示などの文字の大きさを選択します。"
+            android:summary="検索結果などの文字の大きさを選択します。"
             android:dialogTitle="文字サイズ"
             android:entries="@array/font_size_entries"
             android:entryValues="@array/font_size_values" />
+    <ListPreference
+            android:key="color"
+            android:title="背景色"
+            android:summary="画面の背景色を選択します。"
+            android:dialogTitle="背景色"
+            android:entries="@array/color_entries"
+            android:entryValues="@array/color_values" />
   </PreferenceCategory>
   <PreferenceCategory android:title="検索条件詳細">
     <CheckBoxPreference

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
@@ -44,6 +45,7 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    	Preferences.initTheme(this);
         registerForContextMenu(getListView());
         showList();
     }

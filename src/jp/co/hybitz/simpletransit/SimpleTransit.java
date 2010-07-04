@@ -192,6 +192,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
     
     private void initView() {
+    	Preferences.initTheme(this);
         setContentView(R.layout.main);
 
         TextView timeView = (TextView) findViewById(R.id.time);
@@ -366,7 +367,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     private void searchNew() {
         updateQuery();
-        search();
+        int count = search();
+        
+        // 検索条件を履歴として保存
+        if (count > 0) {
+            new Thread(new QueryHistoryWorker(this, query)).start();
+        }
     }
     
     private boolean validateQuery() {
@@ -383,9 +389,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         return true;
     }
     
-    private void search() {
+    private int search() {
         if (!validateQuery()) {
-            return;
+            return 0;
         }
 
         try {
@@ -403,14 +409,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 showResponseCode(result.getResponseCode());
             }
             
-            // 検索条件を履歴として保存
-            if (result.getTransitCount() > 0) {
-                new Thread(new QueryHistoryWorker(this, query)).start();
-            }
+            return result.getTransitCount();
             
         } catch (TransitSearchException e) {
             exceptionHandler.handleException(e);
         }
+        
+        return 0;
     }
     
     private void updatePreviousTimeAndNextTime(TransitResult result) {

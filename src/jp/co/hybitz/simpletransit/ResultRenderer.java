@@ -62,7 +62,7 @@ public class ResultRenderer implements SimpleTransitConst {
     }
     
     private int getListViewResourceId() {
-        int fontSize = Preferences.getFontSize(activity);
+        int fontSize = Preferences.getFontSizeSetting(activity);
         switch (fontSize) {
         case FONT_SIZE_SMALL :
             return R.layout.listview_1;
