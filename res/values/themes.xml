@@ -8,4 +8,8 @@
         <item name="android:textColor">#000000</item>
         <item name="android:background">#FFFFFF</item>
     </style>
+    <style name="beige">
+        <item name="android:textColor">#4169E1</item>
+        <item name="android:background">#F5F5DC</item>
+    </style>
 </resources>

@@ -23,6 +23,7 @@ import android.view.Menu;
  * @author ichy <ichylinux@gmail.com>
  */
 public interface SimpleTransitConst {
+    public static final String APP = "SimpleTransit";
     public static final String APP_ID = "cecab237-aa57-46cd-ad26-3cc3a6135da4";
 
     public static final int ALARM_STATUS_NONE = 0;
@@ -31,6 +32,7 @@ public interface SimpleTransitConst {
 
     public static final int COLOR_BLACK = 1;
     public static final int COLOR_WHITE = 2;
+    public static final int COLOR_BEIGE = 3;
 
     public static final String EXTRA_KEY_ALARM_ONLY = "alarmOnly";
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
@@ -50,6 +52,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_VOICE = Menu.FIRST + 7;
     public static final int MENU_ITEM_MEMO_CREATE = Menu.FIRST + 8;
     public static final int MENU_ITEM_ALARM_CREATE = Menu.FIRST + 9;
+    public static final int MENU_ITEM_CANCEL = Menu.FIRST + 10;
 
     public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
     public static final int REQUEST_CODE_VOICE_INPUT = 2;

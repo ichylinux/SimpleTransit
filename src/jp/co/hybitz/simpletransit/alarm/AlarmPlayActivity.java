@@ -19,7 +19,6 @@ package jp.co.hybitz.simpletransit.alarm;
 
 import java.io.IOException;
 
-import jp.co.hybitz.android.ToastUtils;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.ResultRenderer;
@@ -28,6 +27,7 @@ import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.util.ToastUtils;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.media.AudioManager;

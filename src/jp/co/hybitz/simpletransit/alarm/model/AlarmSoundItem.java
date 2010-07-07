@@ -49,6 +49,6 @@ public class AlarmSoundItem {
      */
     @Override
     public String toString() {
-        return title;
+        return (artist != null ? artist + " - " : "") + title;
     }
 }

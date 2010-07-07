@@ -25,7 +25,6 @@ import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.DialogUtils;
-import jp.co.hybitz.android.ToastUtils;
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
@@ -34,19 +33,17 @@ import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
-import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.history.QueryHistoryListActivity;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
-import jp.co.hybitz.simpletransit.memo.MemoListActivity;
+import jp.co.hybitz.simpletransit.menu.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
@@ -70,6 +67,7 @@ import android.widget.TextView;
  */
 public class SimpleTransit extends Activity implements SimpleTransitConst {
     private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
+    private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
     private ResultRenderer resultRenderer = new ResultRenderer(this);
     private SimpleTransitQuery query = new SimpleTransitQuery();
     private TimeTypeAndDate currentTime;
@@ -106,28 +104,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        switch (item.getItemId()) {
-        case MENU_ITEM_PREFERENCES :
-            startActivity(new Intent(this, Preferences.class));
-            return true;
-        case MENU_ITEM_QUERY_HISTORY :
-            showQueryHistoryList();
-            return true;
-        case MENU_ITEM_ALARM :
-            showMemoList(true);
-            return true;
-        case MENU_ITEM_MEMO :
-            showMemoList(false);
-            return true;
-        case MENU_ITEM_VOICE :
-            voiceInput();
-            return true;
-        case MENU_ITEM_QUIT :
-            finish();
-            return true;
-        default :
-            return super.onMenuItemSelected(featureId, item);
-        }
+        return optionMenuHandler.onMenuItemSelected(featureId, item);
     }
     
     /**
@@ -179,18 +156,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
-    private void voiceInput() {
-        try {
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "出発地・到着地を叫んでください！");
-            startActivityForResult(intent, REQUEST_CODE_VOICE_INPUT);
-        }
-        catch (ActivityNotFoundException e) {
-            ToastUtils.toastLong(this, "音声入力に対応していません。");
-        }        
-    }
-    
     private void initView() {
     	Preferences.initTheme(this);
         setContentView(R.layout.main);
@@ -200,33 +165,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
 
         query.setTimeType(TimeType.DEPARTURE);
         updatePreviousTimeAndNextTimeVisibility();
-    }
-
-    private void showQueryHistoryList() {
-        Intent intent = new Intent(this, QueryHistoryListActivity.class);
-        intent.putExtra(EXTRA_KEY_TRANSIT_QUERY, query);
-        startActivityForResult(intent, REQUEST_CODE_SELECT_TRANSIT_QUERY);
-    }
-    
-    private void showMemoList(boolean alarmOnly) {
-        if (alarmOnly) {
-            TransitResultDao dao = new TransitResultDao(this);
-            int count = dao.getTransitResultCountByAlarmStatus(ALARM_STATUS_BEING_SET);
-            if (count == 0) {
-                ToastUtils.toast(this, "アラームは設定されていません。");
-                return;
-            }
-            else if (count == 1) {
-                Intent intent = new Intent(this, AlarmPlayActivity.class);
-                intent.putExtra(EXTRA_KEY_TRANSIT, dao.getTransitResultIdForAlarm());
-                startActivity(intent);
-                return;
-            }
-        }
-
-        Intent intent = new Intent(this, MemoListActivity.class);
-        intent.putExtra(EXTRA_KEY_ALARM_ONLY, alarmOnly);
-        startActivity(intent);
     }
 
     private void initActions() {
@@ -275,6 +213,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         menu.add(0, MENU_ITEM_MEMO_CREATE, 1, "メモとして保存");
         menu.add(0, MENU_ITEM_ALARM_CREATE, 2, "アラームをセット");
+        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
     }
 
     /**
@@ -294,6 +233,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             SimpleTransitResult str = new SimpleTransitResult(ti.getTransitResult());
             new TransitResultDao(this).createTransitResult(str, ti.getTransit());
             ToastUtils.toast(this, "メモに保存しました。");
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
+            // 何もしない
         }
 
         return super.onContextItemSelected(menuItem);

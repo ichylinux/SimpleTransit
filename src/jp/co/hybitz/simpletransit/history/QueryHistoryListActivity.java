@@ -25,11 +25,13 @@ import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
+import jp.co.hybitz.simpletransit.menu.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -40,6 +42,7 @@ import android.widget.ListView;
  * @author ichy <ichylinux@gmail.com>
  */
 public class QueryHistoryListActivity extends ListActivity implements SimpleTransitConst {
+    private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
     
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -74,6 +77,24 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
         finish();
     }
     
+    /**
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(0, MENU_ITEM_PREFERENCES, 1, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 2, "終了");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
+     */
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        return optionMenuHandler.onMenuItemSelected(featureId, item);
+    }
+
     /**
      * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
      */

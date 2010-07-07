@@ -54,8 +54,8 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
     
     public static int getColorSetting(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String fontSize = sp.getString("color", String.valueOf(COLOR_BLACK));
-        return Integer.parseInt(fontSize);
+        String colorSetting = sp.getString("color", String.valueOf(COLOR_BLACK));
+        return Integer.parseInt(colorSetting);
     }
 
     public static void initTheme(Context context) {
@@ -66,6 +66,9 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         }
         else if (color == COLOR_WHITE) {
         	context.setTheme(R.style.white);
+        }
+        else if (color == COLOR_BEIGE) {
+            context.setTheme(R.style.beige);
         }
     }
 

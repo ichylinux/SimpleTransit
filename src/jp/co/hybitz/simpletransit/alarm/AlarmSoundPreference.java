@@ -94,25 +94,18 @@ public class AlarmSoundPreference extends DialogPreference {
     }
 
     /**
-     * TODO アーティスト名の取得
-     * 
      * @param view
      */
     private void loadSoundFiles(View view) {
-        String[] projection = new String[]{
-                MediaStore.MediaColumns._ID,
-                MediaStore.MediaColumns.TITLE,
-        };
-        
         Cursor cursor = getContext().getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection, null, null, null);
+                null, null, null, null);
 
         ArrayAdapter<AlarmSoundItem> aa = new ArrayAdapter<AlarmSoundItem>(getContext(), R.layout.listview_1);
         while (cursor.moveToNext()) {
-            int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-            String artist = null;
-            String title = cursor.getString(cursor.getColumnIndex(MediaStore.MediaColumns.TITLE));
+            int id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+            String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
             aa.add(new AlarmSoundItem(id, artist, title));
             if (aa.getCount() > 30) {
                 break;
