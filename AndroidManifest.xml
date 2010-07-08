@@ -23,6 +23,8 @@
 
         <!-- メモ -->
         <activity android:name=".memo.MemoListActivity"/>
+        
+        <uses-library android:name="android.test.runner" />
     </application>
     
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -30,4 +32,5 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <uses-sdk android:minSdkVersion="4"/>
+    <instrumentation android:targetPackage="jp.co.hybitz.simpletransit" android:name="android.test.InstrumentationTestRunner" />
 </manifest> 
