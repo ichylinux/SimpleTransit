@@ -92,7 +92,11 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        return optionMenuHandler.onMenuItemSelected(featureId, item);
+        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+            return true;
+        }
+        
+        return super.onMenuItemSelected(featureId, item);
     }
 
     /**
@@ -116,6 +120,8 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
             if (count == 1) {
                 showList();
             }
+            
+            return true;
         }
 
         return super.onContextItemSelected(menuItem);

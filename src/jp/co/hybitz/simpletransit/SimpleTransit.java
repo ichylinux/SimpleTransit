@@ -104,7 +104,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        return optionMenuHandler.onMenuItemSelected(featureId, item);
+        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+            return true;
+        }
+        
+        return super.onMenuItemSelected(featureId, item);
     }
     
     /**
@@ -228,14 +232,17 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         if (menuItem.getItemId() == MENU_ITEM_ALARM_CREATE) {
             AlarmSettingDialog dialog = new AlarmSettingDialog(this, ti.getTransitResult(), ti.getTransit());
             dialog.show();
+            return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_MEMO_CREATE) {
             SimpleTransitResult str = new SimpleTransitResult(ti.getTransitResult());
             new TransitResultDao(this).createTransitResult(str, ti.getTransit());
             ToastUtils.toast(this, "メモに保存しました。");
+            return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
             // 何もしない
+            return true;
         }
 
         return super.onContextItemSelected(menuItem);

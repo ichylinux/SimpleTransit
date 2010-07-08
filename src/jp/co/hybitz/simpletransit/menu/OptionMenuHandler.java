@@ -45,24 +45,25 @@ public class OptionMenuHandler implements SimpleTransitConst {
         switch (item.getItemId()) {
         case MENU_ITEM_PREFERENCES :
             activity.startActivity(new Intent(activity, Preferences.class));
-            break;
+            return true;
         case MENU_ITEM_QUERY_HISTORY :
             showQueryHistoryList();
-            break;
+            return true;
         case MENU_ITEM_ALARM :
             showMemoList(true);
-            break;
+            return true;
         case MENU_ITEM_MEMO :
             showMemoList(false);
-            break;
+            return true;
         case MENU_ITEM_VOICE :
             voiceInput();
-            break;
+            return true;
         case MENU_ITEM_QUIT :
             activity.finish();
+            return true;
         }
         
-        return true;
+        return false;
     }
     
     private void voiceInput() {

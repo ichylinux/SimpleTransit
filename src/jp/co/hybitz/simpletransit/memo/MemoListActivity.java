@@ -92,7 +92,11 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        return optionMenuHandler.onMenuItemSelected(featureId, item);
+        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+            return true;
+        }
+        
+        return super.onMenuItemSelected(featureId, item);
     }
 
     /**
@@ -108,6 +112,8 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
             if (count == 1) {
                 showList();
             }
+            
+            return true;
         }
 
         return super.onContextItemSelected(menuItem);
