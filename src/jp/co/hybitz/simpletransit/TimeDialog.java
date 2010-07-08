@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TimePicker;
 
@@ -37,15 +38,17 @@ import android.widget.TimePicker;
  * @author ichy <ichylinux@gmail.com>
  */
 public class TimeDialog implements DialogInterface {
+    private Activity activity;
 	private AlertDialog dialog;
 	private View layout;
 	private TimeTypeAndDate timeTypeAndDate;
 	
 	public TimeDialog(Activity activity) {
-		dialog = createInnerDialog(activity);
+	    this.activity = activity;
+		dialog = createInnerDialog();
 	}
 
-	private AlertDialog createInnerDialog(Activity activity) {
+	private AlertDialog createInnerDialog() {
 		Context context = activity.getApplicationContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
 		layout = inflater.inflate(R.layout.time_dialog, (ViewGroup) activity.findViewById(R.id.time_dialog_root));
@@ -121,6 +124,11 @@ public class TimeDialog implements DialogInterface {
 	}
 	
 	private void updateTimeView() {
+	    RadioButton dep = (RadioButton) layout.findViewById(R.id.departure);
+	    dep.setTextColor(Preferences.getTextColor(activity));
+        RadioButton arr = (RadioButton) layout.findViewById(R.id.arrival);
+        arr.setTextColor(Preferences.getTextColor(activity));
+	    
 	    RadioGroup rg = (RadioGroup) layout.findViewById(R.id.time_type);
 	    if (timeTypeAndDate.getTimeType() == TimeType.DEPARTURE) {
 	        rg.check(R.id.departure);

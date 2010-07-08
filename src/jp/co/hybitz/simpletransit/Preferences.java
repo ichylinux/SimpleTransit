@@ -26,6 +26,7 @@ import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.util.StringUtils;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -56,6 +57,19 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String colorSetting = sp.getString("color", String.valueOf(COLOR_BLACK));
         return Integer.parseInt(colorSetting);
+    }
+
+    public static int getTextColor(Context context) {
+        switch (getColorSetting(context)) {
+        case COLOR_BLACK :
+            return Color.WHITE;
+        case COLOR_WHITE :
+            return Color.BLACK;
+        case COLOR_BEIGE :
+            return Color.rgb(0x41, 0x69, 0xE1);
+        default :
+            return Color.WHITE;
+        }
     }
 
     public static void initTheme(Context context) {

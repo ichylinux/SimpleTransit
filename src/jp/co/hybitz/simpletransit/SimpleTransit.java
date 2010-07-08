@@ -164,6 +164,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     	Preferences.initTheme(this);
         setContentView(R.layout.main);
 
+        CheckBox first = (CheckBox) findViewById(R.id.first);
+        first.setTextColor(Preferences.getTextColor(this));
+        CheckBox last = (CheckBox) findViewById(R.id.last);
+        last.setTextColor(Preferences.getTextColor(this));
+        
         TextView timeView = (TextView) findViewById(R.id.time);
         timeView.setTextSize(16);
 
