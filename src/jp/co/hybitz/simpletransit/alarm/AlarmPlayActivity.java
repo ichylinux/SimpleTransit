@@ -144,7 +144,7 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
 
         TextView tvTitle = (TextView) findViewById(R.id.tv_title);
         tvTitle.setTextSize(textSize);
-        tvTitle.setText(ResultRenderer.createTitle(atr.getTransitResult()));
+        tvTitle.setText(ResultRenderer.createTitle(atr.getTransitResult(), true));
 
         TextView tvRoute = (TextView) findViewById(R.id.tv_route);
         tvRoute.setTextSize(textSize);

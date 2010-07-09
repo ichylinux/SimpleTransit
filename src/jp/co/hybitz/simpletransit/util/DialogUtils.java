@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.android;
+package jp.co.hybitz.simpletransit.util;
 
+import jp.co.hybitz.simpletransit.Preferences;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 
 /**
  * @author ichy <ichylinux@gmail.com>
@@ -27,24 +31,32 @@ import android.content.DialogInterface;
  */
 public class DialogUtils {
 
-    public static void showMessage(Context context, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(message);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        builder.show();
+    public static void showMessage(Context context, CharSequence message) {
+        showMessage(context, null, message, "OK");
     }
 
     public static void showMessage(Context context, int stringId) {
         showMessage(context, context.getString(stringId));
     }
+    
+    public static void showMessage(Context context, CharSequence title, CharSequence message, String buttonLabel) {
+        ForegroundColorSpan fcs = new ForegroundColorSpan(Preferences.getTextColor(context));
 
-    public static void showMessage(Context context, String title, String message, String buttonLabel) {
+        SpannableString ssTitle = null;
+        if (title != null) {
+            ssTitle = new SpannableString(title);
+            ssTitle.setSpan(fcs, 0, title.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        SpannableString ssMessage = null;
+        if (message != null) {
+            ssMessage = new SpannableString(message);
+            ssMessage.setSpan(fcs, 0, message.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title);
-        builder.setMessage(message);
+        builder.setTitle(ssTitle);
+        builder.setMessage(ssMessage);
         builder.setPositiveButton(buttonLabel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
             }

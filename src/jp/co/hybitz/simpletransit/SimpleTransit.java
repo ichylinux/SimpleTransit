@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
-import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.Platform;
 import jp.co.hybitz.googletransit.TransitSearchException;
 import jp.co.hybitz.googletransit.TransitSearcher;
@@ -41,6 +40,7 @@ import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
@@ -301,7 +301,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 query.setDate(currentTime.getDate());
             } else {
                 query.setTimeType(TimeType.DEPARTURE);
-                query.setDate(null);
+                query.setDate(new Date());
             }
         }
 

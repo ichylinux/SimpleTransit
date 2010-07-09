@@ -21,7 +21,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import jp.co.hybitz.android.DateUtils;
-import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.Transit;
@@ -32,6 +31,7 @@ import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import android.app.Activity;
 import android.app.AlarmManager;

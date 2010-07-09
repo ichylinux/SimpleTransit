@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import jp.co.hybitz.android.CursorEx;
+import jp.co.hybitz.android.DateUtils;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeAndPlace;
 import jp.co.hybitz.googletransit.model.TimeType;
@@ -154,6 +155,7 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
     private SimpleTransitResult loadSimpleTransitResult(SQLiteDatabase db, CursorEx c) {
         SimpleTransitResult ret = new SimpleTransitResult();
         ret.setId(c.getLong("_id"));
+        ret.setQueryDate(DateUtils.toDate(c.getLong("query_date")));
         ret.setTimeType(toTimeType(c.getString("time_type")));
         ret.setAlarmStatus(c.getInt("alarm_status"));
         ret.setAlarmAt(c.getLong("alarm_at"));
@@ -302,6 +304,9 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         try {
             // transit_result
             ContentValues trv = new ContentValues();
+            if (tr.getQueryDate() != null) {
+                trv.put("query_date", DateUtils.toLong(tr.getQueryDate()));
+            }
             trv.put("time_type", toTimeTypeString(tr.getTimeType()));
             if (tr.getTime() != null) {
                 trv.put("time", tr.getTime().getTimeAsString());

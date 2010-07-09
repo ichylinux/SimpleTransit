@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 
 import jp.co.hybitz.googletransit.model.TimeType;
@@ -75,15 +76,25 @@ public class ResultRenderer implements SimpleTransitConst {
         }
     }
     
-    public static String createTitle(TransitResult result) {
+    public static String createTitle(TransitResult result, boolean withTime) {
         String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
 
         StringBuilder sb = new StringBuilder();
         sb.append(result.getFrom().replaceAll(prefecture, ""));
         sb.append(" ～ ");
         sb.append(result.getTo().replaceAll(prefecture, ""));
-        sb.append("　");
         
+        if (withTime) {
+            sb.append("　");
+            sb.append(createTime(result));
+        }
+
+        return sb.toString();
+    }
+    
+    public static String createTime(TransitResult result) {
+        StringBuilder sb = new StringBuilder();
+
         if (result.getTimeType() == TimeType.DEPARTURE) {
             sb.append(result.getTime() + "発");
             
@@ -101,14 +112,47 @@ public class ResultRenderer implements SimpleTransitConst {
         else {
             throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
         }
-
+        
         return sb.toString();
     }
     
+    public static String createDate(TransitResult result) {
+        StringBuilder sb = new StringBuilder();
+
+        
+        if (result.getTimeType() == TimeType.DEPARTURE) {
+            sb.append(getDateOrTime(result) + "発");
+            
+        }
+        else if (result.getTimeType() == TimeType.ARRIVAL) {
+            sb.append(getDateOrTime(result) + "着");
+            
+        }
+        else if (result.getTimeType() == TimeType.FIRST) {
+            sb.append("始発");
+        }
+        else if (result.getTimeType() == TimeType.LAST) {
+            sb.append("終電");
+        }
+        else {
+            throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
+        }
+        
+        return sb.toString();
+    }
+    
+    private static String getDateOrTime(TransitResult result) {
+        String date = result.getTime().toString();
+        if (result.getQueryDate() != null) {
+            date = new SimpleDateFormat("yyyy/MM/dd HH:mm").format(result.getQueryDate());
+        }
+        return date;
+    }
+
     private String createSummary(TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
-            sb.append(createTitle(result));
+            sb.append(createTitle(result, true));
             sb.append("\n");
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
         } else {

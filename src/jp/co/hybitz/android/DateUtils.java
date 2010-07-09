@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.android;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -31,5 +32,17 @@ public class DateUtils {
         }
         
         return Long.parseLong(new SimpleDateFormat("yyyyMMddHHmmss").format(date));
+    }
+    
+    public static Date toDate(Long dateLong) {
+        if (dateLong == null) {
+            return null;
+        }
+        
+        try {
+            return new SimpleDateFormat("yyyyMMddHHmmss").parse(String.valueOf(dateLong));
+        } catch (ParseException e) {
+            return null;
+        }
     }
 }

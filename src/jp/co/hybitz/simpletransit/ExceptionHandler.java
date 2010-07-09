@@ -20,8 +20,8 @@ package jp.co.hybitz.simpletransit;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import jp.co.hybitz.android.DialogUtils;
 import jp.co.hybitz.googletransit.TransitSearchException;
+import jp.co.hybitz.simpletransit.util.DialogUtils;
 import android.content.Context;
 import android.util.Log;
 

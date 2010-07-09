@@ -39,11 +39,19 @@ class MemoArrayAdapter extends ArrayAdapterEx<MemoListItem> implements SimpleTra
     @Override
     protected void updateView(View view, MemoListItem item) {
         TextView title = (TextView) view.findViewWithTag("title");
-        title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult()));
+        title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult(), false));
         
+        TextView queryDate = (TextView) view.findViewWithTag("query_date");
+        if (item.getResult().getQueryDate() != null) {
+            queryDate.setText(ResultRenderer.createDate(item.getResult().getTransitResult()));
+        }
+        else {
+            queryDate.setText(ResultRenderer.createTime(item.getResult().getTransitResult()));
+        }
+
         if (item.getResult().getAlarmStatus() == ALARM_STATUS_BEING_SET) {
             TextView alarmAt = (TextView) view.findViewWithTag("alarm_at");
-            alarmAt.setText("アラーム時刻： " + AlarmUtils.toDateTimeString(item.getResult().getAlarmAt()));
+            alarmAt.setText("アラーム：" + AlarmUtils.toDateTimeString(item.getResult().getAlarmAt()));
         }
     }
 }

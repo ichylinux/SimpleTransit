@@ -18,6 +18,7 @@
 package jp.co.hybitz.simpletransit.model;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import jp.co.hybitz.googletransit.model.Time;
@@ -94,6 +95,14 @@ public class SimpleTransitResult implements Serializable {
 
     public int getResponseCode() {
         return transitResult.getResponseCode();
+    }
+
+    public Date getQueryDate() {
+        return transitResult.getQueryDate();
+    }
+
+    public void setQueryDate(Date queryDate) {
+        transitResult.setQueryDate(queryDate);
     }
 
     public Time getTime() {
