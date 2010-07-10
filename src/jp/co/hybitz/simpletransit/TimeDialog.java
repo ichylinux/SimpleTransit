@@ -117,13 +117,15 @@ public class TimeDialog implements DialogInterface {
 	    if (this.timeTypeAndDate == null) {
 	        Calendar c = Calendar.getInstance();
 	        c.add(Calendar.MINUTE, 1);
-	        this.timeTypeAndDate = new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime());
+		    updateTimeView(new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime()));
+	    }
+	    else {
+		    updateTimeView(this.timeTypeAndDate);
 	    }
 	 
-	    updateTimeView();
 	}
 	
-	private void updateTimeView() {
+	private void updateTimeView(TimeTypeAndDate timeTypeAndDate) {
 	    RadioButton dep = (RadioButton) layout.findViewById(R.id.departure);
 	    dep.setTextColor(Preferences.getTextColor(activity));
         RadioButton arr = (RadioButton) layout.findViewById(R.id.arrival);
