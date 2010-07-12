@@ -32,11 +32,16 @@ public abstract class ArrayAdapterEx<T> extends ArrayAdapter<T> {
 
     private LayoutInflater inflater;
     private int textViewResourceId;
+    private List<T> items;
 
     public ArrayAdapterEx(Context context, int textViewResourceId, List<T> items) {
         super(context, textViewResourceId, items);
         this.textViewResourceId = textViewResourceId;
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+    
+    public List<T> getItems() {
+        return items;
     }
     
     /**

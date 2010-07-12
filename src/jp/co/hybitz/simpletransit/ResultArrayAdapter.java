@@ -17,29 +17,27 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.util.List;
+
+import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.content.Context;
-import android.util.AttributeSet;
-import android.widget.ListView;
+import android.view.View;
+import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class ResultListView extends ListView implements SimpleTransitConst {
+class ResultArrayAdapter extends ArrayAdapterEx<TransitItem> {
 
-    public ResultListView(Context context) {
-        super(context);
+    public ResultArrayAdapter(Context context, int textViewResourceId, List<TransitItem> items) {
+        super(context, textViewResourceId, items);
     }
 
-    public ResultListView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-    }
-
-    public ResultListView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-    
-    public TransitItem getTransitItem(int position) {
-        return (TransitItem) getItemAtPosition(position);
+    @Override
+    protected void updateView(View view, TransitItem item) {
+        TextView textView = (TextView) view;
+        textView.setTextSize(Preferences.getTextSize(getContext()));
+        textView.setText(item.toString());
     }
 }

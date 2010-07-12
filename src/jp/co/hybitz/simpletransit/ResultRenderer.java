@@ -18,15 +18,15 @@
 package jp.co.hybitz.simpletransit;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.app.Activity;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -52,28 +52,13 @@ public class ResultRenderer implements SimpleTransitConst {
         summary.setTextSize(Preferences.getTextSize(activity));
         summary.setText(createSummary(result));
 
-        ArrayAdapter<TransitItem> aa = new ArrayAdapter<TransitItem>(activity, getListViewResourceId());
+        ResultListView results = (ResultListView) activity.findViewById(R.id.results);
+        List<TransitItem> items = new ArrayList<TransitItem>();
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
             Transit transit = it.next();
-            aa.add(new TransitItem(result, transit));
+            items.add(new TransitItem(result, transit));
         }
-        
-        ListView lv = (ListView) activity.findViewById(R.id.results);
-        lv.setAdapter(aa);
-    }
-    
-    private int getListViewResourceId() {
-        int fontSize = Preferences.getFontSizeSetting(activity);
-        switch (fontSize) {
-        case FONT_SIZE_SMALL :
-            return R.layout.listview_1;
-        case FONT_SIZE_MEDIUM :
-            return R.layout.listview_2;
-        case FONT_SIZE_LARGE :
-            return R.layout.listview_3;
-        default :
-            return R.layout.listview_1;
-        }
+        results.setAdapter(new ResultArrayAdapter(activity, R.layout.result_list, items));
     }
     
     public static String createTitle(TransitResult result, boolean withTime) {

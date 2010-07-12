@@ -44,6 +44,7 @@ import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
@@ -55,6 +56,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -74,17 +76,21 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private TimeTypeAndDate previousTime;
     private TimeTypeAndDate nextTime;
 
-	/**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidExceptionHandler.bind(this, APP_ID);
         initView();
-        initActions();
+        initAction();
     }
     
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        TextView summary = (TextView) findViewById(R.id.tv_summary);
+        summary.setTextSize(Preferences.getTextSize(this));
+    }
+
     /**
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
@@ -176,7 +182,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         updatePreviousTimeAndNextTimeVisibility();
     }
 
-    private void initActions() {
+    private void initAction() {
     	TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -329,6 +335,15 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
+    private void hideInputMethod() {
+        InputMethodManager ime = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        EditText from = (EditText) findViewById(R.id.from);
+        ime.hideSoftInputFromWindow(from.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS); 
+        EditText to = (EditText) findViewById(R.id.to);
+        ime.hideSoftInputFromWindow(to.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+    
     private boolean validateQuery() {
         if (StringUtils.isEmpty(query.getFrom())) {
             DialogUtils.showMessage(this, R.string.error_from_required);
@@ -363,6 +378,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 showResponseCode(result.getResponseCode());
             }
             
+            hideInputMethod();
             return result.getTransitCount();
             
         } catch (TransitSearchException e) {
