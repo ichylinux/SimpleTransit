@@ -321,7 +321,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
-            query.setDate(null);
+            query.setDate(new Date());
         }
         else {
             if (currentTime != null) {

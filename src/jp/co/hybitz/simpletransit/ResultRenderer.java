@@ -92,7 +92,12 @@ public class ResultRenderer implements SimpleTransitConst {
             sb.append("始発");
         }
         else if (result.getTimeType() == TimeType.LAST) {
-            sb.append("終電");
+            if (result.getQueryDate() != null) {
+                sb.append(new SimpleDateFormat("yyyy/MM/dd").format(result.getQueryDate()) + "終電");
+            }
+            else {
+                sb.append("終電");
+            }
         }
         else {
             throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
@@ -117,7 +122,12 @@ public class ResultRenderer implements SimpleTransitConst {
             sb.append("始発");
         }
         else if (result.getTimeType() == TimeType.LAST) {
-            sb.append("終電");
+            if (result.getQueryDate() != null) {
+                sb.append(new SimpleDateFormat("yyyy/MM/dd").format(result.getQueryDate()) + "終電");
+            }
+            else {
+                sb.append("終電");
+            }
         }
         else {
             throw new IllegalStateException("予期していない時刻タイプです。timeType=" + result.getTimeType());
