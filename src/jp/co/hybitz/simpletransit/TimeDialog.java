@@ -37,7 +37,7 @@ import android.widget.TimePicker;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TimeDialog implements DialogInterface {
+public class TimeDialog implements DialogInterface, SimpleTransitConst {
     private Activity activity;
 	private AlertDialog dialog;
 	private View layout;
@@ -47,13 +47,27 @@ public class TimeDialog implements DialogInterface {
 	    this.activity = activity;
 		dialog = createInnerDialog();
 	}
+	
+	private int getLayoutId() {
+	    int orientation = Preferences.getOrientation(activity);
+	    if (orientation == ORIENTATION_PORTRAIT) {
+	        return R.layout.time_dialog_portrait;
+	    }
+	    else if (orientation == ORIENTATION_LANDSCAPE) {
+	        return R.layout.time_dialog_landscape;
+	    }
+	    else {
+            throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientation);
+	    }
+	}
 
 	private AlertDialog createInnerDialog() {
 		Context context = activity.getApplicationContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		layout = inflater.inflate(R.layout.time_dialog, (ViewGroup) activity.findViewById(R.id.time_dialog_root));
+		layout = inflater.inflate(getLayoutId(), (ViewGroup) activity.findViewById(R.id.time_dialog_root));
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		builder.setTitle(Preferences.getText(activity, "時刻"));
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		

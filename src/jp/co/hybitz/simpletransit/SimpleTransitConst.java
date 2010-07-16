@@ -53,6 +53,9 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_MEMO_CREATE = Menu.FIRST + 8;
     public static final int MENU_ITEM_ALARM_CREATE = Menu.FIRST + 9;
     public static final int MENU_ITEM_CANCEL = Menu.FIRST + 10;
+    
+    public static final int ORIENTATION_PORTRAIT = 1;
+    public static final int ORIENTATION_LANDSCAPE = 2;
 
     public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
     public static final int REQUEST_CODE_VOICE_INPUT = 2;

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/time_dialog_root" 
+              android:orientation="vertical" 
+              android:layout_width="fill_parent" 
+              android:layout_height="fill_parent"
+              android:padding="5dp" 
+              xmlns:android="http://schemas.android.com/apk/res/android">
+              
+    <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center">
+	    <RadioGroup android:id="@+id/time_type" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:layout_gravity="center">
+	        <RadioButton android:text="出発" android:id="@+id/departure" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	        <RadioButton android:text="到着" android:id="@+id/arrival" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	    </RadioGroup>
+	    <DatePicker android:id="@+id/date_select" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"/>
+	    <TimePicker android:id="@+id/time_select" android:layout_width="wrap_content" android:layout_height="wrap_content"
+	       android:layout_gravity="center" android:layout_marginLeft="10sp"/>
+    </LinearLayout>
+	<LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center">
+	    <Button android:text="決定" android:id="@+id/time_ok" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        <Button android:text="クリア" android:id="@+id/time_clear" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+   		<Button android:text="キャンセル" android:id="@+id/time_cancel" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	</LinearLayout>
+</LinearLayout>

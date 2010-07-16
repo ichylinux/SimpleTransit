@@ -168,8 +168,17 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     private void initView() {
     	Preferences.initTheme(this);
-        setContentView(R.layout.main);
-
+    	int orientation = Preferences.getOrientation(this);
+    	if (orientation == ORIENTATION_PORTRAIT) {
+    	    setContentView(R.layout.main_portrait);
+    	}
+    	else if (orientation == ORIENTATION_LANDSCAPE) {
+    	    setContentView(R.layout.main_landscape);
+    	}
+    	else {
+    	    throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientation);
+    	}
+    	
         CheckBox first = (CheckBox) findViewById(R.id.first);
         first.setTextColor(Preferences.getTextColor(this));
         CheckBox last = (CheckBox) findViewById(R.id.last);

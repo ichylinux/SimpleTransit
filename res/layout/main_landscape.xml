@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_above="@+id/layout_search_buttons" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 検索条件 -->
+    <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_from"/>
+            <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
+                android:maxLines="1" android:singleLine="true" android:id="@+id/from" android:layout_width="fill_parent"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_to"/>
+            <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
+                android:maxLines="1" android:singleLine="true" android:id="@+id/to" android:layout_width="fill_parent"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:text="@+string/label_time"
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/time"
+                android:background="@layout/time_border_enabled"
+                android:textSize="18sp"
+                android:textColor="#000000" android:minWidth="156sp" android:maxWidth="156sp"
+                android:layout_margin="2sp" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+	        <CheckBox android:text="@+string/checkbox_first" android:layout_marginLeft="30sp" android:id="@+id/first" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	        <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="10sp" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <Button android:id="@+id/search" android:layout_height="wrap_content" android:text="@+string/button_search"
+            android:minWidth="120sp" android:layout_width="wrap_content" android:layout_marginLeft="30sp"/>
+    </LinearLayout>
+
+    <!-- 検索結果 -->
+    <RelativeLayout android:layout_width="wrap_content" android:layout_height="fill_parent" android:layout_marginLeft="5sp">
+        <LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:layout_above="@+id/layout_search_buttons">
+            <TextView android:id="@+id/tv_summary" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="5sp"/>
+            <jp.co.hybitz.simpletransit.ResultListView android:id="@+id/results" android:layout_width="fill_parent" android:isScrollContainer="true" android:layout_height="fill_parent" android:longClickable="true"/>
+        </LinearLayout>
+        <RelativeLayout android:id="@+id/layout_search_buttons" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true" android:layout_marginTop="5sp">
+	        <Button android:text="@+string/button_previous_time" android:id="@+id/previous_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"/>
+	        <Button android:text="@+string/button_next_time" android:id="@+id/next_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+    </RelativeLayout>
+</LinearLayout>

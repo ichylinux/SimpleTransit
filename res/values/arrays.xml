@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="color_entries">
+        <item>黒</item>
+        <item>白</item>
+        <item>ベージュ</item>
+    </string-array>
+    <string-array name="color_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
     <string-array name="font_size_entries">
         <item>小</item>
         <item>中</item>
@@ -10,14 +20,12 @@
         <item>2</item>
         <item>3</item>
     </string-array>
-    <string-array name="color_entries">
-        <item>黒</item>
-        <item>白</item>
-        <item>ベージュ</item>
+    <string-array name="orientation_entries">
+        <item>縦向き</item>
+        <item>横向き</item>
     </string-array>
-    <string-array name="color_values">
+    <string-array name="orientation_values">
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 </resources>

@@ -30,6 +30,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 
 /**
@@ -59,6 +62,12 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return Integer.parseInt(colorSetting);
     }
 
+    public static int getOrientation(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        String orientation = sp.getString("orientation", String.valueOf(ORIENTATION_PORTRAIT));
+        return Integer.parseInt(orientation);
+    }
+
     public static int getTextColor(Context context) {
         switch (getColorSetting(context)) {
         case COLOR_BLACK :
@@ -70,6 +79,17 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         default :
             return Color.WHITE;
         }
+    }
+    
+    public static CharSequence getText(Context context, String text) {
+        if (text == null) {
+            return null;
+        }
+
+        ForegroundColorSpan fcs = new ForegroundColorSpan(getTextColor(context));
+        SpannableString ret = new SpannableString(text);
+        ret.setSpan(fcs, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return ret;
     }
 
     public static void initTheme(Context context) {
