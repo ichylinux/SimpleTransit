@@ -33,6 +33,7 @@ import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
+import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
 import jp.co.hybitz.simpletransit.menu.OptionMenuHandler;
@@ -168,16 +169,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     private void initView() {
     	Preferences.initTheme(this);
-    	int orientation = Preferences.getOrientation(this);
-    	if (orientation == ORIENTATION_PORTRAIT) {
-    	    setContentView(R.layout.main_portrait);
-    	}
-    	else if (orientation == ORIENTATION_LANDSCAPE) {
-    	    setContentView(R.layout.main_landscape);
-    	}
-    	else {
-    	    throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientation);
-    	}
+        setContentView(getLayoutId());
     	
         CheckBox first = (CheckBox) findViewById(R.id.first);
         first.setTextColor(Preferences.getTextColor(this));
@@ -188,7 +180,28 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         timeView.setTextSize(16);
 
         query.setTimeType(TimeType.DEPARTURE);
+        
+        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
+        if (latest != null) {
+            query.setFrom(latest.getFrom());
+            query.setTo(latest.getTo());
+            updateQueryView();
+        }
+
         updatePreviousTimeAndNextTimeVisibility();
+    }
+    
+    private int getLayoutId() {
+        int orientation = Preferences.getOrientation(this);
+        if (orientation == ORIENTATION_PORTRAIT) {
+            return R.layout.main_portrait;
+        }
+        else if (orientation == ORIENTATION_LANDSCAPE) {
+            return R.layout.main_landscape;
+        }
+        else {
+            throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientation);
+        }
     }
 
     private void initAction() {
@@ -405,9 +418,17 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             if (query.getTimeType() == TimeType.DEPARTURE) {
                 Time t = TransitUtil.getFirstDepartureTime(result);
                 if (t != null) {
-                    Date date = TransitUtil.getRelativeDate(t, true);
                     Calendar c = Calendar.getInstance();
-                    c.setTime(date);
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, t.getHour());
+                    c.set(Calendar.MINUTE, t.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().before(result.getQueryDate())) {
+                        c.add(Calendar.DATE, 1);
+                    }
+
+                    // 1分後に出発する乗換を検索
                     c.add(Calendar.MINUTE, 1);
                     nextTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
                 }
@@ -421,9 +442,17 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             else if (query.getTimeType() == TimeType.ARRIVAL) {
                 Time t = TransitUtil.getLastArrivalTime(result);
                 if (t != null) {
-                    Date date = TransitUtil.getRelativeDate(t, false);
                     Calendar c = Calendar.getInstance();
-                    c.setTime(date);
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, t.getHour());
+                    c.set(Calendar.MINUTE, t.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().after(result.getQueryDate())) {
+                        c.add(Calendar.DATE, -1);
+                    }
+                    
+                    // 1分前に到着する乗換を検索
                     c.add(Calendar.MINUTE, -1);
                     previousTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
                 }

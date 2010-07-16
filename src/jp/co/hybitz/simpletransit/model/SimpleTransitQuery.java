@@ -30,6 +30,7 @@ public class SimpleTransitQuery implements Serializable {
     private long id;
     private int useCount;
     private long createdAt;
+    private long updatedAt;
     private TransitQuery transitQuery;
     
     public SimpleTransitQuery() {
@@ -61,6 +62,14 @@ public class SimpleTransitQuery implements Serializable {
 
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public long getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(long updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public TransitQuery getTransitQuery() {

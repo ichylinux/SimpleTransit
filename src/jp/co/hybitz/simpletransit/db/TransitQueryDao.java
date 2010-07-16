@@ -62,6 +62,7 @@ public class TransitQueryDao extends AbstractDao {
         ret.setTimeType(TimeType.DEPARTURE);
         ret.setUseCount(c.getInt("use_count"));
         ret.setCreatedAt(c.getLong("created_at"));
+        ret.setUpdatedAt(c.getLong("updated_at"));
         return ret;
     }
 
@@ -86,13 +87,35 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
     
+    public SimpleTransitQuery getLatestTransitQuery() {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            CursorEx c = (CursorEx) db.query("transit_query", null, "updated_at > 0", null, null, null, "updated_at desc", "1");
+
+            SimpleTransitQuery ret = null;
+            
+            if (c.getCount() > 0) {
+                c.moveToFirst();
+                ret = loadTransitQuery(c);
+            }
+            
+            c.close();
+            return ret;
+        }
+        finally {
+            db.close();
+        }
+    }
+
     public long createTransitQuery(SimpleTransitQuery tq) {
         SQLiteDatabase db = getWritableDatabase();
         try {
+            long now = getCurrentDateTime();
             ContentValues values = new ContentValues();
             values.put("transit_from", tq.getFrom());
             values.put("transit_to", tq.getTo());
-            values.put("created_at", getCurrentDateTime());
+            values.put("created_at", now);
+            values.put("updated_at", now);
             return db.insertOrThrow("transit_query", null, values);
         }
         finally {
@@ -115,6 +138,7 @@ public class TransitQueryDao extends AbstractDao {
         try {
             ContentValues values = new ContentValues();
             values.put("use_count", useCount);
+            values.put("updated_at", getCurrentDateTime());
             return db.update("transit_query", values, "_id=?", new String[]{String.valueOf(id)});
         }
         finally {

@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 5;
 
     /**
      * コンストラクタ
@@ -55,6 +55,8 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom2To3(db);
         case 3 :
             upgradeFrom3To4(db);
+        case 4 :
+            upgradeFrom4To5(db);
         default :
             break;
         }
@@ -73,6 +75,10 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         db.execSQL("alter table transit_result add column query_date integer ");
     }
 
+    private void upgradeFrom4To5(SQLiteDatabase db) {
+        db.execSQL("alter table transit_query add column updated_at integer not null default 0 ");
+    }
+
     private void createTableTransitQuery(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
         sb.append("create table transit_query ( ");
@@ -80,7 +86,8 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         sb.append("transit_from text not null, ");
         sb.append("transit_to text not null, ");
         sb.append("use_count integer not null default 0, ");
-        sb.append("created_at integer not null default 0 ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
         sb.append(") ");
         db.execSQL(sb.toString());
     }

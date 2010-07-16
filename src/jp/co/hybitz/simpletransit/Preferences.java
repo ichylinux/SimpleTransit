@@ -46,6 +46,11 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         addPreferencesFromResource(R.xml.preferences);
     }
     
+    public static boolean isUseLatestQueryHistory(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("use_latest_query_history", false);
+    }
+
     public static boolean isUseExpress(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("use_express", false);
