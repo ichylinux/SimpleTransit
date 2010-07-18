@@ -181,11 +181,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
 
         query.setTimeType(TimeType.DEPARTURE);
         
-        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
-        if (latest != null) {
-            query.setFrom(latest.getFrom());
-            query.setTo(latest.getTo());
-            updateQueryView();
+        if (Preferences.isUseLatestQueryHistory(this)) {
+	        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
+	        if (latest != null) {
+	            query.setFrom(latest.getFrom());
+	            query.setTo(latest.getTo());
+	            updateQueryView();
+	        }
         }
 
         updatePreviousTimeAndNextTimeVisibility();
