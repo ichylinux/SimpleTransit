@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.menu;
+package jp.co.hybitz.simpletransit.action;
 
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;

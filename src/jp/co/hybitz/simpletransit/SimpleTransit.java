@@ -18,8 +18,8 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -32,11 +32,13 @@ import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
+import jp.co.hybitz.simpletransit.action.FromToDragListener;
+import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
-import jp.co.hybitz.simpletransit.menu.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
@@ -207,6 +209,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
 
     private void initAction() {
+        EditText from = (EditText) findViewById(R.id.from);
+        EditText to = (EditText) findViewById(R.id.to);
+        from.setOnTouchListener(new FromToDragListener(from, to));
+        to.setOnTouchListener(new FromToDragListener(to, from));
+        
     	TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -319,7 +326,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         
         if (first.isChecked()) {
             query.setTimeType(TimeType.FIRST);
-            query.setDate(null);
+            query.setDate(new Date());
         }
         else if (last.isChecked()) {
             query.setTimeType(TimeType.LAST);
@@ -340,11 +347,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
     
     private void searchPrevious() {
+        query.setTimeType(previousTime.getTimeType());
         query.setDate(previousTime.getDate());
         search();
     }
     
     private void searchNext() {
+        query.setTimeType(nextTime.getTimeType());
         query.setDate(nextTime.getDate());
         search();
     }
@@ -417,7 +426,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         previousTime = null;
         
         if (result != null && result.getTransitCount() > 0) {
-            if (query.getTimeType() == TimeType.DEPARTURE) {
+            if (query.getTimeType() == TimeType.DEPARTURE || query.getTimeType() == TimeType.FIRST) {
                 Time t = TransitUtil.getFirstDepartureTime(result);
                 if (t != null) {
                     Calendar c = Calendar.getInstance();
@@ -432,31 +441,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
 
                     // 1分後に出発する乗換を検索
                     c.add(Calendar.MINUTE, 1);
-                    nextTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
-                }
-                
-                List<Time> times = TransitUtil.getDepartureTimes(result);
-                Collections.sort(times);
-                if (times.size() > 2) {
-                    
+                    nextTime = new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime());
                 }
             }
-            else if (query.getTimeType() == TimeType.ARRIVAL) {
+            else if (query.getTimeType() == TimeType.ARRIVAL || query.getTimeType() == TimeType.LAST) {
                 Time t = TransitUtil.getLastArrivalTime(result);
                 if (t != null) {
-                    Calendar c = Calendar.getInstance();
-                    c.setTime(result.getQueryDate());
+                	Time thisTime = new Time(new SimpleDateFormat("hhmm").format(result.getQueryDate()));
+
+                	Calendar c = Calendar.getInstance();
+                	c.setTime(result.getQueryDate());
                     c.set(Calendar.HOUR_OF_DAY, t.getHour());
                     c.set(Calendar.MINUTE, t.getMinute());
                     
                     // 日を跨いでる場合
-                    if (c.getTime().after(result.getQueryDate())) {
+                    if (t.after(thisTime)) {
                         c.add(Calendar.DATE, -1);
                     }
                     
                     // 1分前に到着する乗換を検索
                     c.add(Calendar.MINUTE, -1);
-                    previousTime = new TimeTypeAndDate(query.getTimeType(), c.getTime());
+                    previousTime = new TimeTypeAndDate(TimeType.ARRIVAL, c.getTime());
                 }
             }
         }

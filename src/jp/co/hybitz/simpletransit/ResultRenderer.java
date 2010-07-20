@@ -89,7 +89,12 @@ public class ResultRenderer implements SimpleTransitConst {
             
         }
         else if (result.getTimeType() == TimeType.FIRST) {
-            sb.append("始発");
+            if (result.getQueryDate() != null) {
+                sb.append(new SimpleDateFormat("yyyy/MM/dd").format(result.getQueryDate()) + "始発");
+            }
+            else {
+                sb.append("始発");
+            }
         }
         else if (result.getTimeType() == TimeType.LAST) {
             if (result.getQueryDate() != null) {
@@ -119,7 +124,12 @@ public class ResultRenderer implements SimpleTransitConst {
             
         }
         else if (result.getTimeType() == TimeType.FIRST) {
-            sb.append("始発");
+            if (result.getQueryDate() != null) {
+                sb.append(new SimpleDateFormat("yyyy/MM/dd").format(result.getQueryDate()) + "始発");
+            }
+            else {
+                sb.append("始発");
+            }
         }
         else if (result.getTimeType() == TimeType.LAST) {
             if (result.getQueryDate() != null) {

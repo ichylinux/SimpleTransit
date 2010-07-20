@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit;
+package jp.co.hybitz.simpletransit.action;
 
+import jp.co.hybitz.simpletransit.R;
 import android.app.Activity;
 import android.graphics.Color;
 import android.widget.CheckBox;
@@ -27,10 +28,10 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class FirstAndLastCheckBoxListener implements OnCheckedChangeListener {
+public class FirstAndLastCheckBoxListener implements OnCheckedChangeListener {
     private Activity activity;
     
-    FirstAndLastCheckBoxListener(Activity activity) {
+    public FirstAndLastCheckBoxListener(Activity activity) {
         this.activity = activity;
     }
     
