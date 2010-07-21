@@ -77,6 +77,19 @@ public class ResultRenderer implements SimpleTransitConst {
         return sb.toString();
     }
     
+    public static String createTitleWithDate(TransitResult result) {
+        String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(result.getFrom().replaceAll(prefecture, ""));
+        sb.append(" ～ ");
+        sb.append(result.getTo().replaceAll(prefecture, ""));
+        sb.append("　");
+        sb.append(createDate(result));
+
+        return sb.toString();
+    }
+
     public static String createTime(TransitResult result) {
         StringBuilder sb = new StringBuilder();
 

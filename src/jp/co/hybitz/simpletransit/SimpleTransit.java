@@ -53,6 +53,7 @@ import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.text.ClipboardManager;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -257,9 +258,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.add(0, MENU_ITEM_MEMO_CREATE, 1, "メモとして保存");
-        menu.add(0, MENU_ITEM_ALARM_CREATE, 2, "アラームをセット");
-        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
+        menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
+        menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
+        menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
     }
 
     /**
@@ -271,7 +273,16 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         ResultListView lv = (ResultListView) findViewById(R.id.results);
         TransitItem ti = lv.getTransitItem(info.position);
 
-        if (menuItem.getItemId() == MENU_ITEM_ALARM_CREATE) {
+        if (menuItem.getItemId() == MENU_ITEM_COPY_TEXT) {
+            ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            StringBuilder sb = new StringBuilder();
+            sb.append(ResultRenderer.createTitleWithDate(ti.getTransitResult()));
+            sb.append("\n\n");
+            sb.append(ti.toString());
+            cm.setText(sb.toString());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_ALARM_CREATE) {
             AlarmSettingDialog dialog = new AlarmSettingDialog(this, ti.getTransitResult(), ti.getTransit());
             dialog.show();
             return true;
