@@ -173,7 +173,8 @@ public class ResultRenderer implements SimpleTransitConst {
             sb.append(createTitle(result, true));
             sb.append("\n");
             sb.append("検索結果は " + result.getTransitCount() + " 件です。");
-        } else {
+        }
+        else {
             sb.append(activity.getString(R.string.no_route_found));
         }
         return sb.toString();

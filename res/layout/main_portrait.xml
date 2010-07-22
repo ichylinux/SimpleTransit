@@ -11,7 +11,7 @@
 	        </TableRow>
 	        <TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
 		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_to"/>
-		        <EditText android:layout_height="wrap_content"
+		        <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
 		                  android:maxLines="1" android:singleLine="true" android:id="@+id/to" android:layout_width="fill_parent"/>
 	            <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="20sp" android:layout_marginRight="20sp" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	        </TableRow>
@@ -36,6 +36,7 @@
     <!-- 検索オプション -->
     <RelativeLayout android:id="@+id/layout_search_buttons" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_alignParentBottom="true" android:layout_marginTop="5sp">
 	    <Button android:text="@+string/button_previous_time" android:id="@+id/previous_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"/>
+	    <Button android:text="@+string/button_maybe" android:id="@+id/maybe" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true"/>
 	    <Button android:text="@+string/button_next_time" android:id="@+id/next_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -61,6 +61,11 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return sp.getBoolean("use_airline", false);
     }
     
+    public static boolean isUseMaybe(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("use_maybe", false);
+    }
+
     public static int getColorSetting(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         String colorSetting = sp.getString("color", String.valueOf(COLOR_BLACK));

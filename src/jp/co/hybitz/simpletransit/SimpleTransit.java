@@ -34,6 +34,7 @@ import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
 import jp.co.hybitz.simpletransit.action.FromToDragListener;
+import jp.co.hybitz.simpletransit.action.MaybeListener;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
@@ -194,6 +195,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
 
         updatePreviousTimeAndNextTimeVisibility();
+        
+        Button maybe = (Button) findViewById(R.id.maybe);
+        maybe.setVisibility(View.INVISIBLE);
     }
     
     private int getLayoutId() {
@@ -417,6 +421,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                 
                 // 前の時刻と次の時刻を取得
                 updatePreviousTimeAndNextTime(result);
+                
+                // もしかしてを更新
+                updateMaybe(result);
             }
             else {
                 showResponseCode(result.getResponseCode());
@@ -430,6 +437,18 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         
         return 0;
+    }
+    
+    private void updateMaybe(TransitResult result) {
+        Button maybe = (Button) findViewById(R.id.maybe);
+
+        if (Preferences.isUseMaybe(this) && result.getMaybe() != null) {
+            maybe.setVisibility(View.VISIBLE);
+            maybe.setOnClickListener(new MaybeListener(this, result.getMaybe()));
+        }
+        else {
+            maybe.setVisibility(View.INVISIBLE);
+        }
     }
     
     private void updatePreviousTimeAndNextTime(TransitResult result) {

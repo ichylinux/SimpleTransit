@@ -3,10 +3,11 @@
     <string name="alart_set">アラームセット！</string>
     <string name="app_name">簡単乗り換え検索</string>
     <string name="button_alarm_stop">アラーム停止</string>
+    <string name="button_maybe">もしかして</string>
+    <string name="button_next_time">次の時刻</string>
     <string name="button_search">検索</string>
     <string name="button_select_time">時刻指定</string>
     <string name="button_previous_time">前の時刻</string>
-    <string name="button_next_time">次の時刻</string>
     <string name="cancel">キャンセル</string>
     <string name="error_alarm_sound_required">アラームとして使用する曲を設定画面で指定してください。</string>
     <string name="error_from_required">出発地を入力してください。</string>

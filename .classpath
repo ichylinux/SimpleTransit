@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="lib" path="lib/ae.jar"/>
-	<classpathentry kind="lib" path="lib/EasyGoogleTransit-1.13.jar"/>
+	<classpathentry kind="lib" path="lib/EasyGoogleTransit-1.14.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -40,6 +40,7 @@
         <RelativeLayout android:id="@+id/layout_search_buttons" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_alignParentBottom="true" android:layout_marginTop="5sp">
 	        <Button android:text="@+string/button_previous_time" android:id="@+id/previous_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"/>
+            <Button android:text="@+string/button_maybe" android:id="@+id/maybe" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true"/>
 	        <Button android:text="@+string/button_next_time" android:id="@+id/next_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
         </RelativeLayout>
     </RelativeLayout>

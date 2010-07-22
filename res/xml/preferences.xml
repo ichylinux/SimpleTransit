@@ -37,6 +37,10 @@
       android:key="use_airline"
       android:title="飛行機を使用"
       android:summary="飛行機を使用する場合はチェックを入れます。"/>
+    <CheckBoxPreference
+      android:key="use_maybe"
+      android:title="もしかして機能を使用"
+      android:summary="もしかして機能を使用する場合はチェックを入れます。"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="アラームの設定">
     <jp.co.hybitz.simpletransit.alarm.AlarmSoundPreference
