@@ -56,7 +56,6 @@ public class AlarmSoundPreference extends DialogPreference {
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        initActions(view);
         restorePreference(view);
         loadSoundFiles(view);
     }
@@ -81,8 +80,7 @@ public class AlarmSoundPreference extends DialogPreference {
         }
     }
 
-    private void initActions(View view) {
-        ListView lv = (ListView) view.findViewById(R.id.sound_files);
+    private void setMusicSelectListener(ListView lv) {
         lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         lv.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -113,6 +111,15 @@ public class AlarmSoundPreference extends DialogPreference {
         }
         
         ListView lv = (ListView) view.findViewById(R.id.sound_files);
-        lv.setAdapter(aa);
+        
+        if (aa.getCount() > 0) {
+            setMusicSelectListener(lv);
+            lv.setAdapter(aa);
+        }
+        else {
+            ArrayAdapter<String> noMusic = new ArrayAdapter<String>(getContext(), R.layout.result_list);
+            noMusic.add("曲を見つけることができませんでした。");
+            lv.setAdapter(noMusic);
+        }
     }
 }

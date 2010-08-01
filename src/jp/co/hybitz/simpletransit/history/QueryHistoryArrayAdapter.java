@@ -20,23 +20,40 @@ package jp.co.hybitz.simpletransit.history;
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
+import jp.co.hybitz.simpletransit.R;
+import jp.co.hybitz.simpletransit.action.StarListener;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 class QueryHistoryArrayAdapter extends ArrayAdapterEx<QueryHistoryListItem> {
+    private Bitmap[] images;
 
     public QueryHistoryArrayAdapter(Context context, int textViewResourceId, List<QueryHistoryListItem> items) {
         super(context, textViewResourceId, items);
+        Resources r = getContext().getResources();
+        images = new Bitmap[]{
+                BitmapFactory.decodeResource(r, R.drawable.star_off),
+                BitmapFactory.decodeResource(r, R.drawable.star_on),
+            };
     }
 
     @Override
     protected void updateView(View view, QueryHistoryListItem item) {
+        ImageView star = (ImageView) view.findViewWithTag("star");
+        star.setImageBitmap(item.getQuery().isFavorite() ? images[1] : images[0]);
+        star.setOnClickListener(new StarListener(images, item.getQuery()));
+        
         TextView fromTo = (TextView) view.findViewWithTag("from_to");
-        fromTo.setText(item.getQuery().getFrom() + " ～ " + item.getQuery().getTo());
+        fromTo.setText(item.getQuery().getFromTo());
+
         TextView useCount = (TextView) view.findViewWithTag("use_count");
         useCount.setText("利用回数： " + item.getQuery().getUseCount() + "回");
     }

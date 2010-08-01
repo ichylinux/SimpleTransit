@@ -54,6 +54,24 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
     
+    public List<SimpleTransitQuery> getTransitQueriesByFavarite() {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            List<SimpleTransitQuery> ret = new ArrayList<SimpleTransitQuery>(); 
+
+            CursorEx c = (CursorEx) db.query("transit_query", null, "is_favorite <> 0", null, null, null, "use_count desc");
+            while (c.moveToNext()) {
+                ret.add(loadTransitQuery(c));
+            }
+            c.close();
+
+            return ret;
+        }
+        finally {
+            db.close();
+        }
+    }
+
     private SimpleTransitQuery loadTransitQuery(CursorEx c) {
         SimpleTransitQuery ret = new SimpleTransitQuery();
         ret.setId(c.getLong("_id"));
@@ -61,6 +79,7 @@ public class TransitQueryDao extends AbstractDao {
         ret.setTo(c.getString("transit_to"));
         ret.setTimeType(TimeType.DEPARTURE);
         ret.setUseCount(c.getInt("use_count"));
+        ret.setFavorite(c.getBoolean("is_favorite"));
         ret.setCreatedAt(c.getLong("created_at"));
         ret.setUpdatedAt(c.getLong("updated_at"));
         return ret;
@@ -69,8 +88,9 @@ public class TransitQueryDao extends AbstractDao {
     public SimpleTransitQuery getTransitQuery(String from, String to) {
         SQLiteDatabase db = getReadableDatabase();
         try {
+            String[] params = new String[]{from, to}; 
             CursorEx c = (CursorEx) db.query("transit_query", null, 
-                    "transit_from=? and transit_to=?", new String[]{from, to}, null, null, null);
+                    "transit_from=? and transit_to=?", params, null, null, null);
 
             SimpleTransitQuery ret = null;
             
@@ -90,7 +110,7 @@ public class TransitQueryDao extends AbstractDao {
     public SimpleTransitQuery getLatestTransitQuery() {
         SQLiteDatabase db = getReadableDatabase();
         try {
-            CursorEx c = (CursorEx) db.query("transit_query", null, "updated_at > 0", null, null, null, "updated_at desc", "1");
+            CursorEx c = (CursorEx) db.query("transit_query", null, "used_at > 0", null, null, null, "updated_at desc", "1");
 
             SimpleTransitQuery ret = null;
             
@@ -136,8 +156,23 @@ public class TransitQueryDao extends AbstractDao {
     public int updateUseCount(long id, int useCount) {
         SQLiteDatabase db = getWritableDatabase();
         try {
+            long now = getCurrentDateTime();
             ContentValues values = new ContentValues();
             values.put("use_count", useCount);
+            values.put("used_at", now);
+            values.put("updated_at", now);
+            return db.update("transit_query", values, "_id=?", new String[]{String.valueOf(id)});
+        }
+        finally {
+            db.close();
+        }
+    }
+    
+    public int updateFavorite(long id, boolean favorite) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("is_favorite", favorite ? 1 : 0);
             values.put("updated_at", getCurrentDateTime());
             return db.update("transit_query", values, "_id=?", new String[]{String.valueOf(id)});
         }

@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent" android:focusable="false">
 
-    <TextView android:tag="from_to" android:textSize="18sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-    <TextView android:tag="use_count" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    <ImageView android:tag="star" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:paddingLeft="10sp"
+        android:paddingTop="15sp"
+        android:paddingRight="10sp"
+        android:paddingBottom="15sp"/>
+	<LinearLayout android:orientation="vertical"
+	    android:layout_width="fill_parent" android:layout_height="wrap_content">
+	    <TextView android:tag="from_to" android:textSize="18sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	    <TextView android:tag="use_count" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+    </LinearLayout>
 </LinearLayout>
 

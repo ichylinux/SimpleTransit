@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 7;
 
     /**
      * コンストラクタ
@@ -57,6 +57,10 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom3To4(db);
         case 4 :
             upgradeFrom4To5(db);
+        case 5 :
+            upgradeFrom5To6(db);
+        case 6 :
+            upgradeFrom6To7(db);
         default :
             break;
         }
@@ -79,13 +83,24 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         db.execSQL("alter table transit_query add column updated_at integer not null default 0 ");
     }
 
+    private void upgradeFrom5To6(SQLiteDatabase db) {
+        db.execSQL("alter table transit_query add column is_favorite integer not null default 0 ");
+    }
+
+    private void upgradeFrom6To7(SQLiteDatabase db) {
+        db.execSQL("alter table transit_query add column used_at integer not null default 0 ");
+        db.execSQL("update transit_query set used_at = updated_at ");
+    }
+
     private void createTableTransitQuery(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
         sb.append("create table transit_query ( ");
         sb.append("_id integer primary key autoincrement, ");
         sb.append("transit_from text not null, ");
         sb.append("transit_to text not null, ");
+        sb.append("is_favorite integer not null default 0, ");
         sb.append("use_count integer not null default 0, ");
+        sb.append("used_at integer not null default 0, ");
         sb.append("created_at integer not null default 0, ");
         sb.append("updated_at integer not null default 0 ");
         sb.append(") ");

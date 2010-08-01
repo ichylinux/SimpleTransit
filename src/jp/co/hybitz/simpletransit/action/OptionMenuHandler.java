@@ -21,7 +21,7 @@ import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.history.QueryHistoryListActivity;
+import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
 import jp.co.hybitz.simpletransit.memo.MemoListActivity;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import android.app.Activity;
@@ -79,7 +79,7 @@ public class OptionMenuHandler implements SimpleTransitConst {
     }
     
     private void showQueryHistoryList() {
-        Intent intent = new Intent(activity, QueryHistoryListActivity.class);
+        Intent intent = new Intent(activity, QueryHistoryTabActivity.class);
         activity.startActivityForResult(intent, REQUEST_CODE_SELECT_TRANSIT_QUERY);
     }
     

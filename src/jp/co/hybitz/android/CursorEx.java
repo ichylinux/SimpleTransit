@@ -34,6 +34,11 @@ public class CursorEx extends SQLiteCursor {
     public byte[] getBlob(String columnName) {
         return super.getBlob(getColumnIndex(columnName));
     }
+    
+    public boolean getBoolean(String columnName) {
+        int ret = getInt(columnName);
+        return ret != 0;
+    }
 
     public double getDouble(String columnName) {
         return super.getDouble(getColumnIndex(columnName));

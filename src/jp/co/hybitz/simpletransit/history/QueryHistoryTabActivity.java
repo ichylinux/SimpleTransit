@@ -27,33 +27,35 @@ import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
-import android.app.ListActivity;
+import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TabHost;
+import android.widget.AdapterView.OnItemClickListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class QueryHistoryListActivity extends ListActivity implements SimpleTransitConst {
-    private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
+public class QueryHistoryTabActivity extends TabActivity implements SimpleTransitConst {
+    private static final String TAG_ALL = "all";
+    private static final String TAG_FAVORITE = "favorite";
     
-    /**
-     * @see android.app.Activity#onCreate(android.os.Bundle)
-     */
-    @Override
+    private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
+
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    	Preferences.initTheme(this);
-        registerForContextMenu(getListView());
-        showList();
-    }
+	    super.onCreate(savedInstanceState);
+	    initView();
+	    initAction();
+	    showList();
+	}
     
     /**
      * @see android.app.Activity#onRestart()
@@ -63,18 +65,46 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
         super.onRestart();
         showList();
     }
+    
+    private void initView() {
+        Preferences.initTheme(this);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.query_history_tab);
 
-    /**
-     * @see android.app.ListActivity#onListItemClick(android.widget.ListView, android.view.View, int, long)
-     */
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        QueryHistoryListItem item = (QueryHistoryListItem) l.getItemAtPosition(position);
-        
-        Intent result = new Intent();
-        result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
-        setResult(RESULT_OK, result);
-        finish();
+        TabHost th = getTabHost();
+        registerForContextMenu(th);
+
+        th.addTab(th.newTabSpec(TAG_ALL).setIndicator("検索履歴").setContent(R.id.query_history_all));
+        th.addTab(th.newTabSpec(TAG_FAVORITE).setIndicator("お気に入り").setContent(R.id.query_history_favorite));
+        th.setCurrentTab(0);
+    }
+    
+    private void initAction() {
+    	ListView all = (ListView) findViewById(R.id.query_history_all);
+    	all.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                QueryHistoryListItem item = (QueryHistoryListItem) parent.getItemAtPosition(position);
+                
+                Intent result = new Intent();
+                result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
+                setResult(RESULT_OK, result);
+                finish();
+            }
+        });
+    	registerForContextMenu(all);
+
+    	ListView fab = (ListView) findViewById(R.id.query_history_favorite);
+        fab.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                QueryHistoryListItem item = (QueryHistoryListItem) parent.getItemAtPosition(position);
+                
+                Intent result = new Intent();
+                result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
+                setResult(RESULT_OK, result);
+                finish();
+            }
+        });
+        registerForContextMenu(fab);
     }
     
     /**
@@ -104,7 +134,9 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.add(0, MENU_ITEM_DELETE, 0, "削除");
+        if (v.getId() == R.id.query_history_all) {
+            menu.add(0, MENU_ITEM_DELETE, 0, "削除");
+        }
     }
 
     /**
@@ -115,7 +147,8 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
         if (menuItem.getItemId() == MENU_ITEM_DELETE) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
             
-            QueryHistoryListItem item = (QueryHistoryListItem) getListView().getItemAtPosition(info.position);
+            ListView lv = (ListView) findViewById(R.id.query_history_all);
+            QueryHistoryListItem item = (QueryHistoryListItem) lv.getItemAtPosition(info.position);
             int count = new TransitQueryDao(this).deleteTransitQuery(item.getQuery().getId());
             if (count == 1) {
                 showList();
@@ -127,14 +160,20 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
         return super.onContextItemSelected(menuItem);
     }
     
-    private void showList() {
-        setListAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems()));
+    public void showList() {
+        ListView all = (ListView) findViewById(R.id.query_history_all);
+        all.setAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems(false)));
+
+        ListView fab = (ListView) findViewById(R.id.query_history_favorite);
+        fab.setAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems(true)));
     }
 
-    private List<QueryHistoryListItem> getItems() {
+    private List<QueryHistoryListItem> getItems(boolean favariteOnly) {
         List<QueryHistoryListItem> ret = new ArrayList<QueryHistoryListItem>();
         
-        List<SimpleTransitQuery> list = new TransitQueryDao(this).getTransitQueries();
+        TransitQueryDao dao = new TransitQueryDao(this);
+        List<SimpleTransitQuery> list = favariteOnly ?
+                dao.getTransitQueriesByFavarite() : dao.getTransitQueries();
         for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
             SimpleTransitQuery query = it.next();
             ret.add(new QueryHistoryListItem(query));
@@ -143,3 +182,4 @@ public class QueryHistoryListActivity extends ListActivity implements SimpleTran
         return ret;
     }
 }
+

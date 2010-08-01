@@ -29,6 +29,7 @@ import jp.co.hybitz.googletransit.model.TransitQuery;
 public class SimpleTransitQuery implements Serializable {
     private long id;
     private int useCount;
+    private boolean favorite;
     private long createdAt;
     private long updatedAt;
     private TransitQuery transitQuery;
@@ -54,6 +55,14 @@ public class SimpleTransitQuery implements Serializable {
 
     public void setUseCount(int useCount) {
         this.useCount = useCount;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 
     public long getCreatedAt() {
@@ -122,6 +131,10 @@ public class SimpleTransitQuery implements Serializable {
 
     public void setUseExpress(boolean useExpress) {
         transitQuery.setUseExpress(useExpress);
+    }
+    
+    public String getFromTo() {
+        return getFrom() + " ～ " + getTo();
     }
 
 }

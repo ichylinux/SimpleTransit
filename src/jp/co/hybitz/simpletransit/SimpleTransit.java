@@ -66,6 +66,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -184,20 +185,44 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         timeView.setTextSize(16);
 
         query.setTimeType(TimeType.DEPARTURE);
-        
-        if (Preferences.isUseLatestQueryHistory(this)) {
-	        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
-	        if (latest != null) {
-	            query.setFrom(latest.getFrom());
-	            query.setTo(latest.getTo());
-	            updateQueryView();
-	        }
-        }
 
-        updatePreviousTimeAndNextTimeVisibility();
-        
         Button maybe = (Button) findViewById(R.id.maybe);
         maybe.setVisibility(View.INVISIBLE);
+
+        updateLatestQueryHistory();
+        updateFavorite();
+        updatePreviousTimeAndNextTimeVisibility();
+    }
+    
+    private void updateFavorite() {
+        List<SimpleTransitQuery> list = new TransitQueryDao(this).getTransitQueriesByFavarite();
+        if (list.isEmpty()) {
+            return;
+        }
+        
+        TextView summary = (TextView) findViewById(R.id.tv_summary);
+        summary.setTextSize(Preferences.getTextSize(this));
+        summary.setText("お気に入り");
+        
+        FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
+        fab.setAdapter(new FavoriteArrayAdapter(this, R.layout.favorite_list, list));
+    }
+    
+    private void updateLatestQueryHistory() {
+        if (!Preferences.isUseLatestQueryHistory(this)) {
+            return;
+        }
+        
+        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
+        updateQuery(latest);
+    }
+    
+    void updateQuery(SimpleTransitQuery stq) {
+        if (stq != null) {
+            query.setFrom(stq.getFrom());
+            query.setTo(stq.getTo());
+            updateQueryView();
+        }
     }
     
     private int getLayoutId() {
@@ -262,10 +287,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
-        menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
-        menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
-        menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
+        if (v.getId() == R.id.results) {
+            menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
+            menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
+            menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
+            menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
+        }
     }
 
     /**
@@ -406,16 +433,27 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         return true;
     }
     
+    private void removeFavoriteList() {
+        FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
+        if (fab != null) {
+            LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
+            view.removeView(fab);
+        }
+    }
+    
     private int search() {
         if (!validateQuery()) {
             return 0;
         }
-
+        
         try {
             TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
             TransitResult result = searcher.search(query.getTransitQuery());
             
             if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                // お気に入りを非表示
+                removeFavoriteList();
+
                 // 検索結果を表示
                 resultRenderer.render(result);
                 
