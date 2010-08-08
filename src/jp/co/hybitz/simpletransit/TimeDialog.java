@@ -67,7 +67,7 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 		layout = inflater.inflate(getLayoutId(), (ViewGroup) activity.findViewById(R.id.time_dialog_root));
 		
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle(Preferences.getText(activity, "時刻"));
+		builder.setTitle(Preferences.getText(activity, "時刻を選択"));
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		

@@ -28,7 +28,7 @@ import android.widget.TextView;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> {
+class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> implements SimpleTransitConst {
     private SimpleTransit activity;
 
     public FavoriteArrayAdapter(SimpleTransit activity, int textViewResourceId, List<SimpleTransitQuery> items) {
@@ -40,6 +40,7 @@ class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> {
     protected void updateView(View view, final SimpleTransitQuery item) {
         TextView textView = (TextView) view;
         textView.setText(item.getFromTo());
+        textView.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         textView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 activity.updateQuery(item);

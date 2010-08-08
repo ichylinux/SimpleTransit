@@ -41,5 +41,5 @@ class FavoriteListView extends ListView implements SimpleTransitConst {
     
     public SimpleTransitQuery getTransitQuery(int position) {
         return (SimpleTransitQuery) getItemAtPosition(position);
-    }
+    }    
 }

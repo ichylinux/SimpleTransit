@@ -103,6 +103,19 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
             return Color.BLACK;
         }
     }
+    
+    public static int getBackgroundResource(Context context) {
+        switch (Preferences.getColorSetting(context)) {
+        case COLOR_BLACK :
+            return R.xml.selector_background_for_black;
+        case COLOR_WHITE :
+            return R.xml.selector_background_for_white;
+        case COLOR_BEIGE :
+            return R.xml.selector_background_for_beige;
+        default :
+            return R.xml.selector_background_for_black;
+        }
+    }
 
     public static CharSequence getText(Context context, String text) {
         if (text == null) {

@@ -192,6 +192,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         updateLatestQueryHistory();
         updateFavorite();
         updatePreviousTimeAndNextTimeVisibility();
+        hideInputMethod();
     }
     
     private void updateFavorite() {
@@ -243,6 +244,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         EditText to = (EditText) findViewById(R.id.to);
         from.setOnTouchListener(new FromToDragListener(from, to));
         to.setOnTouchListener(new FromToDragListener(to, from));
+        registerForContextMenu(from);
+        registerForContextMenu(to);
         
     	TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
@@ -292,6 +295,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
             menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
             menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
+        }
+        else if (v.getId() == R.id.from || v.getId() == R.id.to) {
+            menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
         }
     }
 
