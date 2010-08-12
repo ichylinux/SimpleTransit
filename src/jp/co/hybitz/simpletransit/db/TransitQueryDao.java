@@ -18,10 +18,15 @@
 package jp.co.hybitz.simpletransit.db;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jp.co.hybitz.android.CursorEx;
 import jp.co.hybitz.googletransit.model.TimeType;
+import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.content.ContentValues;
 import android.content.Context;
@@ -54,6 +59,45 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
     
+    public List<Location> getLocations() {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            Map<String, Location> map = new HashMap<String, Location>(); 
+
+            CursorEx c = (CursorEx) db.query("transit_query",
+                    new String[]{"transit_from, transit_to, use_count"}, null, null, null, null, null);
+            while (c.moveToNext()) {
+                String[] locations = new String[]{c.getString("transit_from"), c.getString("transit_to")};
+                for (int i = 0; i < locations.length; i ++) {
+                    String location = locations[i];
+                    
+                    Location l = map.get(location);
+                    if (l == null) {
+                        l = new Location();
+                        map.put(location, l);
+                    }
+                    
+                    l.setLocation(location);
+                    l.setUseCount(l.getUseCount() + c.getInt("use_count"));
+                }
+                
+            }
+            c.close();
+
+            List<Location> ret = new ArrayList<Location>(map.values());
+            Collections.sort(ret, new Comparator<Location>() {
+                public int compare(Location l1, Location l2) {
+                    return l2.getUseCount() - l1.getUseCount(); 
+                }
+            });
+            
+            return ret;
+        }
+        finally {
+            db.close();
+        }
+    }
+
     public List<SimpleTransitQuery> getTransitQueriesByFavarite() {
         SQLiteDatabase db = getReadableDatabase();
         try {

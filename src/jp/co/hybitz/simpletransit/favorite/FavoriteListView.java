@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit;
+package jp.co.hybitz.simpletransit.favorite;
 
+import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -25,7 +26,7 @@ import android.widget.ListView;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class FavoriteListView extends ListView implements SimpleTransitConst {
+public class FavoriteListView extends ListView implements SimpleTransitConst {
 
     public FavoriteListView(Context context) {
         super(context);

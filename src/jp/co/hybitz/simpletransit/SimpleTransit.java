@@ -18,7 +18,6 @@
 package jp.co.hybitz.simpletransit;
 
 import java.net.HttpURLConnection;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +38,10 @@ import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
+import jp.co.hybitz.simpletransit.favorite.FavoriteArrayAdapter;
+import jp.co.hybitz.simpletransit.favorite.FavoriteListView;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
+import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
@@ -88,6 +90,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         AndroidExceptionHandler.bind(this, APP_ID);
         initView();
         initAction();
+        initFavorite();
     }
     
     @Override
@@ -129,10 +132,20 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
             	SimpleTransitQuery q = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
                 query.setFrom(q.getFrom());
                 query.setTo(q.getTo());
+                updateQueryView();
+            }
+            else if (resultCode == RESULT_CODE_FROM_SELECTED) {
+                Location l = (Location) data.getExtras().getSerializable(EXTRA_KEY_LOCATION);
+                query.setFrom(l.getLocation());
+                updateQueryView();
+            }
+            else if (resultCode == RESULT_CODE_TO_SELECTED) {
+                Location l = (Location) data.getExtras().getSerializable(EXTRA_KEY_LOCATION);
+                query.setTo(l.getLocation());
                 updateQueryView();
             }
         }
@@ -190,12 +203,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         maybe.setVisibility(View.INVISIBLE);
 
         updateLatestQueryHistory();
-        updateFavorite();
         updatePreviousTimeAndNextTimeVisibility();
-        hideInputMethod();
     }
     
-    private void updateFavorite() {
+    private void initFavorite() {
         List<SimpleTransitQuery> list = new TransitQueryDao(this).getTransitQueriesByFavarite();
         if (list.isEmpty()) {
             return;
@@ -203,27 +214,30 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         
         TextView summary = (TextView) findViewById(R.id.tv_summary);
         summary.setTextSize(Preferences.getTextSize(this));
-        summary.setText("お気に入り");
+        summary.setText("\nお気に入り");
         
         FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
         fab.setAdapter(new FavoriteArrayAdapter(this, R.layout.favorite_list, list));
+        fab.requestFocus();
+        hideInputMethod();
+        registerForContextMenu(fab);
     }
-    
+
     private void updateLatestQueryHistory() {
         if (!Preferences.isUseLatestQueryHistory(this)) {
             return;
         }
         
         SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
-        updateQuery(latest);
+        if (latest != null) {
+            updateQuery(latest.getFrom(), latest.getTo());
+        }
     }
     
-    void updateQuery(SimpleTransitQuery stq) {
-        if (stq != null) {
-            query.setFrom(stq.getFrom());
-            query.setTo(stq.getTo());
-            updateQueryView();
-        }
+    public void updateQuery(String from, String to) {
+        query.setFrom(from);
+        query.setTo(to);
+        updateQueryView();
     }
     
     private int getLayoutId() {
@@ -281,8 +295,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             }
         });
         
-        ListView lv = (ListView) findViewById(R.id.results);
-        registerForContextMenu(lv);
+        ListView results = (ListView) findViewById(R.id.results);
+        registerForContextMenu(results);
     }
     
     /**
@@ -298,7 +312,26 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else if (v.getId() == R.id.from || v.getId() == R.id.to) {
             menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
+//            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, Menu.FIRST, "逆経路");
+//            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
         }
+        else if (v.getId() == R.id.favorite) {
+            menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
+            menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
+            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        }
+    }
+    
+    private TransitItem getSelectedTransitItem(MenuItem menuItem) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+        ResultListView lv = (ResultListView) findViewById(R.id.results);
+        return lv.getTransitItem(info.position);
+    }
+    
+    private SimpleTransitQuery getSelectedTransitQuery(MenuItem menuItem) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+        FavoriteListView lv = (FavoriteListView) findViewById(R.id.favorite);
+        return lv.getTransitQuery(info.position);
     }
 
     /**
@@ -306,11 +339,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     public boolean onContextItemSelected(MenuItem menuItem) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
-        ResultListView lv = (ResultListView) findViewById(R.id.results);
-        TransitItem ti = lv.getTransitItem(info.position);
-
         if (menuItem.getItemId() == MENU_ITEM_COPY_TEXT) {
+            TransitItem ti = getSelectedTransitItem(menuItem);
+
             ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
             StringBuilder sb = new StringBuilder();
             sb.append(ResultRenderer.createTitleWithDate(ti.getTransitResult()));
@@ -320,15 +351,34 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_ALARM_CREATE) {
+            TransitItem ti = getSelectedTransitItem(menuItem);
+            
             AlarmSettingDialog dialog = new AlarmSettingDialog(this, ti.getTransitResult(), ti.getTransit());
             dialog.show();
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_MEMO_CREATE) {
+            TransitItem ti = getSelectedTransitItem(menuItem);
+
             SimpleTransitResult str = new SimpleTransitResult(ti.getTransitResult());
             new TransitResultDao(this).createTransitResult(str, ti.getTransit());
             ToastUtils.toast(this, "メモに保存しました。");
             return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE) {
+            SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
+            updateQuery(stq.getFrom(), stq.getTo());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE_REVERSE) {
+            SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
+            updateQuery(stq.getTo(), stq.getFrom());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_REVERSE_LOCATION) {
+            updateQuery(query.getTo(), query.getFrom());
         }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
             // 何もしない
@@ -521,15 +571,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             else if (query.getTimeType() == TimeType.ARRIVAL || query.getTimeType() == TimeType.LAST) {
                 Time t = TransitUtil.getLastArrivalTime(result);
                 if (t != null) {
-                	Time thisTime = new Time(new SimpleDateFormat("hhmm").format(result.getQueryDate()));
-
                 	Calendar c = Calendar.getInstance();
                 	c.setTime(result.getQueryDate());
                     c.set(Calendar.HOUR_OF_DAY, t.getHour());
                     c.set(Calendar.MINUTE, t.getMinute());
                     
                     // 日を跨いでる場合
-                    if (t.after(thisTime)) {
+                    if (c.getTime().after(result.getQueryDate())) {
                         c.add(Calendar.DATE, -1);
                     }
                     

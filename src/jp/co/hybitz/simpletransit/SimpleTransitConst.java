@@ -38,6 +38,7 @@ public interface SimpleTransitConst {
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";
     public static final String EXTRA_KEY_TRANSIT_QUERY = "transit_query";
+    public static final String EXTRA_KEY_LOCATION = "location";
     
     public static final int FONT_SIZE_SMALL = 1;
     public static final int FONT_SIZE_MEDIUM = 2;
@@ -54,11 +55,21 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_ALARM_CREATE = Menu.FIRST + 9;
     public static final int MENU_ITEM_CANCEL = Menu.FIRST + 10;
     public static final int MENU_ITEM_COPY_TEXT = Menu.FIRST + 11;
+    public static final int MENU_ITEM_SET_FROM = Menu.FIRST + 12;
+    public static final int MENU_ITEM_SET_TO = Menu.FIRST + 13;
+    public static final int MENU_ITEM_SET_FAVORITE = Menu.FIRST + 14;
+    public static final int MENU_ITEM_SET_FAVORITE_REVERSE = Menu.FIRST + 15;
+    public static final int MENU_ITEM_SELECT_LOCATION = Menu.FIRST + 16;
+    public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 17;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;
 
     public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
     public static final int REQUEST_CODE_VOICE_INPUT = 2;
+    
+    public static final int RESULT_CODE_ROUTE_SELECTED = 1;
+    public static final int RESULT_CODE_FROM_SELECTED = 2;
+    public static final int RESULT_CODE_TO_SELECTED = 3;
     
 }

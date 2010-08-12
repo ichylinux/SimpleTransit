@@ -26,6 +26,7 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
+import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import android.app.TabActivity;
 import android.content.Intent;
@@ -47,6 +48,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class QueryHistoryTabActivity extends TabActivity implements SimpleTransitConst {
     private static final String TAG_ALL = "all";
     private static final String TAG_FAVORITE = "favorite";
+    private static final String TAG_LOCATION = "location";
     
     private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
 
@@ -74,37 +76,41 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
         TabHost th = getTabHost();
         registerForContextMenu(th);
 
-        th.addTab(th.newTabSpec(TAG_ALL).setIndicator("検索履歴").setContent(R.id.query_history_all));
         th.addTab(th.newTabSpec(TAG_FAVORITE).setIndicator("お気に入り").setContent(R.id.query_history_favorite));
+        th.addTab(th.newTabSpec(TAG_ALL).setIndicator("検索履歴").setContent(R.id.query_history_all));
+        th.addTab(th.newTabSpec(TAG_LOCATION).setIndicator("目的地履歴").setContent(R.id.query_history_location));
         th.setCurrentTab(0);
     }
     
     private void initAction() {
-    	ListView all = (ListView) findViewById(R.id.query_history_all);
-    	all.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                QueryHistoryListItem item = (QueryHistoryListItem) parent.getItemAtPosition(position);
-                
-                Intent result = new Intent();
-                result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
-                setResult(RESULT_OK, result);
-                finish();
-            }
-        });
-    	registerForContextMenu(all);
-
-    	ListView fab = (ListView) findViewById(R.id.query_history_favorite);
+        ListView fab = (ListView) findViewById(R.id.query_history_favorite);
         fab.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 QueryHistoryListItem item = (QueryHistoryListItem) parent.getItemAtPosition(position);
                 
                 Intent result = new Intent();
                 result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
-                setResult(RESULT_OK, result);
+                setResult(RESULT_CODE_ROUTE_SELECTED, result);
                 finish();
             }
         });
         registerForContextMenu(fab);
+
+        ListView all = (ListView) findViewById(R.id.query_history_all);
+    	all.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                QueryHistoryListItem item = (QueryHistoryListItem) parent.getItemAtPosition(position);
+                
+                Intent result = new Intent();
+                result.putExtra(EXTRA_KEY_TRANSIT_QUERY, item.getQuery());
+                setResult(RESULT_CODE_ROUTE_SELECTED, result);
+                finish();
+            }
+        });
+    	registerForContextMenu(all);
+
+        ListView location = (ListView) findViewById(R.id.query_history_location);
+        registerForContextMenu(location);
     }
     
     /**
@@ -135,7 +141,15 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         if (v.getId() == R.id.query_history_all) {
-            menu.add(0, MENU_ITEM_DELETE, 0, "削除");
+            menu.setHeaderTitle(Preferences.getText(this, "履歴の編集"));
+            menu.add(0, MENU_ITEM_DELETE, 1, "削除");
+            menu.add(0, MENU_ITEM_CANCEL, 2, "キャンセル");
+        }
+        else if (v.getId() == R.id.query_history_location) {
+            menu.setHeaderTitle(Preferences.getText(this, "目的地の編集"));
+            menu.add(0, MENU_ITEM_SET_FROM, 1, "出発地に設定");
+            menu.add(0, MENU_ITEM_SET_TO, 2, "到着地に設定");
+            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
         }
     }
 
@@ -144,7 +158,10 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
      */
     @Override
     public boolean onContextItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == MENU_ITEM_DELETE) {
+        if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_DELETE) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
             
             ListView lv = (ListView) findViewById(R.id.query_history_all);
@@ -156,19 +173,47 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
             
             return true;
         }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_FROM || menuItem.getItemId() == MENU_ITEM_SET_TO) {
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+            
+            ListView lv = (ListView) findViewById(R.id.query_history_location);
+            Location item = (Location) lv.getItemAtPosition(info.position);
+
+            Intent result = new Intent();
+            result.putExtra(EXTRA_KEY_LOCATION, item);
+            setResult(getResultCode(menuItem.getItemId()), result);
+            finish();
+            
+            return true;
+        }
 
         return super.onContextItemSelected(menuItem);
     }
     
+    private int getResultCode(int menuItemId) {
+        switch (menuItemId) {
+        case MENU_ITEM_SET_FROM :
+            return RESULT_CODE_FROM_SELECTED;
+        case MENU_ITEM_SET_TO :
+            return RESULT_CODE_TO_SELECTED;
+        default :
+            throw new IllegalStateException("予期していないメニューアイテムIDです。menuItemId=" + menuItemId);
+        }
+        
+    }
+    
     public void showList() {
         ListView all = (ListView) findViewById(R.id.query_history_all);
-        all.setAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems(false)));
+        all.setAdapter(new RouteHistoryArrayAdapter(this, R.layout.query_history_route, getRoutes(false)));
 
         ListView fab = (ListView) findViewById(R.id.query_history_favorite);
-        fab.setAdapter(new QueryHistoryArrayAdapter(this, R.layout.query_history_list, getItems(true)));
+        fab.setAdapter(new RouteHistoryArrayAdapter(this, R.layout.query_history_route, getRoutes(true)));
+        
+        ListView location = (ListView) findViewById(R.id.query_history_location);
+        location.setAdapter(new LocationHistoryArrayAdapter(this, R.layout.query_history_location, getLocations()));
     }
 
-    private List<QueryHistoryListItem> getItems(boolean favariteOnly) {
+    private List<QueryHistoryListItem> getRoutes(boolean favariteOnly) {
         List<QueryHistoryListItem> ret = new ArrayList<QueryHistoryListItem>();
         
         TransitQueryDao dao = new TransitQueryDao(this);
@@ -177,6 +222,18 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
         for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
             SimpleTransitQuery query = it.next();
             ret.add(new QueryHistoryListItem(query));
+        }
+        
+        return ret;
+    }
+    
+    private List<Location> getLocations() {
+        List<Location> ret = new ArrayList<Location>();
+        
+        List<Location> list = new TransitQueryDao(this).getLocations();
+        for (Iterator<Location> it = list.iterator(); it.hasNext();) {
+            Location location = it.next();
+            ret.add(location);
         }
         
         return ret;

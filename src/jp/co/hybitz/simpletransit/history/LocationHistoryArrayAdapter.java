@@ -15,36 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit;
+package jp.co.hybitz.simpletransit.history;
 
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.Preferences;
+import jp.co.hybitz.simpletransit.model.Location;
+import android.content.Context;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> implements SimpleTransitConst {
-    private SimpleTransit activity;
+class LocationHistoryArrayAdapter extends ArrayAdapterEx<Location> {
 
-    public FavoriteArrayAdapter(SimpleTransit activity, int textViewResourceId, List<SimpleTransitQuery> items) {
-        super(activity, textViewResourceId, items);
-        this.activity = activity;
+    public LocationHistoryArrayAdapter(Context context, int textViewResourceId, List<Location> items) {
+        super(context, textViewResourceId, items);
     }
 
     @Override
-    protected void updateView(View view, final SimpleTransitQuery item) {
-        TextView textView = (TextView) view;
-        textView.setText(item.getFromTo());
-        textView.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        textView.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                activity.updateQuery(item);
-            }
-        });
+    protected void updateView(View view, Location item) {
+        TextView location = (TextView) view.findViewWithTag("location");
+        location.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        location.setText(item.getLocation());
+
+        TextView useCount = (TextView) view.findViewWithTag("use_count");
+        useCount.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        useCount.setText("利用回数： " + item.getUseCount() + "回");
     }
 }

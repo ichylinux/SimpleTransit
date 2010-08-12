@@ -23,6 +23,10 @@
                 android:id="@+id/query_history_favorite"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"/>
+            <ListView 
+                android:id="@+id/query_history_location"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"/>
         </FrameLayout>
     </LinearLayout>
 </TabHost>
