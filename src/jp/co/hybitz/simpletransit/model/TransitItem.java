@@ -44,33 +44,38 @@ public class TransitItem {
 
     @Override
     public String toString() {
-        String prefectureWithParen = transitResult.getPrefecture() == null ? "" : "（" + transitResult.getPrefecture() + "）";
-        
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(transit.getDurationAndFare());
-        if (transit.getTransferCount() > 0) {
-            sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
-        }
-        sb.append("\n");
-
-        for (int i = 0; i < transit.getDetails().size(); i ++) {
-            TransitDetail detail = transit.getDetails().get(i);
+        try {
+            String prefectureWithParen = transitResult.getPrefecture() == null ? "" : "（" + transitResult.getPrefecture() + "）";
             
-            sb.append(detail.getRoute());
-
-            if (!detail.isWalking()) {
-                sb.append("\n");
-                sb.append(detail.getDeparture().getTime()).append("発　");
-                sb.append(detail.getDeparture().getPlace().replaceAll(prefectureWithParen, "")).append("\n");
-                sb.append(detail.getArrival().getTime()).append("着　");
-                sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
+            StringBuilder sb = new StringBuilder();
+    
+            sb.append(transit.getDurationAndFare());
+            if (transit.getTransferCount() > 0) {
+                sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
             }
-
-            if (i < transit.getDetails().size() - 1) {
-                sb.append("\n");
+            sb.append("\n");
+    
+            for (int i = 0; i < transit.getDetails().size(); i ++) {
+                TransitDetail detail = transit.getDetails().get(i);
+                
+                sb.append(detail.getRoute());
+    
+                if (!detail.isWalking()) {
+                    sb.append("\n");
+                    sb.append(detail.getDeparture().getTime()).append("発　");
+                    sb.append(detail.getDeparture().getPlace().replaceAll(prefectureWithParen, "")).append("\n");
+                    sb.append(detail.getArrival().getTime()).append("着　");
+                    sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
+                }
+    
+                if (i < transit.getDetails().size() - 1) {
+                    sb.append("\n");
+                }
             }
+            return sb.toString();
         }
-        return sb.toString();
+        catch (RuntimeException e) {
+            throw new IllegalStateException(transitResult.getFrom() + " => " + transitResult.getTo(), e);
+        }
     }
 }

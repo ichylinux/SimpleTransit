@@ -83,6 +83,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private TimeTypeAndDate currentTime;
     private TimeTypeAndDate previousTime;
     private TimeTypeAndDate nextTime;
+    private View searchDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +132,24 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
+        if (requestCode == REQUEST_CODE_PREFERENCE) {
+            if (findViewById(R.id.search_details) == null) {
+                CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
+                CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
+                express.setChecked(Preferences.isUseExpress(this));
+                airline.setChecked(Preferences.isUseAirline(this));
+                
+                if (Preferences.isFullInput(this)) {
+                    addSearchDetails();
+                }
+            }
+            else {
+                if (!Preferences.isFullInput(this)) {
+                    removeSearchDetails();
+                }
+            }
+        }
+        else if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
             	SimpleTransitQuery q = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
                 query.setFrom(q.getFrom());
@@ -198,11 +216,16 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         timeView.setTextSize(16);
 
         query.setTimeType(TimeType.DEPARTURE);
+        
+        CheckBox express = (CheckBox) findViewById(R.id.express);
+        express.setTextColor(Preferences.getTextColor(this));
+        CheckBox airline = (CheckBox) findViewById(R.id.airline);
+        airline.setTextColor(Preferences.getTextColor(this));
 
         Button maybe = (Button) findViewById(R.id.maybe);
         maybe.setVisibility(View.INVISIBLE);
 
-        updateLatestQueryHistory();
+        initQuery();
         updatePreviousTimeAndNextTimeVisibility();
     }
     
@@ -223,14 +246,22 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         registerForContextMenu(fab);
     }
 
-    private void updateLatestQueryHistory() {
-        if (!Preferences.isUseLatestQueryHistory(this)) {
-            return;
+    private void initQuery() {
+        if (Preferences.isUseLatestQueryHistory(this)) {
+            SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
+            if (latest != null) {
+                updateQuery(latest.getFrom(), latest.getTo());
+            }
         }
         
-        SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
-        if (latest != null) {
-            updateQuery(latest.getFrom(), latest.getTo());
+        CheckBox express = (CheckBox) findViewById(R.id.express);
+        express.setChecked(Preferences.isUseExpress(this));
+        CheckBox airline = (CheckBox) findViewById(R.id.airline);
+        airline.setChecked(Preferences.isUseAirline(this));
+        
+        searchDetails = findViewById(R.id.search_details);
+        if (!Preferences.isFullInput(this)) {
+            removeSearchDetails();
         }
     }
     
@@ -440,8 +471,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             }
         }
 
-        query.setUseExpress(Preferences.isUseExpress(this));
-        query.setUseAirline(Preferences.isUseAirline(this));
+        CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
+        CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
+        query.setUseExpress(express.isChecked());
+        query.setUseAirline(airline.isChecked());
     }
     
     private void searchPrevious() {
@@ -497,6 +530,34 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
+    private void removeSearchDetails() {
+        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) { 
+            LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
+            view.removeView(searchDetails);
+        }
+        else if (Preferences.getOrientation(this) == ORIENTATION_LANDSCAPE) {
+            LinearLayout view = (LinearLayout) findViewById(R.id.layout_search);
+            view.removeView(searchDetails);
+        }
+        else {
+            throw new IllegalStateException("予期していないレイアウトの向きです。" + Preferences.getOrientation(this));
+        }
+    }
+    
+    private void addSearchDetails() {
+        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) { 
+            LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
+            view.addView(searchDetails, 1);
+        }
+        else if (Preferences.getOrientation(this) == ORIENTATION_LANDSCAPE) {
+            LinearLayout view = (LinearLayout) findViewById(R.id.layout_search);
+            view.addView(searchDetails, 4);
+        }
+        else {
+            throw new IllegalStateException("予期していないレイアウトの向きです。" + Preferences.getOrientation(this));
+        }
+    }
+
     private int search() {
         if (!validateQuery()) {
             return 0;

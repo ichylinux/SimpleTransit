@@ -24,22 +24,26 @@
             android:entries="@array/color_entries"
             android:entryValues="@array/color_values" />
   </PreferenceCategory>
-  <PreferenceCategory android:title="検索条件詳細">
+  <PreferenceCategory android:title="検索条件の設定">
+    <CheckBoxPreference
+      android:key="full_input"
+      android:title="検索条件フル表示"
+      android:summary="指定可能なすべての検索条件を初期表示する場合はチェックを入れます。"/>
     <CheckBoxPreference
       android:key="use_latest_query_history"
-      android:title="前回の検索条件を使用"
-      android:summary="前回の検索条件を初期値として使用する場合はチェックを入れます。"/>
+      android:title="前回の検索条件"
+      android:summary="前回の出発地と到着地を初期値として使用する場合はチェックを入れます。"/>
     <CheckBoxPreference
       android:key="use_express"
-      android:title="有料特急を使用"
+      android:title="有料特急"
       android:summary="有料特急を使用する場合はチェックを入れます。"/>
     <CheckBoxPreference
       android:key="use_airline"
-      android:title="飛行機を使用"
+      android:title="飛行機"
       android:summary="飛行機を使用する場合はチェックを入れます。"/>
     <CheckBoxPreference
       android:key="use_maybe"
-      android:title="もしかして機能を使用"
+      android:title="もしかして機能"
       android:summary="もしかして機能を使用する場合はチェックを入れます。"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="アラームの設定">

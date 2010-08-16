@@ -44,7 +44,7 @@ public class OptionMenuHandler implements SimpleTransitConst {
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
         switch (item.getItemId()) {
         case MENU_ITEM_PREFERENCES :
-            activity.startActivity(new Intent(activity, Preferences.class));
+            activity.startActivityForResult(new Intent(activity, Preferences.class), REQUEST_CODE_PREFERENCE);
             return true;
         case MENU_ITEM_QUERY_HISTORY :
             showQueryHistoryList();

@@ -65,8 +65,9 @@ public interface SimpleTransitConst {
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;
 
-    public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 1;
-    public static final int REQUEST_CODE_VOICE_INPUT = 2;
+    public static final int REQUEST_CODE_PREFERENCE = 1;
+    public static final int REQUEST_CODE_SELECT_TRANSIT_QUERY = 2;
+    public static final int REQUEST_CODE_VOICE_INPUT = 3;
     
     public static final int RESULT_CODE_ROUTE_SELECTED = 1;
     public static final int RESULT_CODE_FROM_SELECTED = 2;

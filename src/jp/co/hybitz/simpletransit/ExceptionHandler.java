@@ -53,5 +53,4 @@ public class ExceptionHandler {
             throw new IllegalStateException(e.getMessage() + "\n[\n" + e.getHtml() + "\n]", e);
         }
     }
-    
 }

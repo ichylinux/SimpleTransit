@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_above="@+id/layout_search_buttons" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 検索条件 -->
-    <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <LinearLayout android:id="@+id/layout_search"
+        android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        
         <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_from"/>
             <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
@@ -25,6 +27,14 @@
         <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
 	        <CheckBox android:text="@+string/checkbox_first" android:layout_marginLeft="30sp" android:id="@+id/first" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	        <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="10sp" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout android:id="@+id/search_details"
+            android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            
+            <CheckBox android:id="@+id/express" android:text="@+string/checkbox_express" 
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <CheckBox android:id="@+id/airline" android:text="@+string/checkbox_airline" 
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
         </LinearLayout>
         <Button android:id="@+id/search" android:layout_height="wrap_content" android:text="@+string/button_search"
             android:minWidth="120sp" android:layout_width="wrap_content" android:layout_marginLeft="30sp"/>
