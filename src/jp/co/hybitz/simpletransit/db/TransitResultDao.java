@@ -23,6 +23,7 @@ import java.util.List;
 
 import jp.co.hybitz.android.CursorEx;
 import jp.co.hybitz.android.DateUtils;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeAndPlace;
 import jp.co.hybitz.googletransit.model.TimeType;
@@ -30,7 +31,6 @@ import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
-import jp.co.hybitz.util.StringUtils;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

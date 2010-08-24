@@ -19,11 +19,11 @@ package jp.co.hybitz.simpletransit;
 
 import java.io.IOException;
 
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.csv.CsvException;
 import jp.co.hybitz.csv.CsvReader;
 import jp.co.hybitz.csv.CsvWriter;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
-import jp.co.hybitz.util.StringUtils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;

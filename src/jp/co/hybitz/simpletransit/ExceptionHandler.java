@@ -20,7 +20,7 @@ package jp.co.hybitz.simpletransit;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import jp.co.hybitz.googletransit.TransitSearchException;
+import jp.co.hybitz.common.HttpSearchException;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import android.content.Context;
 import android.util.Log;
@@ -35,7 +35,7 @@ public class ExceptionHandler {
         this.context = context;
     }
 
-    public void handleException(TransitSearchException e) {
+    public void handleException(HttpSearchException e) {
         Log.e("SimpleTransit", e.getMessage(), e);
         
         if (e.getCause() instanceof UnknownHostException) {

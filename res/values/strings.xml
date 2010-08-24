@@ -16,9 +16,9 @@
     <string name="error_alarm_sound_required">アラームとして使用する曲を設定画面で指定してください。</string>
     <string name="error_from_required">出発地を入力してください。</string>
     <string name="error_to_required">到着地を入力してください。</string>
-    <string name="error_operation_timed_out">Googleとの通信がタイムアウトしました。</string>
-    <string name="error_socket_exception">Googleと通信ができませんでした。</string>
-    <string name="error_unknow_host_exception">Googleに接続できませんでした。</string>
+    <string name="error_operation_timed_out">通信がタイムアウトしました。</string>
+    <string name="error_socket_exception">通信ができませんでした。</string>
+    <string name="error_unknow_host_exception">サービスに接続できませんでした。</string>
     <string name="label_from">出発</string>
     <string name="label_time">時刻</string>
     <string name="label_to">到着</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="jp.co.hybitz.simpletransit"
-      android:versionName="2.14" android:versionCode="91">
+      android:versionName="3.1" android:versionCode="101">
     <application android:icon="@drawable/icon" android:label="@string/app_name">
         <activity android:name=".SimpleTransit"
                   android:label="@string/app_name">
@@ -24,6 +24,9 @@
         <!-- メモ -->
         <activity android:name=".memo.MemoListActivity"/>
         
+        <!-- 運行状況 -->
+        <activity android:name=".traveldelay.TravelDelayListActivity"/>
+
         <uses-library android:name="android.test.runner" />
     </application>
     

@@ -18,6 +18,8 @@
 package jp.co.hybitz.simpletransit.memo;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +30,9 @@ import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -82,8 +86,9 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, MENU_ITEM_PREFERENCES, 1, "設定");
-        menu.add(0, MENU_ITEM_QUIT, 2, "終了");
+        menu.add(0, MENU_ITEM_DELETE_OLD_MEMO, 1, "古いメモを削除");
+        menu.add(0, MENU_ITEM_PREFERENCES, 2, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 3, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -92,13 +97,52 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+        switch (item.getItemId()) {
+        case MENU_ITEM_DELETE_OLD_MEMO :
+            deleteOldMemo();
             return true;
         }
-        
-        return super.onMenuItemSelected(featureId, item);
+
+        return optionMenuHandler.onMenuItemSelected(featureId, item);
     }
 
+    private void deleteOldMemo() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(Preferences.getText(this, "昨日までのメモを全て削除します。よろしいですか？"));
+        builder.setPositiveButton("はい", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Calendar c = Calendar.getInstance();
+                c.set(Calendar.HOUR_OF_DAY, 0);
+                c.set(Calendar.MINUTE, 0);
+                c.set(Calendar.SECOND, 0);
+                c.set(Calendar.MILLISECOND, 0);
+                Date today = c.getTime();
+                
+                TransitResultDao dao = new TransitResultDao(MemoListActivity.this);
+                for (int i = getListView().getCount(); i > 0; i --) {
+                    MemoListItem item = (MemoListItem) getListView().getItemAtPosition(i-1);
+                    Date date = item.getResult().getQueryDate();
+                    if (date == null) {
+                        continue;
+                    }
+                    
+                    if (date.after(today)) {
+                        continue;
+                    }
+                    
+                    dao.deleteTransitResult(item.getResult().getId());
+                }
+                
+                showList();
+            }
+        });
+        builder.setNegativeButton("いいえ", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.show();
+    }
+    
     /**
      * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
      */
@@ -121,6 +165,7 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
 
     private void showList() {
         setListAdapter(new MemoArrayAdapter(this, R.layout.memo_list, getItems()));
+        setTitle(getTitle() + "　メモ（" + getListAdapter().getCount() + "件）");
     }
 
     private List<MemoListItem> getItems() {

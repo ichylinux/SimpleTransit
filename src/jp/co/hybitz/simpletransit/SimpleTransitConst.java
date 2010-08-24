@@ -35,10 +35,11 @@ public interface SimpleTransitConst {
     public static final int COLOR_BEIGE = 3;
 
     public static final String EXTRA_KEY_ALARM_ONLY = "alarmOnly";
+    public static final String EXTRA_KEY_LOCATION = "location";
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";
     public static final String EXTRA_KEY_TRANSIT_QUERY = "transit_query";
-    public static final String EXTRA_KEY_LOCATION = "location";
+    public static final String EXTRA_KEY_TRAVEL_DELAY_RESULT = "travel_delay_result";
     
     public static final int FONT_SIZE_SMALL = 1;
     public static final int FONT_SIZE_MEDIUM = 2;
@@ -61,6 +62,8 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_SET_FAVORITE_REVERSE = Menu.FIRST + 15;
     public static final int MENU_ITEM_SELECT_LOCATION = Menu.FIRST + 16;
     public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 17;
+    public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 18;
+    public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

@@ -7,9 +7,8 @@
     <TextView android:tag="title" android:textSize="18sp" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
     <RelativeLayout android:tag="bottom_layout"
         android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_alignParentBottom="true">
-        
-        <TextView android:tag="query_date" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true"/>
-        <TextView android:tag="alarm_at" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
+
+        <TextView android:tag="information" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp" android:layout_marginRight="8sp"/>
     </RelativeLayout>
 </LinearLayout>
-

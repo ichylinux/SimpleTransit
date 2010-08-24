@@ -15,15 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
  */
-package jp.co.hybitz.simpletransit.memo;
+package jp.co.hybitz.simpletransit.traveldelay;
 
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.Preferences;
-import jp.co.hybitz.simpletransit.ResultRenderer;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
-import jp.co.hybitz.simpletransit.alarm.AlarmUtils;
 import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
@@ -31,34 +29,23 @@ import android.widget.TextView;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class MemoArrayAdapter extends ArrayAdapterEx<MemoListItem> implements SimpleTransitConst {
+class TravelDelayArrayAdapter extends ArrayAdapterEx<TravelDelayItem> implements SimpleTransitConst {
 
-    public MemoArrayAdapter(Context context, int textViewResourceId, List<MemoListItem> items) {
+    public TravelDelayArrayAdapter(Context context, int textViewResourceId, List<TravelDelayItem> items) {
         super(context, textViewResourceId, items);
     }
 
     @Override
-    protected void updateView(View view, MemoListItem item) {
+    protected void updateView(View view, TravelDelayItem item) {
         TextView title = (TextView) view.findViewWithTag("title");
-        title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult(), false));
+        title.setText(item.getTitle());
         title.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
 
         View bottomLayout = view.findViewWithTag("bottom_layout");
         bottomLayout.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         
-        TextView queryDate = (TextView) view.findViewWithTag("query_date");
-        queryDate.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        if (item.getResult().getQueryDate() != null) {
-            queryDate.setText(ResultRenderer.createDate(item.getResult().getTransitResult()));
-        }
-        else {
-            queryDate.setText(ResultRenderer.createTime(item.getResult().getTransitResult()));
-        }
-
-        if (item.getResult().getAlarmStatus() == ALARM_STATUS_BEING_SET) {
-            TextView alarmAt = (TextView) view.findViewWithTag("alarm_at");
-            alarmAt.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-            alarmAt.setText("アラーム：" + AlarmUtils.toDateTimeString(item.getResult().getAlarmAt()));
-        }
+        TextView condition = (TextView) view.findViewWithTag("information");
+        condition.setText(item.getInformation());
+        condition.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
     }
 }

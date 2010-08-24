@@ -23,7 +23,9 @@ import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
 import jp.co.hybitz.simpletransit.memo.MemoListActivity;
+import jp.co.hybitz.simpletransit.traveldelay.TravelDelayTask;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
+import jp.co.hybitz.traveldelay.model.TravelDelayQuery;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -58,12 +60,20 @@ public class OptionMenuHandler implements SimpleTransitConst {
         case MENU_ITEM_VOICE :
             voiceInput();
             return true;
+        case MENU_ITEM_TRAVEL_DELAY :
+            showTravelDelay();
+            return true;
         case MENU_ITEM_QUIT :
             activity.finish();
             return true;
         }
         
         return false;
+    }
+    
+    private void showTravelDelay() {
+        TravelDelayQuery query = new TravelDelayQuery();
+        new TravelDelayTask(activity).execute(query);
     }
     
     private void voiceInput() {

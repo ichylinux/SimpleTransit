@@ -23,8 +23,9 @@ import java.util.Date;
 import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
-import jp.co.hybitz.googletransit.Platform;
-import jp.co.hybitz.googletransit.TransitSearchException;
+import jp.co.hybitz.common.HttpSearchException;
+import jp.co.hybitz.common.Platform;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.googletransit.TransitSearcher;
 import jp.co.hybitz.googletransit.TransitSearcherFactory;
 import jp.co.hybitz.googletransit.TransitUtil;
@@ -48,7 +49,6 @@ import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
-import jp.co.hybitz.util.StringUtils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -107,11 +107,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
-        menu.add(0, MENU_ITEM_VOICE, 2, "音声入力");
+        menu.add(0, MENU_ITEM_MEMO, 2, "メモ");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
-        menu.add(0, MENU_ITEM_MEMO, 4, "メモ");
+        menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行状況");
         menu.add(0, MENU_ITEM_PREFERENCES, 5, "設定");
-        menu.add(0, MENU_ITEM_QUIT, 6, "終了");
+        menu.add(0, MENU_ITEM_VOICE, 6, "音声入力");
+        menu.add(0, MENU_ITEM_QUIT, 7, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -587,7 +588,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             hideInputMethod();
             return result.getTransitCount();
             
-        } catch (TransitSearchException e) {
+        } catch (HttpSearchException e) {
             exceptionHandler.handleException(e);
         }
         
