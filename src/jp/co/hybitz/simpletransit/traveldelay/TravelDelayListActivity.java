@@ -46,6 +46,7 @@ public class TravelDelayListActivity extends ListActivity implements SimpleTrans
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     	Preferences.initTheme(this);
+        setTitle(getTitle() + "　運行情報");
         adapter = new TravelDelayArrayAdapter(this, R.layout.travel_delay_list, new ArrayList<TravelDelayItem>());
         registerForContextMenu(getListView());
         showList();

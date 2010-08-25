@@ -22,16 +22,18 @@ import java.util.List;
 import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class ResultArrayAdapter extends ArrayAdapterEx<TransitItem> {
+class ResultArrayAdapter extends ArrayAdapterEx<TransitItem> implements SimpleTransitConst {
 
-    public ResultArrayAdapter(Context context, int textViewResourceId, List<TransitItem> items) {
-        super(context, textViewResourceId, items);
+    public ResultArrayAdapter(Context context, List<TransitItem> items) {
+        super(context, R.layout.result_list, items);
     }
 
     @Override
@@ -39,5 +41,12 @@ class ResultArrayAdapter extends ArrayAdapterEx<TransitItem> {
         TextView textView = (TextView) view;
         textView.setTextSize(Preferences.getTextSize(getContext()));
         textView.setText(item.toString());
+    }
+    
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
+        menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
+        menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
+        menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
     }
 }

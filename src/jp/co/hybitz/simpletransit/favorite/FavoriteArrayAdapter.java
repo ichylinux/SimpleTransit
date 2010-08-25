@@ -21,6 +21,7 @@ import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.Preferences;
+import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransit;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
@@ -34,16 +35,16 @@ import android.widget.TextView;
 public class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> implements SimpleTransitConst {
     private SimpleTransit activity;
 
-    public FavoriteArrayAdapter(SimpleTransit activity, int textViewResourceId, List<SimpleTransitQuery> items) {
-        super(activity, textViewResourceId, items);
+    public FavoriteArrayAdapter(SimpleTransit activity, List<SimpleTransitQuery> items) {
+        super(activity, R.layout.favorite_list, items);
         this.activity = activity;
     }
 
     @Override
     protected void updateView(View view, final SimpleTransitQuery item) {
         TextView textView = (TextView) view;
-        textView.setText(item.getFromTo());
         textView.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        textView.setText(item.getFromTo());
         textView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 activity.updateQuery(item.getFrom(), item.getTo());

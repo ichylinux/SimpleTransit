@@ -19,15 +19,11 @@ package jp.co.hybitz.simpletransit;
 
 import java.util.Calendar;
 
+import jp.co.hybitz.android.DialogBase;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.RadioButton;
@@ -37,19 +33,15 @@ import android.widget.TimePicker;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TimeDialog implements DialogInterface, SimpleTransitConst {
-    private Activity activity;
-	private AlertDialog dialog;
-	private View layout;
+public class TimeDialog extends DialogBase implements SimpleTransitConst {
 	private TimeTypeAndDate timeTypeAndDate;
 	
-	public TimeDialog(Activity activity) {
-	    this.activity = activity;
-		dialog = createInnerDialog();
+	public TimeDialog(Context context) {
+	    super(context);
 	}
 	
-	private int getLayoutId() {
-	    int orientation = Preferences.getOrientation(activity);
+	protected int getLayoutId() {
+	    int orientation = Preferences.getOrientation(getContext());
 	    if (orientation == ORIENTATION_PORTRAIT) {
 	        return R.layout.time_dialog_portrait;
 	    }
@@ -61,25 +53,18 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 	    }
 	}
 
-	private AlertDialog createInnerDialog() {
-		Context context = activity.getApplicationContext();
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-		layout = inflater.inflate(getLayoutId(), (ViewGroup) activity.findViewById(R.id.time_dialog_root));
+	protected void onCreate() {
+		setTitle(Preferences.getText(getContext(), "時刻を選択"));
 		
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-		builder.setTitle(Preferences.getText(activity, "時刻を選択"));
-		builder.setView(layout);
-		AlertDialog dialog = builder.create();
-		
-		final RadioGroup timeTypeRadioGroup = (RadioGroup) layout.findViewById(R.id.time_type);
+		final RadioGroup timeTypeRadioGroup = (RadioGroup) findViewById(R.id.time_type);
 		timeTypeRadioGroup.check(R.id.departure);
 		
-		final DatePicker dp = (DatePicker) layout.findViewById(R.id.date_select);
+		final DatePicker dp = (DatePicker) findViewById(R.id.date_select);
 
-		final TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
+		final TimePicker tp = (TimePicker) findViewById(R.id.time_select);
 		tp.setIs24HourView(true);
 		
-		Button ok = (Button) layout.findViewById(R.id.time_ok);
+		Button ok = (Button) findViewById(R.id.time_ok);
         ok.setOnClickListener(new View.OnClickListener() {
         	public void onClick(View v) {
         		TimeType tt;
@@ -104,7 +89,7 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 			}
 		});
 
-		Button clear = (Button) layout.findViewById(R.id.time_clear);
+		Button clear = (Button) findViewById(R.id.time_clear);
         clear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				timeTypeAndDate = null;
@@ -112,14 +97,13 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 			}
 		});
 
-		Button cancel = (Button) layout.findViewById(R.id.time_cancel);
+		Button cancel = (Button) findViewById(R.id.time_cancel);
         cancel.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				cancel();
 			}
 		});
 		
-		return dialog;
 	}
 	
 	public TimeTypeAndDate getTimeTypeAndDate() {
@@ -140,12 +124,12 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 	}
 	
 	private void updateTimeView(TimeTypeAndDate timeTypeAndDate) {
-	    RadioButton dep = (RadioButton) layout.findViewById(R.id.departure);
-	    dep.setTextColor(Preferences.getTextColor(activity));
-        RadioButton arr = (RadioButton) layout.findViewById(R.id.arrival);
-        arr.setTextColor(Preferences.getTextColor(activity));
+	    RadioButton dep = (RadioButton) findViewById(R.id.departure);
+	    dep.setTextColor(Preferences.getTextColor(getContext()));
+        RadioButton arr = (RadioButton) findViewById(R.id.arrival);
+        arr.setTextColor(Preferences.getTextColor(getContext()));
 	    
-	    RadioGroup rg = (RadioGroup) layout.findViewById(R.id.time_type);
+	    RadioGroup rg = (RadioGroup) findViewById(R.id.time_type);
 	    if (timeTypeAndDate.getTimeType() == TimeType.DEPARTURE) {
 	        rg.check(R.id.departure);
 	    }
@@ -153,27 +137,12 @@ public class TimeDialog implements DialogInterface, SimpleTransitConst {
 	        rg.check(R.id.arrival);
 	    }
 
-	    DatePicker dp = (DatePicker) layout.findViewById(R.id.date_select);
+	    DatePicker dp = (DatePicker) findViewById(R.id.date_select);
 	    dp.updateDate(timeTypeAndDate.getYear(), timeTypeAndDate.getMonth(), timeTypeAndDate.getDay());
 
-	    TimePicker tp = (TimePicker) layout.findViewById(R.id.time_select);
+	    TimePicker tp = (TimePicker) findViewById(R.id.time_select);
         tp.setCurrentHour(timeTypeAndDate.getHour());
         tp.setCurrentMinute(timeTypeAndDate.getMinute());
 	}
 	
-	public void show() {
-		dialog.show();
-	}
-
-	public void cancel() {
-		dialog.cancel();
-	}
-
-	public void dismiss() {
-		dialog.dismiss();
-	}
-	
-	public void setOnDismissListener(OnDismissListener listener) {
-		dialog.setOnDismissListener(listener);
-	}
 }

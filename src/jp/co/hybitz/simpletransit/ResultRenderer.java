@@ -27,6 +27,7 @@ import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import android.app.Activity;
+import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -52,13 +53,13 @@ public class ResultRenderer implements SimpleTransitConst {
         summary.setTextSize(Preferences.getTextSize(activity));
         summary.setText(createSummary(result));
 
-        ResultListView results = (ResultListView) activity.findViewById(R.id.results);
+        ListView results = (ListView) activity.findViewById(R.id.results);
         List<TransitItem> items = new ArrayList<TransitItem>();
         for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
             Transit transit = it.next();
             items.add(new TransitItem(result, transit));
         }
-        results.setAdapter(new ResultArrayAdapter(activity, R.layout.result_list, items));
+        results.setAdapter(new ResultArrayAdapter(activity, items));
     }
     
     public static String createTitle(TransitResult result, boolean withTime) {

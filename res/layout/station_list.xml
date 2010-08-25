@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:longClickable="true">
+
+    <TextView android:tag="name" android:textSize="18sp" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+    <RelativeLayout android:tag="bottom_layout"
+        android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_alignParentBottom="true">
+        
+        <TextView android:tag="line" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true" android:layout_marginLeft="20sp"/>
+        <TextView android:tag="direction_and_distance" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+</LinearLayout>
+

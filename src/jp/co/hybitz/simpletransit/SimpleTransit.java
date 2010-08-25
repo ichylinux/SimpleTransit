@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
+import jp.co.hybitz.android.ContextMenuAware;
 import jp.co.hybitz.common.HttpSearchException;
 import jp.co.hybitz.common.Platform;
 import jp.co.hybitz.common.StringUtils;
@@ -47,8 +48,10 @@ import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
 import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.station.SearchNearStationsTask;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
+import jp.co.hybitz.stationapi.model.Station;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -109,18 +112,48 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
         menu.add(0, MENU_ITEM_MEMO, 2, "メモ");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
-        menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行状況");
+        menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行情報");
         menu.add(0, MENU_ITEM_PREFERENCES, 5, "設定");
         menu.add(0, MENU_ITEM_VOICE, 6, "音声入力");
+        menu.add(0, MENU_ITEM_SEARCH_NEAR_STATIONS, 7, "最寄駅検索");
         menu.add(0, MENU_ITEM_QUIT, 7, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
+     * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        if (v.getId() == R.id.results) {
+            ListView results = (ListView) v;
+            if (results.getAdapter() instanceof ContextMenuAware) {
+                ((ContextMenuAware)results.getAdapter()).onCreateContextMenu(menu, v, menuInfo);
+            }
+        }
+        else if (v.getId() == R.id.from || v.getId() == R.id.to) {
+            menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, Menu.FIRST, "逆経路");
+//            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
+        }
+        else if (v.getId() == R.id.favorite) {
+            menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
+            menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
+            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        }
+    }
+    
+    /**
      * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
      */
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        switch (item.getItemId()) {
+        case MENU_ITEM_SEARCH_NEAR_STATIONS :
+            searchNearStations();
+            return true;
+        }
+        
         if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
             return true;
         }
@@ -128,27 +161,32 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         return super.onMenuItemSelected(featureId, item);
     }
     
+    private void searchNearStations() {
+        new SearchNearStationsTask(this).execute();
+    }
+    
+
     /**
      * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PREFERENCE) {
-            if (findViewById(R.id.search_details) == null) {
-                CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
-                CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
-                express.setChecked(Preferences.isUseExpress(this));
-                airline.setChecked(Preferences.isUseAirline(this));
-                
-                if (Preferences.isFullInput(this)) {
-                    addSearchDetails();
+                if (findViewById(R.id.search_details) == null) {
+                    CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
+                    CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
+                    express.setChecked(Preferences.isUseExpress(this));
+                    airline.setChecked(Preferences.isUseAirline(this));
+                    
+                    if (Preferences.isFullInput(this)) {
+                        addSearchDetails();
+                    }
                 }
-            }
-            else {
-                if (!Preferences.isFullInput(this)) {
-                    removeSearchDetails();
+                else {
+                    if (!Preferences.isFullInput(this)) {
+                        removeSearchDetails();
+                    }
                 }
-            }
         }
         else if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
@@ -241,7 +279,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         summary.setText("\nお気に入り");
         
         FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
-        fab.setAdapter(new FavoriteArrayAdapter(this, R.layout.favorite_list, list));
+        fab.setAdapter(new FavoriteArrayAdapter(this, list));
         fab.requestFocus();
         hideInputMethod();
         registerForContextMenu(fab);
@@ -272,6 +310,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         updateQueryView();
     }
     
+    public void updateFrom(String from) {
+        query.setFrom(from);
+        updateQueryView();
+    }
+
     private int getLayoutId() {
         int orientation = Preferences.getOrientation(this);
         if (orientation == ORIENTATION_PORTRAIT) {
@@ -331,39 +374,22 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         registerForContextMenu(results);
     }
     
-    /**
-     * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
-     */
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        if (v.getId() == R.id.results) {
-            menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
-            menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
-            menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
-            menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
-        }
-        else if (v.getId() == R.id.from || v.getId() == R.id.to) {
-            menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
-//            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, Menu.FIRST, "逆経路");
-//            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
-        }
-        else if (v.getId() == R.id.favorite) {
-            menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
-            menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
-            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
-        }
-    }
-    
     private TransitItem getSelectedTransitItem(MenuItem menuItem) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
-        ResultListView lv = (ResultListView) findViewById(R.id.results);
-        return lv.getTransitItem(info.position);
+        ListView lv = (ListView) findViewById(R.id.results);
+        return (TransitItem) lv.getItemAtPosition(info.position);
     }
     
     private SimpleTransitQuery getSelectedTransitQuery(MenuItem menuItem) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
         FavoriteListView lv = (FavoriteListView) findViewById(R.id.favorite);
         return lv.getTransitQuery(info.position);
+    }
+
+    private Station getSelectedStation(MenuItem menuItem) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+        ListView lv = (ListView) findViewById(R.id.results);
+        return (Station) lv.getItemAtPosition(info.position);
     }
 
     /**
@@ -411,6 +437,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else if (menuItem.getItemId() == MENU_ITEM_REVERSE_LOCATION) {
             updateQuery(query.getTo(), query.getFrom());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_FROM) {
+            Station s = getSelectedStation(menuItem);
+            updateFrom(s.getName());
+            return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
             // 何もしない
@@ -523,7 +555,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         return true;
     }
     
-    private void removeFavoriteList() {
+    public void removeFavoriteList() {
         FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
         if (fab != null) {
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
@@ -548,11 +580,15 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private void addSearchDetails() {
         if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) { 
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
-            view.addView(searchDetails, 1);
+            if (view != null) {
+                view.addView(searchDetails, 1);
+            }
         }
         else if (Preferences.getOrientation(this) == ORIENTATION_LANDSCAPE) {
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_search);
-            view.addView(searchDetails, 4);
+            if (view != null) {
+                view.addView(searchDetails, 4);
+            }
         }
         else {
             throw new IllegalStateException("予期していないレイアウトの向きです。" + Preferences.getOrientation(this));
@@ -670,5 +706,5 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private void showResponseCode(int responseCode) {
         DialogUtils.showMessage(this, "連絡", "Googleの応答が「" + responseCode + "」でした。。", "しかたないね");
     }
-    
+
 }

@@ -59,7 +59,7 @@
 	            android:longClickable="true"/>
 
             <!-- 検索結果 -->
-            <jp.co.hybitz.simpletransit.ResultListView
+            <ListView
                 android:id="@+id/results"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"

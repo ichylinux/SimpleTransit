@@ -20,15 +20,17 @@ package jp.co.hybitz.android;
 import java.util.List;
 
 import android.content.Context;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public abstract class ArrayAdapterEx<T> extends ArrayAdapter<T> {
+public abstract class ArrayAdapterEx<T> extends ArrayAdapter<T> implements ContextMenuAware {
 
     private LayoutInflater inflater;
     private int textViewResourceId;
@@ -57,6 +59,12 @@ public abstract class ArrayAdapterEx<T> extends ArrayAdapter<T> {
         updateView(view, getItem(position));
 
         return view;
+    }
+    
+    /**
+     * @see jp.co.hybitz.android.ContextMenuAware#onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo)
+     */
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
     }
     
     protected abstract void updateView(View view, T item);

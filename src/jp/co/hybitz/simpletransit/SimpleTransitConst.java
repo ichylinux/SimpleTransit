@@ -25,6 +25,7 @@ import android.view.Menu;
 public interface SimpleTransitConst {
     public static final String APP = "SimpleTransit";
     public static final String APP_ID = "cecab237-aa57-46cd-ad26-3cc3a6135da4";
+    public static final String APP_API_KEY = "0jbW9fq6qul_4jEtbJm72tJ-7msqQkOqqv47ZlQ";
 
     public static final int ALARM_STATUS_NONE = 0;
     public static final int ALARM_STATUS_BEING_SET = 1;
@@ -64,6 +65,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 17;
     public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 18;
     public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
+    public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 20;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

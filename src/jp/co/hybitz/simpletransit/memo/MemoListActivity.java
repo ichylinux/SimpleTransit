@@ -103,7 +103,11 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
             return true;
         }
 
-        return optionMenuHandler.onMenuItemSelected(featureId, item);
+        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+            return true;
+        }
+        
+        return super.onMenuItemSelected(featureId, item);
     }
 
     private void deleteOldMemo() {
