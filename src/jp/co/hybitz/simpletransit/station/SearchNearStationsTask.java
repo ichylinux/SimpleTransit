@@ -18,7 +18,11 @@
 package jp.co.hybitz.simpletransit.station;
 
 import jp.co.hybitz.android.WebSearchTask;
+import jp.co.hybitz.common.GeoLocation;
 import jp.co.hybitz.common.HttpSearchException;
+import jp.co.hybitz.rgeocode.RGeocodeSearcherFactory;
+import jp.co.hybitz.rgeocode.model.RGeocodeQuery;
+import jp.co.hybitz.rgeocode.model.RGeocodeResult;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransit;
@@ -85,6 +89,7 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
         builder.setCancelable(false);
         builder.setPositiveButton("はい", new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                showProgressDialog();
                 gpsFinished = true;
             }
         });
@@ -102,19 +107,33 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
     protected StationApiResult search(Void in) throws HttpSearchException {
         while (!gpsFinished) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 break;
             }
         }
         
         if (location != null) {
+            GeoLocation gl = new GeoLocation();
+            gl.setLatitude(location.getLatitude());
+            gl.setLongitude(location.getLongitude());
+
             StationApiQuery query = new StationApiQuery();
-            query.setLatitude(location.getLatitude());
-            query.setLongitude(location.getLongitude());
+            query.setGeoLocation(gl);
             StationApiResult result = StationApiSearcherFactory.createSearcher().search(query);
             
             if (result.isOK()) {
+                try {
+                    RGeocodeQuery rquery = new RGeocodeQuery();
+                    rquery.setGeoLocation(gl);
+                    RGeocodeResult rresult = RGeocodeSearcherFactory.createSearcher().search(rquery);
+                    if (result.isOK()) {
+                        result.setRGeocodeResult(rresult);
+                    }
+                }
+                catch (HttpSearchException e) {
+                }
+                
                 return result;
             }
         }
@@ -136,7 +155,12 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
                 SimpleTransit st = (SimpleTransit) getActivity();
                 st.hideInputMethod();
                 TextView summary = (TextView) st.findViewById(R.id.tv_summary);
-                summary.setText("最寄駅");
+                if (result.getRGeocodeResult() != null) {
+                    summary.setText(result.getRGeocodeResult().toString() + "付近の最寄駅");
+                }
+                else {
+                    summary.setText("最寄駅");
+                }
                 ListView results = (ListView) st.findViewById(R.id.results);
                 results.setAdapter(new StationArrayAdapter(st, result.getStations()));
             }
