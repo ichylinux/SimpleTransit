@@ -53,22 +53,32 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
     @Override
     protected void onPreExecute() {
         if (useProgressDialog()) {
-            dialog = new ProgressDialog(activity);
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            dialog.setIndeterminate(true);
-            dialog.setTitle(Preferences.getText(activity, "通信中"));
-            dialog.setMessage(Preferences.getText(activity, "しばらくお待ち下さい"));
-            
-            if (isCancelable()) {
-                dialog.setCancelable(isCancelable());
-                dialog.setOnCancelListener(new OnCancelListener() {
-                    public void onCancel(DialogInterface dialog) {
-                        cancel(true);
-                    }
-                });
-            }
-            
-            dialog.show();
+            showProgressDialog();
+        }
+    }
+    
+    protected void showProgressDialog() {
+        dialog = new ProgressDialog(activity);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setIndeterminate(true);
+        dialog.setTitle(Preferences.getText(activity, "通信中"));
+        dialog.setMessage(Preferences.getText(activity, "しばらくお待ち下さい"));
+        
+        if (isCancelable()) {
+            dialog.setCancelable(isCancelable());
+            dialog.setOnCancelListener(new OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
+        }
+        
+        dialog.show();
+    }
+    
+    protected void hideProgressDialog() {
+        if (dialog != null) {
+            dialog.dismiss();
         }
     }
     
@@ -86,13 +96,14 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
     
     @Override
     protected void onPostExecute(OUT result) {
-        dialog.dismiss();
         
         if (e != null) {
+            hideProgressDialog();
             new ExceptionHandler(activity).handleException(e);
         }
         else {
             updateView(result);
+            hideProgressDialog();
         }
     }
 

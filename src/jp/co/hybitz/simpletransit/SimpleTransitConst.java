@@ -26,6 +26,7 @@ public interface SimpleTransitConst {
     public static final String APP = "SimpleTransit";
     public static final String APP_ID = "cecab237-aa57-46cd-ad26-3cc3a6135da4";
     public static final String APP_API_KEY = "0jbW9fq6qul_4jEtbJm72tJ-7msqQkOqqv47ZlQ";
+    public static final String APP_NAME = "簡単乗り換え検索";
 
     public static final int ALARM_STATUS_NONE = 0;
     public static final int ALARM_STATUS_BEING_SET = 1;

@@ -27,7 +27,11 @@ import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.stationapi.StationApiSearcherFactory;
 import jp.co.hybitz.stationapi.model.StationApiQuery;
 import jp.co.hybitz.stationapi.model.StationApiResult;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -46,9 +50,52 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
 
     @Override
     protected void onPreExecute() {
-        super.onPreExecute();
         locationManager = (LocationManager)getActivity().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        if (locationManager == null) {
+            DialogUtils.showMessage(getActivity(), Preferences.getText(getActivity(), "GPS機能を利用できません。"));
+            cancel(true);
+            return;
+        }
+        
+        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location != null) {
+            askReuse();
+        }
+        else {
+            startGps();
+        }
+        
+    }
+    
+    private void startGps() {
+        showProgressDialog();
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setSpeedRequired(true);
+        String provider = locationManager.getBestProvider(criteria, true);
+        if (provider == null) {
+            provider = LocationManager.GPS_PROVIDER;
+        }
+        locationManager.requestLocationUpdates(provider, 0, 0, this);
+    }
+    
+    private void askReuse() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(Preferences.getText(getActivity(), "前回のGPS情報を利用しますか？"));
+        builder.setCancelable(false);
+        builder.setPositiveButton("はい", new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                gpsFinished = true;
+            }
+        });
+        builder.setNegativeButton("いいえ", new OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                startGps();
+            }
+        });
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
@@ -87,9 +134,9 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
             }
             else {
                 SimpleTransit st = (SimpleTransit) getActivity();
+                st.hideInputMethod();
                 TextView summary = (TextView) st.findViewById(R.id.tv_summary);
                 summary.setText("最寄駅");
-                st.removeFavoriteList();
                 ListView results = (ListView) st.findViewById(R.id.results);
                 results.setAdapter(new StationArrayAdapter(st, result.getStations()));
             }

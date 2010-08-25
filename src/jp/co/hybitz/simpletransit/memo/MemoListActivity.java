@@ -169,7 +169,7 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
 
     private void showList() {
         setListAdapter(new MemoArrayAdapter(this, R.layout.memo_list, getItems()));
-        setTitle(getTitle() + "　メモ（" + getListAdapter().getCount() + "件）");
+        setTitle(APP_NAME + "　メモ（" + getListAdapter().getCount() + "件）");
     }
 
     private List<MemoListItem> getItems() {

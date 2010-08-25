@@ -25,7 +25,9 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransit;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import android.view.ContextMenu;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
@@ -50,5 +52,11 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> imp
                 activity.updateQuery(item.getFrom(), item.getTo());
             }
         });
+    }
+    
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
+        menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
+        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
     }
 }

@@ -17,31 +17,24 @@
  */
 package jp.co.hybitz.simpletransit;
 
-import java.net.HttpURLConnection;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.ContextMenuAware;
-import jp.co.hybitz.common.HttpSearchException;
-import jp.co.hybitz.common.Platform;
 import jp.co.hybitz.common.StringUtils;
-import jp.co.hybitz.googletransit.TransitSearcher;
-import jp.co.hybitz.googletransit.TransitSearcherFactory;
 import jp.co.hybitz.googletransit.TransitUtil;
 import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
 import jp.co.hybitz.simpletransit.action.FromToDragListener;
-import jp.co.hybitz.simpletransit.action.MaybeListener;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.favorite.FavoriteArrayAdapter;
-import jp.co.hybitz.simpletransit.favorite.FavoriteListView;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
 import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
@@ -79,9 +72,7 @@ import android.widget.TextView;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends Activity implements SimpleTransitConst {
-    private ExceptionHandler exceptionHandler = new ExceptionHandler(this);
     private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
-    private ResultRenderer resultRenderer = new ResultRenderer(this);
     private SimpleTransitQuery query = new SimpleTransitQuery();
     private TimeTypeAndDate currentTime;
     private TimeTypeAndDate previousTime;
@@ -135,11 +126,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, Menu.FIRST, "逆経路");
 //            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
-        }
-        else if (v.getId() == R.id.favorite) {
-            menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
-            menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
-            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
         }
     }
     
@@ -278,7 +264,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         summary.setTextSize(Preferences.getTextSize(this));
         summary.setText("\nお気に入り");
         
-        FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
+        ListView fab = (ListView) findViewById(R.id.results);
         fab.setAdapter(new FavoriteArrayAdapter(this, list));
         fab.requestFocus();
         hideInputMethod();
@@ -382,8 +368,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     private SimpleTransitQuery getSelectedTransitQuery(MenuItem menuItem) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
-        FavoriteListView lv = (FavoriteListView) findViewById(R.id.favorite);
-        return lv.getTransitQuery(info.position);
+        ListView lv = (ListView) findViewById(R.id.results);
+        return (SimpleTransitQuery) lv.getItemAtPosition(info.position);
     }
 
     private Station getSelectedStation(MenuItem menuItem) {
@@ -513,26 +499,26 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private void searchPrevious() {
         query.setTimeType(previousTime.getTimeType());
         query.setDate(previousTime.getDate());
-        search();
+        search(false);
     }
     
     private void searchNext() {
         query.setTimeType(nextTime.getTimeType());
         query.setDate(nextTime.getDate());
-        search();
+        search(false);
     }
     
     private void searchNew() {
         updateQuery();
-        int count = search();
+        search(true);
         
-        // 検索条件を履歴として保存
-        if (count > 0) {
-            new Thread(new QueryHistoryWorker(this, query)).start();
-        }
     }
     
-    private void hideInputMethod() {
+    public void saveHistory() {
+        new Thread(new QueryHistoryWorker(this, query)).start();
+    }
+    
+    public void hideInputMethod() {
         InputMethodManager ime = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         EditText from = (EditText) findViewById(R.id.from);
@@ -553,14 +539,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         
         return true;
-    }
-    
-    public void removeFavoriteList() {
-        FavoriteListView fab = (FavoriteListView) findViewById(R.id.favorite);
-        if (fab != null) {
-            LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
-            view.removeView(fab);
-        }
     }
     
     private void removeSearchDetails() {
@@ -595,55 +573,15 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
 
-    private int search() {
+    private void search(boolean isNew) {
         if (!validateQuery()) {
-            return 0;
+            return;
         }
         
-        try {
-            TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-            TransitResult result = searcher.search(query.getTransitQuery());
-            
-            if (result.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // お気に入りを非表示
-                removeFavoriteList();
-
-                // 検索結果を表示
-                resultRenderer.render(result);
-                
-                // 前の時刻と次の時刻を取得
-                updatePreviousTimeAndNextTime(result);
-                
-                // もしかしてを更新
-                updateMaybe(result);
-            }
-            else {
-                showResponseCode(result.getResponseCode());
-            }
-            
-            hideInputMethod();
-            return result.getTransitCount();
-            
-        } catch (HttpSearchException e) {
-            exceptionHandler.handleException(e);
-        }
-        
-        return 0;
+        new TransitSearchTask(this, isNew).execute(query.getTransitQuery());
     }
     
-    private void updateMaybe(TransitResult result) {
-        Button maybe = (Button) findViewById(R.id.maybe);
-
-        if (Preferences.isUseMaybe(this) && result.getMaybe() != null) {
-            maybe.setVisibility(View.VISIBLE);
-            maybe.setOnClickListener(new MaybeListener(this, result.getMaybe()));
-        }
-        else {
-            maybe.setVisibility(View.INVISIBLE);
-        }
-    }
-    
-    private void updatePreviousTimeAndNextTime(TransitResult result) {
+    public void updatePreviousTimeAndNextTime(TransitResult result) {
         nextTime = null;
         previousTime = null;
         
@@ -703,8 +641,4 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         next.setVisibility(nextTime != null ? View.VISIBLE : View.INVISIBLE);
     }
     
-    private void showResponseCode(int responseCode) {
-        DialogUtils.showMessage(this, "連絡", "Googleの応答が「" + responseCode + "」でした。。", "しかたないね");
-    }
-
 }
