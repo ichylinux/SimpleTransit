@@ -79,4 +79,7 @@ public interface SimpleTransitConst {
     public static final int RESULT_CODE_FROM_SELECTED = 2;
     public static final int RESULT_CODE_TO_SELECTED = 3;
     
+    public static final int SEARCH_TYPE_NEW = 1;
+    public static final int SEARCH_TYPE_NEXT = 2;
+    public static final int SEARCH_TYPE_PREVIOUS = 3;
 }

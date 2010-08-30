@@ -30,11 +30,11 @@ import android.view.View;
 import android.widget.Button;
 
 class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> implements SimpleTransitConst {
-    private boolean isNew;
-
-    public TransitSearchTask(SimpleTransit activity, boolean isNew) {
+    private int searchType;
+    
+    public TransitSearchTask(SimpleTransit activity, int searchType) {
         super(activity);
-        this.isNew = isNew;
+        this.searchType = searchType;
     }
     
     protected SimpleTransit getActivity() {
@@ -56,18 +56,22 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
             new ResultRenderer(getActivity()).render(out);
             
             // 前の時刻と次の時刻を取得
-            getActivity().updatePreviousTimeAndNextTime(out);
+            getActivity().updatePreviousTimeAndNextTime(searchType, out);
             
             // もしかしてを更新
             updateMaybe(out);
             
-            if (isNew && out.getTransitCount() > 0) {
+            if (isNew() && out.getTransitCount() > 0) {
                 getActivity().saveHistory();
             }
         }
         else {
             showResponseCode(out.getResponseCode());
         }
+    }
+    
+    private boolean isNew() {
+        return searchType == SEARCH_TYPE_NEW;
     }
     
     private void showResponseCode(int responseCode) {

@@ -77,8 +77,15 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
     }
     
     protected void hideProgressDialog() {
-        if (dialog != null) {
-            dialog.dismiss();
+        if (isCancelled()) {
+            return;
+        }
+        
+        synchronized (dialog) {
+            if (dialog != null) {
+                dialog.dismiss();
+                dialog = null;
+            }
         }
     }
     
@@ -109,6 +116,7 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
 
     @Override
     protected void onCancelled() {
+        hideProgressDialog();
     }
 
 }

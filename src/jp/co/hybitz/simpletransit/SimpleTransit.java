@@ -152,7 +152,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private void searchNearStations() {
         new SearchNearStationsTask(this).execute();
     }
-    
 
     /**
      * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
@@ -496,34 +495,22 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
     
     private void searchPrevious() {
-        TimeTypeAndDate ttd = previousTime.pop();
-        if (currentTime != null) {
-            nextTime.push(currentTime);
-        }
-        currentTime = ttd;
-
-        query.setTimeType(currentTime.getTimeType());
-        query.setDate(currentTime.getDate());
-        search(false);
+        TimeTypeAndDate ttd = previousTime.peek();
+        query.setTimeType(ttd.getTimeType());
+        query.setDate(ttd.getDate());
+        search(SEARCH_TYPE_PREVIOUS);
     }
     
     private void searchNext() {
-        TimeTypeAndDate ttd = nextTime.pop();
-        if (currentTime != null) {
-            previousTime.push(currentTime);
-        }
-        currentTime = ttd;
-
-        query.setTimeType(currentTime.getTimeType());
-        query.setDate(currentTime.getDate());
-        search(false);
+        TimeTypeAndDate ttd = nextTime.peek();
+        query.setTimeType(ttd.getTimeType());
+        query.setDate(ttd.getDate());
+        search(SEARCH_TYPE_NEXT);
     }
     
     private void searchNew() {
-        nextTime.clear();
-        previousTime.clear();
         updateQuery();
-        search(true);
+        search(SEARCH_TYPE_NEW);
     }
     
     public void saveHistory() {
@@ -585,54 +572,115 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
 
-    private void search(boolean isNew) {
+    private void search(int searchType) {
         if (!validateQuery()) {
             return;
         }
         
-        new TransitSearchTask(this, isNew).execute(query.getTransitQuery());
+        new TransitSearchTask(this, searchType).execute(query.getTransitQuery());
     }
     
-    public void updatePreviousTimeAndNextTime(TransitResult result) {
+    public void updatePreviousTimeAndNextTime(int searchType, TransitResult result) {
         if (result == null || result.getTransitCount() == 0) {
             updatePreviousTimeAndNextTimeVisibility();
             return;
         }
         
-        if (query.getTimeType() == TimeType.DEPARTURE || query.getTimeType() == TimeType.FIRST) {
-            Time t = TransitUtil.getFirstDepartureTime(result);
-            if (t != null) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(result.getQueryDate());
-                c.set(Calendar.HOUR_OF_DAY, t.getHour());
-                c.set(Calendar.MINUTE, t.getMinute());
-                
-                // 日を跨いでる場合
-                if (c.getTime().before(result.getQueryDate())) {
-                    c.add(Calendar.DATE, 1);
+        if (searchType == SEARCH_TYPE_NEW) {
+            nextTime.clear();
+            previousTime.clear();
+        }
+        else if (searchType == SEARCH_TYPE_NEXT) {
+            if (currentTime != null) {
+                previousTime.push(currentTime);
+            }
+            TimeTypeAndDate ttd = nextTime.pop();
+            currentTime = ttd;
+        }
+        else if (searchType == SEARCH_TYPE_PREVIOUS) {
+            if (currentTime != null) {
+                nextTime.push(currentTime);
+            }
+            TimeTypeAndDate ttd = previousTime.pop();
+            currentTime = ttd;
+        }
+        
+        if (result.getTimeType() == TimeType.DEPARTURE || result.getTimeType() == TimeType.FIRST) {
+            if (nextTime.isEmpty()) {
+                Time firstDepartureTime = TransitUtil.getFirstDepartureTime(result);
+                if (firstDepartureTime != null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, firstDepartureTime.getHour());
+                    c.set(Calendar.MINUTE, firstDepartureTime.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().before(result.getQueryDate())) {
+                        c.add(Calendar.DATE, 1);
+                    }
+    
+                    // 1分後に出発する乗換を検索
+                    c.add(Calendar.MINUTE, 1);
+                    nextTime.push(new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime()));
                 }
-
-                // 1分後に出発する乗換を検索
-                c.add(Calendar.MINUTE, 1);
-                nextTime.push(new TimeTypeAndDate(TimeType.DEPARTURE, c.getTime()));
+            }
+            
+            if (previousTime.isEmpty()) {
+                Time firstArrivalTime = TransitUtil.getFirstArrivalTime(result);
+                if (firstArrivalTime != null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, firstArrivalTime.getHour());
+                    c.set(Calendar.MINUTE, firstArrivalTime.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().before(result.getQueryDate())) {
+                        c.add(Calendar.DATE, 1);
+                    }
+                    
+                    // 1分前に到着する乗換を基点に検索
+                    c.add(Calendar.MINUTE, -1);
+                    previousTime.push(new TimeTypeAndDate(TimeType.PREVIOUS_DEPARTURE, c.getTime()));
+                }
             }
         }
-        else if (query.getTimeType() == TimeType.ARRIVAL || query.getTimeType() == TimeType.LAST) {
-            Time t = TransitUtil.getLastArrivalTime(result);
-            if (t != null) {
-                Calendar c = Calendar.getInstance();
-                c.setTime(result.getQueryDate());
-                c.set(Calendar.HOUR_OF_DAY, t.getHour());
-                c.set(Calendar.MINUTE, t.getMinute());
-                
-                // 日を跨いでる場合
-                if (c.getTime().after(result.getQueryDate())) {
-                    c.add(Calendar.DATE, -1);
+        else if (result.getTimeType() == TimeType.ARRIVAL || result.getTimeType() == TimeType.LAST) {
+            if (nextTime.isEmpty()) {
+                Time lastDepartureTime = TransitUtil.getLastDepartureTime(result);
+                if (lastDepartureTime != null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, lastDepartureTime.getHour());
+                    c.set(Calendar.MINUTE, lastDepartureTime.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().after(result.getQueryDate())) {
+                        c.add(Calendar.DATE, -1);
+                    }
+    
+                    // 1分後に出発する乗換を基点に検索
+                    c.add(Calendar.MINUTE, 1);
+                    nextTime.push(new TimeTypeAndDate(TimeType.NEXT_ARRIVAL, c.getTime()));
                 }
-                
-                // 1分前に到着する乗換を検索
-                c.add(Calendar.MINUTE, -1);
-                previousTime.push(new TimeTypeAndDate(TimeType.ARRIVAL, c.getTime()));
+            }
+
+            if (previousTime.isEmpty()) {
+                Time lastArrivalTime = TransitUtil.getLastArrivalTime(result);
+                if (lastArrivalTime != null) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(result.getQueryDate());
+                    c.set(Calendar.HOUR_OF_DAY, lastArrivalTime.getHour());
+                    c.set(Calendar.MINUTE, lastArrivalTime.getMinute());
+                    
+                    // 日を跨いでる場合
+                    if (c.getTime().after(result.getQueryDate())) {
+                        c.add(Calendar.DATE, -1);
+                    }
+                    
+                    // 1分前に到着する乗換を検索
+                    c.add(Calendar.MINUTE, -1);
+                    previousTime.push(new TimeTypeAndDate(TimeType.ARRIVAL, c.getTime()));
+                }
             }
         }
         
