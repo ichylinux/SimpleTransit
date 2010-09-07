@@ -67,6 +67,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 /**
@@ -106,7 +107,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         menu.add(0, MENU_ITEM_MEMO, 2, "メモ");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
         menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行情報");
-        menu.add(0, MENU_ITEM_TIME_TABLE, 5, "時刻表");
+        menu.add(0, MENU_ITEM_TIME_TABLE, 5, "駅・時刻表");
         menu.add(0, MENU_ITEM_VOICE, 6, "音声入力");
         menu.add(0, MENU_ITEM_SEARCH_NEAR_STATIONS, 7, "最寄駅検索");
         menu.add(0, MENU_ITEM_PREFERENCES, 8, "設定");
@@ -165,6 +166,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
                     CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
                     express.setChecked(Preferences.isUseExpress(this));
                     airline.setChecked(Preferences.isUseAirline(this));
+                    initSort();
                     
                     if (Preferences.isFullInput(this)) {
                         addSearchDetails();
@@ -287,8 +289,25 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         airline.setChecked(Preferences.isUseAirline(this));
         
         searchDetails = (LinearLayout) findViewById(R.id.search_details);
+        
+        initSort();
+        
         if (!Preferences.isFullInput(this)) {
             removeSearchDetails();
+        }
+    }
+    
+    private void initSort() {
+        Spinner sort = (Spinner) searchDetails.findViewById(R.id.sort);
+        String prefferedSort = Preferences.getSort(this);
+        if ("time".equals(prefferedSort)) {
+            sort.setSelection(0);
+        }
+        else if ("fare".equals(prefferedSort)) {
+            sort.setSelection(1);
+        }
+        else if ("num".equals(prefferedSort)) {
+            sort.setSelection(2);
         }
     }
     
@@ -503,6 +522,17 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
         query.setUseExpress(express.isChecked());
         query.setUseAirline(airline.isChecked());
+        
+        Spinner sort = (Spinner) searchDetails.findViewById(R.id.sort);
+        if (sort.getSelectedItemPosition() == 0) {
+            query.setSort("time");
+        }
+        else if (sort.getSelectedItemPosition() == 1) {
+            query.setSort("fare");
+        }
+        else if (sort.getSelectedItemPosition() == 2) {
+            query.setSort("num");
+        }
     }
     
     private void searchPrevious() {

@@ -137,4 +137,12 @@ public class SimpleTransitQuery implements Serializable {
         return getFrom() + " ～ " + getTo();
     }
 
+    public String getSort() {
+        return transitQuery.getSort();
+    }
+
+    public void setSort(String sort) {
+        transitQuery.setSort(sort);
+    }
+
 }
