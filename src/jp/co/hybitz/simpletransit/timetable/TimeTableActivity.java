@@ -37,31 +37,52 @@ import jp.co.hybitz.timetable.model.Line;
 import jp.co.hybitz.timetable.model.Prefecture;
 import jp.co.hybitz.timetable.model.Station;
 import jp.co.hybitz.timetable.model.TimeTableQuery;
-import android.app.ListActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class TimeTableListActivity extends ListActivity implements SimpleTransitConst {
+public class TimeTableActivity extends Activity implements SimpleTransitConst {
     private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
-    private TimeTableArrayAdapter adapter;
     private ParentBackItem backItem;
     private TimeTableResultEx result;
+    private TextView title;
+    private ListView list;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    	Preferences.initTheme(this);
-        setTitle(getTitle() + "　Yahoo時刻表");
-        registerForContextMenu(getListView());
-        result = (TimeTableResultEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE_RESULT);
+        initView();
+        initAction();
         showAreas();
+    }
+    
+    private void initView() {
+        Preferences.initTheme(this);
+        setContentView(R.layout.time_table);
+        setTitle(getTitle() + "　Yahoo時刻表");
+        result = (TimeTableResultEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE_RESULT);
+        title = (TextView) findViewById(R.id.time_table_title);
+        list = (ListView) findViewById(R.id.time_table_list);
+    }
+    
+    private void initAction() {
+        list.setOnItemClickListener(new OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TimeTableItem item = (TimeTableItem) parent.getItemAtPosition(position);
+                updateList(item);
+            }
+        });
+        registerForContextMenu(list);
     }
     
     @Override
@@ -119,10 +140,7 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
         }
     }
     
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        TimeTableItem item = (TimeTableItem) l.getItemAtPosition(position);
-        
+    private void updateList(TimeTableItem item) {
         if (item instanceof ParentBackItem) {
             handleBack(item);
         }
@@ -198,7 +216,7 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
     }
     
     public void showAreas() {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = null;
 
         for (AreaEx a : result.getAreas()) {
@@ -206,11 +224,12 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.add(item);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, "地域"));
+        list.setAdapter(adapter);
     }
 
     public void showPrefectures(AreaEx a) {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem();
 
         for (int i = 0; i < a.getPrefectures().size(); i ++) {
@@ -219,11 +238,12 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.insert(item, i);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, a.getName()));
+        list.setAdapter(adapter);
     }
     
     public void showLines(AreaEx a, PrefectureEx p) {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a);
 
         for (int i = 0; i < p.getLines().size(); i ++) {
@@ -232,11 +252,12 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.insert(item, i);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, p.getName()));
+        list.setAdapter(adapter);
     }
     
     public void showStations(AreaEx a, PrefectureEx p, LineEx l) {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p);
 
         for (int i = 0; i < l.getStations().size(); i ++) {
@@ -245,11 +266,12 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.insert(item, i);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName()));
+        list.setAdapter(adapter);
     }
     
     public void showTimeTables(AreaEx a, PrefectureEx p, LineEx l, StationEx s) {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p, l);
 
         for (int i = 0; i < s.getTimeTables().size(); i ++) {
@@ -258,11 +280,12 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.insert(item, i);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName()));
+        list.setAdapter(adapter);
     }
     
     private void showTimeLines(AreaEx a, PrefectureEx p, LineEx l, StationEx s, TimeTableEx tt) {
-        adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p, l, s);
 
         for (int i = 0; i < tt.getTimeLines().size(); i ++) {
@@ -271,6 +294,7 @@ public class TimeTableListActivity extends ListActivity implements SimpleTransit
             adapter.insert(item, i);
         }
 
-        setListAdapter(adapter);
+        title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
+        list.setAdapter(adapter);
     }
 }

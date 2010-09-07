@@ -78,13 +78,13 @@ public class TimeTableTask extends WebSearchTask<TimeTableQuery, TimeTableResult
                 // 時刻表アクティビティ開始
                 TimeTableResultEx resultEx = new TimeTableResultEx();
                 resultEx.setAreas(dao.getAreas());
-                Intent intent = new Intent(getActivity(), TimeTableListActivity.class);
+                Intent intent = new Intent(getActivity(), TimeTableActivity.class);
                 intent.putExtra(EXTRA_KEY_TIME_TABLE_RESULT, resultEx);
                 getActivity().startActivity(intent);
                 
                 return null;
             }
-            else if (getActivity() instanceof TimeTableListActivity) {
+            else if (getActivity() instanceof TimeTableActivity) {
                 return result;
             }
         }
@@ -99,7 +99,7 @@ public class TimeTableTask extends WebSearchTask<TimeTableQuery, TimeTableResult
         }
         
         TimeTableResultDao dao = new TimeTableResultDao(getActivity());
-        TimeTableListActivity ttla = (TimeTableListActivity) getActivity();
+        TimeTableActivity ttla = (TimeTableActivity) getActivity();
         Area a = out.getAreas().get(0);
         Prefecture p = a.getPrefectures().get(0);
         

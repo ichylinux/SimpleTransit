@@ -55,9 +55,11 @@ public class TravelDelayListActivity extends ListActivity implements SimpleTrans
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         TravelDelayItem item = (TravelDelayItem) l.getItemAtPosition(position);
-        TravelDelayQuery query = new TravelDelayQuery();
-        query.setCategory(item.getCategory());
-        new TravelDelayTask(this).execute(query);
+        if (item.getCategory() != null) {
+            TravelDelayQuery query = new TravelDelayQuery();
+            query.setCategory(item.getCategory());
+            new TravelDelayTask(this).execute(query);
+        }
     }
     
     /**

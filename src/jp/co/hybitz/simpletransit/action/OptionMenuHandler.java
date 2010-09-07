@@ -26,7 +26,7 @@ import jp.co.hybitz.simpletransit.db.TimeTableResultDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
 import jp.co.hybitz.simpletransit.memo.MemoListActivity;
-import jp.co.hybitz.simpletransit.timetable.TimeTableListActivity;
+import jp.co.hybitz.simpletransit.timetable.TimeTableActivity;
 import jp.co.hybitz.simpletransit.timetable.TimeTableTask;
 import jp.co.hybitz.simpletransit.timetable.model.AreaEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableResultEx;
@@ -97,7 +97,7 @@ public class OptionMenuHandler implements SimpleTransitConst {
         else {
             TimeTableResultEx result = new TimeTableResultEx();
             result.setAreas(areas);
-            Intent intent = new Intent(activity, TimeTableListActivity.class);
+            Intent intent = new Intent(activity, TimeTableActivity.class);
             intent.putExtra(EXTRA_KEY_TIME_TABLE_RESULT, result);
             activity.startActivity(intent);
         }
