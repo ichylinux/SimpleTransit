@@ -93,7 +93,7 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
                 gpsFinished = true;
             }
         });
-        builder.setNegativeButton("いいえ", new OnClickListener() {
+        builder.setNegativeButton("再確認", new OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 startGps();
             }

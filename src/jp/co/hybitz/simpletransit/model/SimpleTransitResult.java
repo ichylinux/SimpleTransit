@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import jp.co.hybitz.googletransit.model.Time;
+import jp.co.hybitz.common.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitResult;

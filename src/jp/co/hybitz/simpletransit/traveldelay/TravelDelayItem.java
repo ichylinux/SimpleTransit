@@ -6,7 +6,7 @@ import java.util.Iterator;
 import jp.co.hybitz.traveldelay.model.Category;
 import jp.co.hybitz.traveldelay.model.TravelDelay;
 
-public class TravelDelayItem implements Serializable {
+class TravelDelayItem implements Serializable {
     private Category category;
     private TravelDelay delay;
 

@@ -109,6 +109,11 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         }
     }
     
+    public static String getSort(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getString("sort", "time");
+    }
+
     public static int getBackgroundResource(Context context) {
         switch (Preferences.getColorSetting(context)) {
         case COLOR_BLACK :

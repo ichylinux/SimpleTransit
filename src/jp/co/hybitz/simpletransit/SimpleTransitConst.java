@@ -17,6 +17,8 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import jp.co.hybitz.timetable.model.TimeTableResult;
+import jp.co.hybitz.traveldelay.model.TravelDelayResult;
 import android.view.Menu;
 
 /**
@@ -41,7 +43,8 @@ public interface SimpleTransitConst {
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";
     public static final String EXTRA_KEY_TRANSIT_QUERY = "transit_query";
-    public static final String EXTRA_KEY_TRAVEL_DELAY_RESULT = "travel_delay_result";
+    public static final String EXTRA_KEY_TRAVEL_DELAY_RESULT = TravelDelayResult.class.getName();
+    public static final String EXTRA_KEY_TIME_TABLE_RESULT = TimeTableResult.class.getName();
     
     public static final int FONT_SIZE_SMALL = 1;
     public static final int FONT_SIZE_MEDIUM = 2;
@@ -67,6 +70,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 18;
     public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
     public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 20;
+    public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 21;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

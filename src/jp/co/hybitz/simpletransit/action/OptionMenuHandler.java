@@ -17,14 +17,22 @@
  */
 package jp.co.hybitz.simpletransit.action;
 
+import java.util.List;
+
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
+import jp.co.hybitz.simpletransit.db.TimeTableResultDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
 import jp.co.hybitz.simpletransit.memo.MemoListActivity;
+import jp.co.hybitz.simpletransit.timetable.TimeTableListActivity;
+import jp.co.hybitz.simpletransit.timetable.TimeTableTask;
+import jp.co.hybitz.simpletransit.timetable.model.AreaEx;
+import jp.co.hybitz.simpletransit.timetable.model.TimeTableResultEx;
 import jp.co.hybitz.simpletransit.traveldelay.TravelDelayTask;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
+import jp.co.hybitz.timetable.model.TimeTableQuery;
 import jp.co.hybitz.traveldelay.model.TravelDelayQuery;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -63,6 +71,9 @@ public class OptionMenuHandler implements SimpleTransitConst {
         case MENU_ITEM_TRAVEL_DELAY :
             showTravelDelay();
             return true;
+        case MENU_ITEM_TIME_TABLE :
+            showTimeTable();
+            return true;
         case MENU_ITEM_QUIT :
             activity.finish();
             return true;
@@ -76,6 +87,23 @@ public class OptionMenuHandler implements SimpleTransitConst {
         new TravelDelayTask(activity).execute(query);
     }
     
+    private void showTimeTable() {
+        TimeTableResultDao dao = new TimeTableResultDao(activity);
+        List<AreaEx> areas = dao.getAreas();
+        if (areas.isEmpty()) {
+            TimeTableQuery query = new TimeTableQuery();
+            new TimeTableTask(activity).execute(query);
+        }
+        else {
+            TimeTableResultEx result = new TimeTableResultEx();
+            result.setAreas(areas);
+            Intent intent = new Intent(activity, TimeTableListActivity.class);
+            intent.putExtra(EXTRA_KEY_TIME_TABLE_RESULT, result);
+            activity.startActivity(intent);
+        }
+        
+    }
+
     private void voiceInput() {
         try {
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);

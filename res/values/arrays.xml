@@ -28,4 +28,19 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="sort_entries">
+        <item>早い順</item>
+        <item>安い順</item>
+        <item>乗り換えの少ない順</item>
+    </string-array>
+    <string-array name="sort_entries_short">
+        <item>早い順</item>
+        <item>安い順</item>
+        <item>楽な順</item>
+    </string-array>
+    <string-array name="sort_values">
+        <item>time</item>
+        <item>fare</item>
+        <item>num</item>
+    </string-array>
 </resources>

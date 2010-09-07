@@ -68,6 +68,7 @@ class StationArrayAdapter extends ArrayAdapterEx<Station> implements SimpleTrans
     
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         menu.add(0, MENU_ITEM_SET_FROM, 1, "出発地に設定");
-        menu.add(0, MENU_ITEM_CANCEL, 2, "キャンセル");
+        menu.add(0, MENU_ITEM_SET_TO, 2, "到着地に設定");
+        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
     }
 }

@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 7;
+    private static final int DB_VERSION = 11;
 
     /**
      * コンストラクタ
@@ -40,14 +40,29 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        if (db.isReadOnly()) {
+            db = getWritableDatabase();
+        }
+
         createTableTransitQuery(db);
         createTableTransitResult(db);
         createTableTransit(db);
         createTableTransitDetail(db);
+        createTableArea(db);
+        createTablePrefecture(db);
+        createTableLine(db);
+        createTableStation(db);
+        createTableTimeTable(db);
+        createTableTimeLine(db);
+        createTableTransitTime(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (db.isReadOnly()) {
+            db = getWritableDatabase();
+        }
+        
         switch (oldVersion) {
         case 1 :
             upgradeFrom1To2(db);
@@ -61,8 +76,15 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom5To6(db);
         case 6 :
             upgradeFrom6To7(db);
+        case 7 :
+            upgradeFrom7To8(db);
+        case 8 :
+            upgradeFrom8To9(db);
+        case 9 :
+            upgradeFrom9To10(db);
+        case 10 :
+            upgradeFrom10To11(db);
         default :
-            break;
         }
     }
 
@@ -90,6 +112,32 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private void upgradeFrom6To7(SQLiteDatabase db) {
         db.execSQL("alter table transit_query add column used_at integer not null default 0 ");
         db.execSQL("update transit_query set used_at = updated_at ");
+    }
+
+    private void upgradeFrom7To8(SQLiteDatabase db) {
+        createTableArea(db);
+        createTablePrefecture(db);
+    }
+
+    private void upgradeFrom8To9(SQLiteDatabase db) {
+        createTableLine(db);
+    }
+
+    private void upgradeFrom9To10(SQLiteDatabase db) {
+        createTableStation(db);
+    }
+
+    private void upgradeFrom10To11(SQLiteDatabase db) {
+        createTableTimeTable(db);
+        createTableTimeLine(db);
+        createTableTransitTime(db);
+        db.execSQL("delete from area ");
+        db.execSQL("delete from prefecture ");
+        db.execSQL("delete from line ");
+        db.execSQL("delete from station ");
+        db.execSQL("delete from time_table ");
+        db.execSQL("delete from time_line ");
+        db.execSQL("delete from transit_time ");
     }
 
     private void createTableTransitQuery(SQLiteDatabase db) {
@@ -148,4 +196,95 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         db.execSQL(sb.toString());
     }
     
+    private void createTableArea(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table area ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("name text not null, ");
+        sb.append("url text, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+    
+    private void createTablePrefecture(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table prefecture ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("area_id integer not null, ");
+        sb.append("name text not null, ");
+        sb.append("url text not null, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+    
+    private void createTableLine(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table line ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("prefecture_id integer not null, ");
+        sb.append("name text not null, ");
+        sb.append("company text, ");
+        sb.append("url text not null, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+    
+    private void createTableStation(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table station ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("line_id integer not null, ");
+        sb.append("name text not null, ");
+        sb.append("url text not null, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+
+    private void createTableTimeTable(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table time_table ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("station_id integer not null, ");
+        sb.append("direction text not null, ");
+        sb.append("type integer not null, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+    
+    private void createTableTimeLine(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table time_line ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("time_table_id integer not null, ");
+        sb.append("hour integer not null, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
+    
+    private void createTableTransitTime(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create table transit_time ( ");
+        sb.append("_id integer primary key autoincrement, ");
+        sb.append("time_line_id integer not null, ");
+        sb.append("hour integer not null, ");
+        sb.append("minute integer not null, ");
+        sb.append("transit_class text, ");
+        sb.append("bound_for text, ");
+        sb.append("created_at integer not null default 0, ");
+        sb.append("updated_at integer not null default 0 ");
+        sb.append(") ");
+        db.execSQL(sb.toString());
+    }
 }

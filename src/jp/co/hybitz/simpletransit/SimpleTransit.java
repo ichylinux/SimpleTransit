@@ -25,8 +25,8 @@ import java.util.Stack;
 import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.ContextMenuAware;
 import jp.co.hybitz.common.StringUtils;
+import jp.co.hybitz.common.model.Time;
 import jp.co.hybitz.googletransit.TransitUtil;
-import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
@@ -79,7 +79,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private TimeTypeAndDate currentTime;
     private Stack<TimeTypeAndDate> previousTime = new Stack<TimeTypeAndDate>();
     private Stack<TimeTypeAndDate> nextTime = new Stack<TimeTypeAndDate>();
-    private View searchDetails;
+    private LinearLayout searchDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,10 +106,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         menu.add(0, MENU_ITEM_MEMO, 2, "メモ");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
         menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行情報");
-        menu.add(0, MENU_ITEM_PREFERENCES, 5, "設定");
+        menu.add(0, MENU_ITEM_TIME_TABLE, 5, "時刻表");
         menu.add(0, MENU_ITEM_VOICE, 6, "音声入力");
         menu.add(0, MENU_ITEM_SEARCH_NEAR_STATIONS, 7, "最寄駅検索");
-        menu.add(0, MENU_ITEM_QUIT, 7, "終了");
+        menu.add(0, MENU_ITEM_PREFERENCES, 8, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 9, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -285,7 +286,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         CheckBox airline = (CheckBox) findViewById(R.id.airline);
         airline.setChecked(Preferences.isUseAirline(this));
         
-        searchDetails = findViewById(R.id.search_details);
+        searchDetails = (LinearLayout) findViewById(R.id.search_details);
         if (!Preferences.isFullInput(this)) {
             removeSearchDetails();
         }
@@ -299,6 +300,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     
     public void updateFrom(String from) {
         query.setFrom(from);
+        updateQueryView();
+    }
+
+    public void updateTo(String to) {
+        query.setTo(to);
         updateQueryView();
     }
 
@@ -431,6 +437,11 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             updateFrom(s.getName());
             return true;
         }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_TO) {
+            Station s = getSelectedStation(menuItem);
+            updateTo(s.getName());
+            return true;
+        }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
             // 何もしない
             return true;
@@ -546,8 +557,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             view.removeView(searchDetails);
         }
         else if (Preferences.getOrientation(this) == ORIENTATION_LANDSCAPE) {
+            Button search = (Button) findViewById(R.id.search);
+            LinearLayout searchDetailsMiddle = (LinearLayout) findViewById(R.id.search_details_middle);
+            LinearLayout searchDetailsBottom = (LinearLayout) findViewById(R.id.search_details_bottom);
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_search);
+            searchDetailsMiddle.removeView(search);
             view.removeView(searchDetails);
+            searchDetailsBottom.addView(search);
         }
         else {
             throw new IllegalStateException("予期していないレイアウトの向きです。" + Preferences.getOrientation(this));
@@ -564,7 +580,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         else if (Preferences.getOrientation(this) == ORIENTATION_LANDSCAPE) {
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_search);
             if (view != null) {
+                Button search = (Button) findViewById(R.id.search);
+                LinearLayout searchDetailsBottom = (LinearLayout) findViewById(R.id.search_details_bottom);
+                searchDetailsBottom.removeView(search);
                 view.addView(searchDetails, 4);
+                LinearLayout searchDetailsMiddle = (LinearLayout) findViewById(R.id.search_details_middle);
+                searchDetailsMiddle.addView(search);
             }
         }
         else {

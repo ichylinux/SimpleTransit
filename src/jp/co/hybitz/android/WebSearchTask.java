@@ -81,11 +81,12 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
             return;
         }
         
-        synchronized (dialog) {
-            if (dialog != null) {
-                dialog.dismiss();
-                dialog = null;
-            }
+        // タイミングによってエラーになる「View not attached to screen」が、
+        // 理由がわからず。。ダイアログは消えていると予想してtry～catchしておく。
+        try {
+            dialog.dismiss();
+        }
+        catch (IllegalArgumentException e) {
         }
     }
     
@@ -103,7 +104,6 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
     
     @Override
     protected void onPostExecute(OUT result) {
-        
         if (e != null) {
             hideProgressDialog();
             new ExceptionHandler(activity).handleException(e);
@@ -113,10 +113,4 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
             hideProgressDialog();
         }
     }
-
-    @Override
-    protected void onCancelled() {
-        hideProgressDialog();
-    }
-
 }

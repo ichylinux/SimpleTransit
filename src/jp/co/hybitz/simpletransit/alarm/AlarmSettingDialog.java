@@ -21,8 +21,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import jp.co.hybitz.android.DateUtils;
+import jp.co.hybitz.common.model.Time;
 import jp.co.hybitz.googletransit.TransitUtil;
-import jp.co.hybitz.googletransit.model.Time;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.Preferences;
