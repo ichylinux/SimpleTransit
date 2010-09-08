@@ -128,7 +128,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else if (v.getId() == R.id.from || v.getId() == R.id.to) {
             menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
-            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, Menu.FIRST, "逆経路");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, 1, "逆経路");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_LOCATION_CLEAR, 2, "経路をクリア");
 //            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
         }
     }
@@ -279,7 +280,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         if (Preferences.isUseLatestQueryHistory(this)) {
             SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
             if (latest != null) {
-                updateQuery(latest.getFrom(), latest.getTo());
+                updateFromAndTo(latest.getFrom(), latest.getTo());
             }
         }
         
@@ -311,7 +312,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
-    public void updateQuery(String from, String to) {
+    public void updateFromAndTo(String from, String to) {
         query.setFrom(from);
         query.setTo(to);
         updateQueryView();
@@ -437,18 +438,18 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE) {
             SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
-            updateQuery(stq.getFrom(), stq.getTo());
+            updateFromAndTo(stq.getFrom(), stq.getTo());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE_REVERSE) {
             SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
-            updateQuery(stq.getTo(), stq.getFrom());
+            updateFromAndTo(stq.getTo(), stq.getFrom());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
         }
         else if (menuItem.getItemId() == MENU_ITEM_REVERSE_LOCATION) {
-            updateQuery(query.getTo(), query.getFrom());
+            updateFromAndTo(query.getTo(), query.getFrom());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FROM) {
@@ -459,6 +460,10 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         else if (menuItem.getItemId() == MENU_ITEM_SET_TO) {
             Station s = getSelectedStation(menuItem);
             updateTo(s.getName());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_LOCATION_CLEAR) {
+            updateFromAndTo(null, null);
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {

@@ -57,6 +57,6 @@ public class ParentBackItem extends TimeTableItem {
     
     @Override
     public String getTitle() {
-        return " ↑ [戻る]";
+        return "..";
     }
 }

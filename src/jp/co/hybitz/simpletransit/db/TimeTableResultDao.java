@@ -421,4 +421,18 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
             db.close();
         }
     }
+    
+    public int deleteLines(long prefectureId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int count = db.delete("line", "prefecture_id=?", new String[]{String.valueOf(prefectureId)});
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
 }

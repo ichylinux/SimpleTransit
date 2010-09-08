@@ -85,6 +85,44 @@ public class TimeTableTask extends WebSearchTask<TimeTableQuery, TimeTableResult
                 return null;
             }
             else if (getActivity() instanceof TimeTableActivity) {
+                TimeTableResultDao dao = new TimeTableResultDao(getActivity());
+                Area a = result.getAreas().get(0);
+                Prefecture p = a.getPrefectures().get(0);
+                
+                if (item.getLine() == null) {
+                    // 検索結果を保存
+                    if (dao.getLines(item.getPrefecture().getId()).isEmpty()) {
+                        List<LineEx> lines = new ArrayList<LineEx>();
+                        for (Line l : p.getLines()) {
+                            lines.add(new LineEx(l));
+                        }
+                        dao.insertLines(item.getPrefecture().getId(), lines);
+                    }
+                    item.getPrefecture().setLines(dao.getLines(item.getPrefecture().getId()));
+                }
+                else if (item.getStation() == null) {
+                    // 検索結果を保存
+                    if (dao.getStations(item.getLine().getId()).isEmpty()) {
+                        List<StationEx> stations = new ArrayList<StationEx>();
+                        for (Station s : p.getLines().get(0).getStations()) {
+                            stations.add(new StationEx(s));
+                        }
+                        dao.insertStations(item.getLine().getId(), stations);
+                    }
+                    item.getLine().setStations(dao.getStations(item.getLine().getId()));
+                }
+                else if (item.getTimeTable() == null) {
+                    // 検索結果を保存
+                    if (dao.getTimeTables(item.getStation().getId()).isEmpty()) {
+                        List<TimeTableEx> timeTables = new ArrayList<TimeTableEx>();
+                        for (TimeTable tt : p.getLines().get(0).getStations().get(0).getTimeTables()) {
+                            timeTables.add(new TimeTableEx(tt));
+                        }
+                        dao.insertTimeTables(item.getStation().getId(), timeTables);
+                    }
+                    item.getStation().setTimeTables(dao.getTimeTables(item.getStation().getId()));
+                }
+
                 return result;
             }
         }
@@ -98,48 +136,15 @@ public class TimeTableTask extends WebSearchTask<TimeTableQuery, TimeTableResult
             return;
         }
         
-        TimeTableResultDao dao = new TimeTableResultDao(getActivity());
         TimeTableActivity ttla = (TimeTableActivity) getActivity();
-        Area a = out.getAreas().get(0);
-        Prefecture p = a.getPrefectures().get(0);
         
         if (item.getLine() == null) {
-            // 検索結果を保存
-            if (dao.getLines(item.getPrefecture().getId()).isEmpty()) {
-                List<LineEx> lines = new ArrayList<LineEx>();
-                for (Line l : p.getLines()) {
-                    lines.add(new LineEx(l));
-                }
-                dao.insertLines(item.getPrefecture().getId(), lines);
-            }
-            
-            item.getPrefecture().setLines(dao.getLines(item.getPrefecture().getId()));
             ttla.showLines(item.getArea(), item.getPrefecture());
         }
         else if (item.getStation() == null) {
-            // 検索結果を保存
-            if (dao.getStations(item.getLine().getId()).isEmpty()) {
-                List<StationEx> stations = new ArrayList<StationEx>();
-                for (Station s : p.getLines().get(0).getStations()) {
-                    stations.add(new StationEx(s));
-                }
-                dao.insertStations(item.getLine().getId(), stations);
-            }
-
-            item.getLine().setStations(dao.getStations(item.getLine().getId()));
             ttla.showStations(item.getArea(), item.getPrefecture(), item.getLine());
         }
         else if (item.getTimeTable() == null) {
-            // 検索結果を保存
-            if (dao.getTimeTables(item.getStation().getId()).isEmpty()) {
-                List<TimeTableEx> timeTables = new ArrayList<TimeTableEx>();
-                for (TimeTable tt : p.getLines().get(0).getStations().get(0).getTimeTables()) {
-                    timeTables.add(new TimeTableEx(tt));
-                }
-                dao.insertTimeTables(item.getStation().getId(), timeTables);
-            }
-            
-            item.getStation().setTimeTables(dao.getTimeTables(item.getStation().getId()));
             ttla.showTimeTables(item.getArea(), item.getPrefecture(), item.getLine(), item.getStation());
         }
     }

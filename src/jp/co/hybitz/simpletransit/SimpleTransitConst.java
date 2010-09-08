@@ -71,6 +71,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
     public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 20;
     public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 21;
+    public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 22;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

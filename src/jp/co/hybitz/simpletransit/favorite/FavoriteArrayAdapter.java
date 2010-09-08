@@ -49,7 +49,7 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> imp
         textView.setText(item.getFromTo());
         textView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                activity.updateQuery(item.getFrom(), item.getTo());
+                activity.updateFromAndTo(item.getFrom(), item.getTo());
             }
         });
     }

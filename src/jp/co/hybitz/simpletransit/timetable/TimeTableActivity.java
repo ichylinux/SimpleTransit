@@ -232,10 +232,11 @@ public class TimeTableActivity extends Activity implements SimpleTransitConst {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem();
 
+        adapter.insert(backItem, 0);
         for (int i = 0; i < a.getPrefectures().size(); i ++) {
             PrefectureEx p = a.getPrefectures().get(i);
             TimeTableItem item = new TimeTableItem(a, p);
-            adapter.insert(item, i);
+            adapter.insert(item, i+1);
         }
 
         title.setText(Preferences.getText(this, a.getName()));
@@ -246,10 +247,11 @@ public class TimeTableActivity extends Activity implements SimpleTransitConst {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a);
 
+        adapter.insert(backItem, 0);
         for (int i = 0; i < p.getLines().size(); i ++) {
             LineEx l = p.getLines().get(i);
             TimeTableItem item = new TimeTableItem(a, p, l);
-            adapter.insert(item, i);
+            adapter.insert(item, i+1);
         }
 
         title.setText(Preferences.getText(this, p.getName()));
@@ -260,10 +262,11 @@ public class TimeTableActivity extends Activity implements SimpleTransitConst {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p);
 
+        adapter.insert(backItem, 0);
         for (int i = 0; i < l.getStations().size(); i ++) {
             StationEx s = l.getStations().get(i);
             TimeTableItem item = new TimeTableItem(a, p, l, s);
-            adapter.insert(item, i);
+            adapter.insert(item, i+1);
         }
 
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName()));
@@ -274,10 +277,11 @@ public class TimeTableActivity extends Activity implements SimpleTransitConst {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p, l);
 
+        adapter.insert(backItem, 0);
         for (int i = 0; i < s.getTimeTables().size(); i ++) {
             TimeTableEx tt = s.getTimeTables().get(i);
             TimeTableItem item = new TimeTableItem(a, p, l, s, tt);
-            adapter.insert(item, i);
+            adapter.insert(item, i+1);
         }
 
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName()));
@@ -288,10 +292,11 @@ public class TimeTableActivity extends Activity implements SimpleTransitConst {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         backItem = new ParentBackItem(a, p, l, s);
 
+        adapter.insert(backItem, 0);
         for (int i = 0; i < tt.getTimeLines().size(); i ++) {
             TimeLineEx tl = tt.getTimeLines().get(i);
             TimeTableItem item = new TimeTableItem(a, p, l, s, tt, tl);
-            adapter.insert(item, i);
+            adapter.insert(item, i+1);
         }
 
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
