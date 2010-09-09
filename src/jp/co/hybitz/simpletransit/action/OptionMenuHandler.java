@@ -100,8 +100,10 @@ public class OptionMenuHandler implements SimpleTransitConst {
             Intent intent = new Intent(activity, TimeTableActivity.class);
             intent.putExtra(EXTRA_KEY_TIME_TABLE_RESULT, result);
             activity.startActivity(intent);
+            if (activity instanceof TimeTableActivity) {
+                activity.finish();
+            }
         }
-        
     }
 
     private void voiceInput() {

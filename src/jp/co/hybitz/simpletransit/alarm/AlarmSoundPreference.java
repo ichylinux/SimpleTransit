@@ -17,27 +17,24 @@
  */
 package jp.co.hybitz.simpletransit.alarm;
 
-import java.io.IOException;
-
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
+import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
+import android.app.Activity;
 import android.content.Context;
-import android.database.Cursor;
+import android.content.Intent;
 import android.preference.DialogPreference;
-import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class AlarmSoundPreference extends DialogPreference {
+public class AlarmSoundPreference extends DialogPreference implements SimpleTransitConst {
     private AlarmSoundItem selectedItem;
 
     public AlarmSoundPreference(Context context, AttributeSet attrs) {
@@ -56,20 +53,20 @@ public class AlarmSoundPreference extends DialogPreference {
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
+        initAction(view);
         restorePreference(view);
-        loadSoundFiles(view);
     }
     
-    @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
-        if (positiveResult) {
-            try {
-                Preferences.setAlarmSoundFile(getContext(), selectedItem);
-            } catch (IOException e) {
-                // TODO
+    private void initAction(View view) {
+        Button b = (Button) view.findViewById(R.id.pick_up_music);
+        b.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("audio/*");
+                ((Activity)getContext()).startActivityForResult(Intent.createChooser(intent, "音楽を検索"), REQUEST_CODE_SELECT_MUSIC);
+                getDialog().dismiss();
             }
-        }
+        });
     }
     
     private void restorePreference(View view) {
@@ -77,49 +74,6 @@ public class AlarmSoundPreference extends DialogPreference {
         selectedItem = Preferences.getAlarmSoundFile(getContext());
         if (selectedItem != null) {
             tv.setText(selectedItem.getTitle());
-        }
-    }
-
-    private void setMusicSelectListener(ListView lv) {
-        lv.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        lv.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectedItem = (AlarmSoundItem) parent.getItemAtPosition(position);
-                TextView tv = (TextView) getDialog().findViewById(R.id.selected_sound);
-                tv.setText(selectedItem.getTitle());
-            }
-        });
-    }
-
-    /**
-     * @param view
-     */
-    private void loadSoundFiles(View view) {
-        Cursor cursor = getContext().getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                null, null, null, null);
-
-        ArrayAdapter<AlarmSoundItem> aa = new ArrayAdapter<AlarmSoundItem>(getContext(), R.layout.result_list);
-        while (cursor.moveToNext()) {
-            int id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-            String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-            String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-            aa.add(new AlarmSoundItem(id, artist, title));
-            if (aa.getCount() > 30) {
-                break;
-            }
-        }
-        
-        ListView lv = (ListView) view.findViewById(R.id.sound_files);
-        
-        if (aa.getCount() > 0) {
-            setMusicSelectListener(lv);
-            lv.setAdapter(aa);
-        }
-        else {
-            ArrayAdapter<String> noMusic = new ArrayAdapter<String>(getContext(), R.layout.result_list);
-            noMusic.add("曲を見つけることができませんでした。");
-            lv.setAdapter(noMusic);
         }
     }
 }

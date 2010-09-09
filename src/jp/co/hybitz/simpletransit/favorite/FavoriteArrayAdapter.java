@@ -24,39 +24,75 @@ import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransit;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
+import jp.co.hybitz.simpletransit.common.model.Favorable;
 import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.timetable.TimeTableActivity;
+import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
+import android.content.Intent;
 import android.view.ContextMenu;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class FavoriteArrayAdapter extends ArrayAdapterEx<SimpleTransitQuery> implements SimpleTransitConst {
+public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements SimpleTransitConst {
     private SimpleTransit activity;
 
-    public FavoriteArrayAdapter(SimpleTransit activity, List<SimpleTransitQuery> items) {
+    public FavoriteArrayAdapter(SimpleTransit activity, List<Favorable> items) {
         super(activity, R.layout.favorite_list, items);
         this.activity = activity;
     }
 
     @Override
-    protected void updateView(View view, final SimpleTransitQuery item) {
+    protected void updateView(View view, final Favorable item) {
         TextView textView = (TextView) view;
         textView.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        textView.setText(item.getFromTo());
+        textView.setText(getText(item));
         textView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                activity.updateFromAndTo(item.getFrom(), item.getTo());
+                if (item instanceof SimpleTransitQuery) {
+                    SimpleTransitQuery query = (SimpleTransitQuery) item;
+                    activity.updateFromAndTo(query.getFrom(), query.getTo());
+                }
+                else if (item instanceof TimeTableEx) {
+                    TimeTableEx tt = (TimeTableEx) item;
+                    Intent intent = new Intent(activity, TimeTableActivity.class);
+                    intent.putExtra(EXTRA_KEY_TIME_TABLE, tt);
+                    activity.startActivity(intent);
+                }
             }
         });
     }
     
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
-        menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
-        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
+        Favorable item = getItem(info.position);
+        if (item instanceof SimpleTransitQuery) {
+            menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
+            menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
+            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        }
+        else if (item instanceof TimeTableEx) {
+            menu.add(0, MENU_ITEM_SET_FROM, 1, "出発地に設定");
+            menu.add(0, MENU_ITEM_SET_TO, 2, "到着地に設定");
+            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        }
+    }
+    
+    private String getText(Favorable f) {
+        if (f instanceof SimpleTransitQuery) {
+            SimpleTransitQuery query = (SimpleTransitQuery) f;
+            return query.getFromTo();
+        }
+        else if (f instanceof TimeTableEx) {
+            TimeTableEx tt = (TimeTableEx) f;
+            return tt.getStation().getName() + "　" + tt.getDirection() + "　" + tt.getTypeString();
+        }
+        
+        return null;
     }
 }

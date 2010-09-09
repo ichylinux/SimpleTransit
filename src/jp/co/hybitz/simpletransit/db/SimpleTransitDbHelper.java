@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 11;
+    private static final int DB_VERSION = 14;
 
     /**
      * コンストラクタ
@@ -40,10 +40,6 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        if (db.isReadOnly()) {
-            db = getWritableDatabase();
-        }
-
         createTableTransitQuery(db);
         createTableTransitResult(db);
         createTableTransit(db);
@@ -59,10 +55,6 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (db.isReadOnly()) {
-            db = getWritableDatabase();
-        }
-        
         switch (oldVersion) {
         case 1 :
             upgradeFrom1To2(db);
@@ -84,6 +76,16 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom9To10(db);
         case 10 :
             upgradeFrom10To11(db);
+        case 11 :
+            if (oldVersion >= 11) {
+                upgradeFrom11To12(db);
+            }
+        case 12 :
+            if (oldVersion >= 11) {
+                upgradeFrom12To13(db);
+            }
+        case 13 :
+            upgradeFrom13To14(db);
         default :
         }
     }
@@ -138,6 +140,22 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         db.execSQL("delete from time_table ");
         db.execSQL("delete from time_line ");
         db.execSQL("delete from transit_time ");
+    }
+
+    private void upgradeFrom11To12(SQLiteDatabase db) {
+        db.execSQL("alter table station add column is_favorite integer not null default 0 ");
+    }
+
+    private void upgradeFrom12To13(SQLiteDatabase db) {
+        db.execSQL("alter table time_table add column is_favorite integer not null default 0 ");
+    }
+
+    private void upgradeFrom13To14(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table station add column is_favorite integer not null default 0 ");
+        }
+        catch (Exception e) {
+        }
     }
 
     private void createTableTransitQuery(SQLiteDatabase db) {
@@ -242,6 +260,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         sb.append("line_id integer not null, ");
         sb.append("name text not null, ");
         sb.append("url text not null, ");
+        sb.append("is_favorite integer not null default 0, ");
         sb.append("created_at integer not null default 0, ");
         sb.append("updated_at integer not null default 0 ");
         sb.append(") ");
@@ -255,6 +274,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         sb.append("station_id integer not null, ");
         sb.append("direction text not null, ");
         sb.append("type integer not null, ");
+        sb.append("is_favorite integer not null default 0, ");
         sb.append("created_at integer not null default 0, ");
         sb.append("updated_at integer not null default 0 ");
         sb.append(") ");

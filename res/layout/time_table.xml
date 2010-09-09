@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView android:id="@+id/time_table_title"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:textSize="18sp"/>
-    <ListView android:id="@+id/time_table_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" android:layout_marginTop="10sp"/>
-</LinearLayout>
+	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent">
+            <ImageView android:id="@+id/star" android:layout_width="48sp" android:layout_height="48sp" android:padding="10sp"/>
+		    <TextView android:id="@+id/time_table_title"
+		        android:layout_width="fill_parent" android:layout_height="wrap_content" android:textSize="18sp" android:layout_centerVertical="true" android:layout_toRightOf="@+id/star"/>
+        </RelativeLayout>
+	    <ListView android:id="@+id/time_table_list"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent" android:layout_marginTop="5sp" android:layout_marginBottom="20sp"/>
+	</LinearLayout>
+    <RelativeLayout android:id="@+id/time_table_control" android:layout_height="wrap_content"
+        android:layout_width="fill_parent" android:layout_alignParentBottom="true">
+	    <LinearLayout
+	        android:orientation="horizontal"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content" android:layout_alignParentRight="true">
+            <TextView android:text="更新日："
+                android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	        <TextView android:id="@+id/last_update"
+	            android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+	        <Button android:layout_height="wrap_content" android:layout_width="wrap_content"
+	            android:text="再読込" android:id="@+id/update"/>
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

@@ -108,7 +108,7 @@ class TimeTableItem implements Serializable {
             StringBuilder sb = new StringBuilder();
             for (TransitTimeEx t : timeLine.getTimes()) {
                 if (sb.length() > 0) {
-                    sb.append("　");
+                    sb.append("  ");
                 }
                 sb.append(df.format(t.getMinute()));
                 if (StringUtils.isNotEmpty(t.getTransitClass())) {

@@ -25,11 +25,14 @@ import jp.co.hybitz.csv.CsvReader;
 import jp.co.hybitz.csv.CsvWriter;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -208,4 +211,29 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("no_sound_but_vibration", false);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_SELECT_MUSIC) {
+            if (data != null && data.getData() != null) {
+                Cursor cursor = getContentResolver().query(data.getData(), null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    int id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                    String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                    String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
+                    try {
+                        setAlarmSoundFile(this, new AlarmSoundItem(id, artist, title));
+                    }
+                    catch (IOException e) {
+                        Log.w(APP, "アラーム曲の保存に失敗 " + data);
+                    }
+                }
+                else {
+                    Log.w(APP, "アラーム曲が見つからない " + data);
+                }
+            }
+        }
+    }
+    
+    
 }

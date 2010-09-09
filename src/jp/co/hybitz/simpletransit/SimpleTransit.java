@@ -33,6 +33,8 @@ import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
 import jp.co.hybitz.simpletransit.action.FromToDragListener;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
+import jp.co.hybitz.simpletransit.common.model.Favorable;
+import jp.co.hybitz.simpletransit.db.TimeTableResultDao;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.favorite.FavoriteArrayAdapter;
@@ -43,6 +45,7 @@ import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.simpletransit.station.SearchNearStationsTask;
+import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.stationapi.model.Station;
@@ -81,6 +84,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private Stack<TimeTypeAndDate> previousTime = new Stack<TimeTypeAndDate>();
     private Stack<TimeTypeAndDate> nextTime = new Stack<TimeTypeAndDate>();
     private LinearLayout searchDetails;
+    private ListView results;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         super.onRestart();
         TextView summary = (TextView) findViewById(R.id.tv_summary);
         summary.setTextSize(Preferences.getTextSize(this));
+        if (results.getAdapter() instanceof FavoriteArrayAdapter) {
+            initFavorite();
+        }
     }
 
     /**
@@ -237,6 +244,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     	Preferences.initTheme(this);
         setContentView(getLayoutId());
     	
+        results = (ListView) findViewById(R.id.results);
+
         CheckBox first = (CheckBox) findViewById(R.id.first);
         first.setTextColor(Preferences.getTextColor(this));
         CheckBox last = (CheckBox) findViewById(R.id.last);
@@ -259,8 +268,13 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         updatePreviousTimeAndNextTimeVisibility();
     }
     
+    @SuppressWarnings("unchecked")
     private void initFavorite() {
-        List<SimpleTransitQuery> list = new TransitQueryDao(this).getTransitQueriesByFavarite();
+        List list = new TransitQueryDao(this).getTransitQueriesByFavorite();
+        if (list.size() > 0) {
+            list.add(new Favorable());
+        }
+        list.addAll(new TimeTableResultDao(this).getTimeTablesByFavorite());
         if (list.isEmpty()) {
             return;
         }
@@ -399,10 +413,9 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         return (SimpleTransitQuery) lv.getItemAtPosition(info.position);
     }
 
-    private Station getSelectedStation(MenuItem menuItem) {
+    private Object getSelectedItem(MenuItem menuItem) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
-        ListView lv = (ListView) findViewById(R.id.results);
-        return (Station) lv.getItemAtPosition(info.position);
+        return results.getItemAtPosition(info.position);
     }
 
     /**
@@ -453,14 +466,26 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FROM) {
-            Station s = getSelectedStation(menuItem);
-            updateFrom(s.getName());
-            return true;
+            Object item = getSelectedItem(menuItem);
+            if (item instanceof Station) {
+                updateFrom(((Station)item).getName());
+                return true;
+            }
+            else if (item instanceof TimeTableEx) {
+                updateFrom(((TimeTableEx)item).getStation().getName());
+                return true;
+            }
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_TO) {
-            Station s = getSelectedStation(menuItem);
-            updateTo(s.getName());
-            return true;
+            Object item = getSelectedItem(menuItem);
+            if (item instanceof Station) {
+                updateTo(((Station)item).getName());
+                return true;
+            }
+            else if (item instanceof TimeTableEx) {
+                updateTo(((TimeTableEx)item).getStation().getName());
+                return true;
+            }
         }
         else if (menuItem.getItemId() == MENU_ITEM_LOCATION_CLEAR) {
             updateFromAndTo(null, null);

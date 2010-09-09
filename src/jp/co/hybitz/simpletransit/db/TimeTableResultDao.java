@@ -110,6 +110,20 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         return ret;
     }
 
+    private StationEx getStation(SQLiteDatabase db, long stationId) {
+        CursorEx c = (CursorEx) db.query("station", null, "_id=?", new String[]{String.valueOf(stationId)}, null, null, null);
+        try {
+            if (c.moveToFirst()) {
+                return loadStation(c);
+            }
+        }
+        finally {
+            c.close();
+        }
+        
+        return null;
+    }
+
     public List<TimeTableEx> getTimeTables(long stationId) {
         List<TimeTableEx> ret = new ArrayList<TimeTableEx>();
         
@@ -128,6 +142,16 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
         
         return ret;
+    }
+    
+    public List<TimeLineEx> getTimeLines(long timeTableId) {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            return getTimeLines(db, timeTableId);
+        }
+        finally {
+            db.close();
+        }
     }
 
     private List<TimeLineEx> getTimeLines(SQLiteDatabase db, long timeTableId) {
@@ -162,6 +186,8 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         a.setId(c.getLong("_id"));
         a.setName(c.getString("name"));
         a.setUrl(c.getString("url"));
+        a.setCreatedAt(c.getLong("created_at"));
+        a.setUpdatedAt(c.getLong("updated_at"));
         return a;
     }
     
@@ -171,17 +197,21 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         p.setAreaId(c.getLong("area_id"));
         p.setName(c.getString("name"));
         p.setUrl(c.getString("url"));
+        p.setCreatedAt(c.getLong("created_at"));
+        p.setUpdatedAt(c.getLong("updated_at"));
         return p;
     }
 
     private LineEx loadLine(CursorEx c) {
-        LineEx p = new LineEx();
-        p.setId(c.getLong("_id"));
-        p.setPrefectureId(c.getLong("prefecture_id"));
-        p.setName(c.getString("name"));
-        p.setCompany(c.getString("company"));
-        p.setUrl(c.getString("url"));
-        return p;
+        LineEx l = new LineEx();
+        l.setId(c.getLong("_id"));
+        l.setPrefectureId(c.getLong("prefecture_id"));
+        l.setName(c.getString("name"));
+        l.setCompany(c.getString("company"));
+        l.setUrl(c.getString("url"));
+        l.setCreatedAt(c.getLong("created_at"));
+        l.setUpdatedAt(c.getLong("updated_at"));
+        return l;
     }
 
     private StationEx loadStation(CursorEx c) {
@@ -190,6 +220,8 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         s.setLineId(c.getLong("line_id"));
         s.setName(c.getString("name"));
         s.setUrl(c.getString("url"));
+        s.setCreatedAt(c.getLong("created_at"));
+        s.setUpdatedAt(c.getLong("updated_at"));
         return s;
     }
 
@@ -199,6 +231,9 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         tt.setStationId(c.getLong("station_id"));
         tt.setDirection(c.getString("direction"));
         tt.setType(toType(c.getInt("type")));
+        tt.setFavorite(c.getBoolean("is_favorite"));
+        tt.setCreatedAt(c.getLong("created_at"));
+        tt.setUpdatedAt(c.getLong("updated_at"));
         return tt;
     }
     
@@ -217,6 +252,8 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         tt.setTimeLineId(c.getLong("time_line_id"));
         tt.setTransitClass(c.getString("transit_class"));
         tt.setBoundFor(c.getString("bound_for"));
+        tt.setCreatedAt(c.getLong("created_at"));
+        tt.setUpdatedAt(c.getLong("updated_at"));
         return tt;
     }
 
@@ -333,11 +370,11 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
-            for (StationEx l : stations) {
+            for (StationEx s : stations) {
                 ContentValues cv = new ContentValues();
                 cv.put("line_id", lineId);
-                cv.put("name", l.getName());
-                cv.put("url", l.getUrl());
+                cv.put("name", s.getName());
+                cv.put("url", s.getUrl());
                 cv.put("created_at", now);
                 cv.put("updated_at", now);
                 
@@ -371,6 +408,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
                 cv.put("station_id", stationId);
                 cv.put("direction", tt.getDirection());
                 cv.put("type", toInt(tt.getType()));
+                cv.put("is_favorite", tt.isFavorite() ? 1 : 0);
                 cv.put("created_at", now);
                 cv.put("updated_at", now);
                 
@@ -432,6 +470,39 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
         finally {
             db.endTransaction();
+            db.close();
+        }
+    }
+    
+    public int updateFavorite(TimeTableEx timeTable) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("is_favorite", timeTable.isFavorite() ? 1 : 0);
+            values.put("updated_at", getCurrentDateTime());
+            return db.update("time_table", values, "_id=?", new String[]{String.valueOf(timeTable.getId())});
+        }
+        finally {
+            db.close();
+        }
+    }
+    
+    public List<TimeTableEx> getTimeTablesByFavorite() {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            List<TimeTableEx> ret = new ArrayList<TimeTableEx>(); 
+
+            CursorEx c = (CursorEx) db.query("time_table", null, "is_favorite <> 0", null, null, null, "_id asc");
+            while (c.moveToNext()) {
+                TimeTableEx tt = loadTimeTable(c);
+                tt.setStation(getStation(db, tt.getStationId()));
+                ret.add(tt);
+            }
+            c.close();
+
+            return ret;
+        }
+        finally {
             db.close();
         }
     }

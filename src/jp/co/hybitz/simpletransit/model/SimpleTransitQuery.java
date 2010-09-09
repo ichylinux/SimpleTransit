@@ -17,21 +17,17 @@
  */
 package jp.co.hybitz.simpletransit.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitQuery;
+import jp.co.hybitz.simpletransit.common.model.Favorable;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransitQuery implements Serializable {
-    private long id;
+public class SimpleTransitQuery extends Favorable {
     private int useCount;
-    private boolean favorite;
-    private long createdAt;
-    private long updatedAt;
     private TransitQuery transitQuery;
     
     public SimpleTransitQuery() {
@@ -42,43 +38,12 @@ public class SimpleTransitQuery implements Serializable {
         this.transitQuery = transitQuery;
     }
     
-    public long getId() {
-        return id;
-    }
-    public void setId(long id) {
-        this.id = id;
-    }
-    
     public int getUseCount() {
         return useCount;
     }
 
     public void setUseCount(int useCount) {
         this.useCount = useCount;
-    }
-
-    public boolean isFavorite() {
-        return favorite;
-    }
-
-    public void setFavorite(boolean favorite) {
-        this.favorite = favorite;
-    }
-
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(long createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public long getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(long updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public TransitQuery getTransitQuery() {

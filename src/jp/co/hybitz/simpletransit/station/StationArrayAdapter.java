@@ -34,7 +34,7 @@ import android.widget.TextView;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-class StationArrayAdapter extends ArrayAdapterEx<Station> implements SimpleTransitConst {
+public class StationArrayAdapter extends ArrayAdapterEx<Station> implements SimpleTransitConst {
 
     public StationArrayAdapter(SimpleTransit context, List<Station> items) {
         super(context, R.layout.station_list, items);

@@ -6,5 +6,5 @@
 
     <TextView android:tag="hour" android:textSize="18sp" android:layout_width="wrap_content" android:layout_height="fill_parent"/>
     <TextView android:tag="title" android:textSize="18sp" android:layout_width="fill_parent" android:layout_height="fill_parent"
-        android:layout_marginRight="10sp"/>
+        android:layout_marginRight="5sp"/>
 </LinearLayout>

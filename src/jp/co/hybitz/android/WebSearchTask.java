@@ -81,7 +81,7 @@ public abstract class WebSearchTask<IN, OUT> extends AsyncTask<IN, Integer, OUT>
             return;
         }
         
-        // タイミングによってエラーになる「View not attached to screen」が、
+        // タイミングによってエラー「View not attached to screen」になるが、
         // 理由がわからず。。ダイアログは消えていると予想してtry～catchしておく。
         try {
             dialog.dismiss();

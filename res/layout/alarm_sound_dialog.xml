@@ -10,6 +10,8 @@
         android:layout_height="wrap_content"
         android:background="@layout/alarm_sound_border"
         android:textColor="#000000"/>
-    <ListView android:id="@+id/sound_files" android:isScrollContainer="true" 
-            android:layout_height="fill_parent" android:layout_width="fill_parent"/>
+    <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent">
+        <Button android:id="@+id/pick_up_music"
+            android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="検索" android:layout_centerInParent="true"/>
+    </RelativeLayout>
 </LinearLayout>

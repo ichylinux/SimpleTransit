@@ -45,4 +45,17 @@ public class DateUtils {
             return null;
         }
     }
+    
+    public static String format(Long dateLong, String pattern) {
+        if (dateLong == null) {
+            return null;
+        }
+        
+        try {
+            Date date = new SimpleDateFormat("yyyyMMddHHmmss").parse(String.valueOf(dateLong));
+            return new SimpleDateFormat(pattern).format(date);
+        } catch (ParseException e) {
+            return null;
+        }
+    }
 }

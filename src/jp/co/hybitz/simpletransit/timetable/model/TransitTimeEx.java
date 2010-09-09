@@ -17,12 +17,10 @@
  */
 package jp.co.hybitz.simpletransit.timetable.model;
 
-import java.io.Serializable;
-
+import jp.co.hybitz.simpletransit.common.model.Entity;
 import jp.co.hybitz.timetable.model.TransitTime;
 
-public class TransitTimeEx implements Serializable {
-    private long id;
+public class TransitTimeEx extends Entity {
     private long timeLineId;
     private TransitTime transitTime;
 
@@ -32,14 +30,6 @@ public class TransitTimeEx implements Serializable {
 
     public TransitTime getTransitTime() {
         return transitTime;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public long getTimeLineId() {

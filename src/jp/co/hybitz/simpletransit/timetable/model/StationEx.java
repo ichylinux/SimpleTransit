@@ -17,14 +17,13 @@
  */
 package jp.co.hybitz.simpletransit.timetable.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.co.hybitz.simpletransit.common.model.Entity;
 import jp.co.hybitz.timetable.model.Station;
 
-public class StationEx implements Serializable {
-    private long id;
+public class StationEx extends Entity {
     private long lineId;
     private Station station;
     private List<TimeTableEx> timeTables = new ArrayList<TimeTableEx>();
@@ -39,14 +38,6 @@ public class StationEx implements Serializable {
 
     public Station getStation() {
         return station;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public long getLineId() {

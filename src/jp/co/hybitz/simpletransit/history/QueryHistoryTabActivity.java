@@ -218,7 +218,7 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
         
         TransitQueryDao dao = new TransitQueryDao(this);
         List<SimpleTransitQuery> list = favariteOnly ?
-                dao.getTransitQueriesByFavarite() : dao.getTransitQueries();
+                dao.getTransitQueriesByFavorite() : dao.getTransitQueries();
         for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
             SimpleTransitQuery query = it.next();
             ret.add(new QueryHistoryListItem(query));

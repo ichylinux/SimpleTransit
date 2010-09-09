@@ -98,7 +98,7 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
 
-    public List<SimpleTransitQuery> getTransitQueriesByFavarite() {
+    public List<SimpleTransitQuery> getTransitQueriesByFavorite() {
         SQLiteDatabase db = getReadableDatabase();
         try {
             List<SimpleTransitQuery> ret = new ArrayList<SimpleTransitQuery>(); 

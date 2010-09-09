@@ -17,15 +17,14 @@
  */
 package jp.co.hybitz.simpletransit.timetable.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.co.hybitz.simpletransit.common.model.Entity;
 import jp.co.hybitz.timetable.model.Area;
 import jp.co.hybitz.timetable.model.Prefecture;
 
-public class AreaEx implements Serializable {
-    private long id;
+public class AreaEx extends Entity {
     private Area area;
     private List<PrefectureEx> prefectures = new ArrayList<PrefectureEx>();
 
@@ -42,14 +41,6 @@ public class AreaEx implements Serializable {
 
     public Area getArea() {
         return area;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {

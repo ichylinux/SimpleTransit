@@ -17,18 +17,18 @@
  */
 package jp.co.hybitz.simpletransit.timetable.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.co.hybitz.simpletransit.common.model.Favorable;
 import jp.co.hybitz.timetable.model.TimeLine;
 import jp.co.hybitz.timetable.model.TimeTable;
 import jp.co.hybitz.timetable.model.TimeTable.Type;
 
-public class TimeTableEx implements Serializable {
-    private long id;
+public class TimeTableEx extends Favorable {
     private long stationId;
     private TimeTable timeTable;
+    private StationEx station;
     private List<TimeLineEx> timeLines = new ArrayList<TimeLineEx>();
 
     public TimeTableEx() {
@@ -46,20 +46,20 @@ public class TimeTableEx implements Serializable {
         return timeTable;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public long getStationId() {
         return stationId;
     }
 
     public void setStationId(long stationId) {
         this.stationId = stationId;
+    }
+
+    public StationEx getStation() {
+        return station;
+    }
+
+    public void setStation(StationEx station) {
+        this.station = station;
     }
 
     public void addTimeLine(TimeLineEx timeLine) {
