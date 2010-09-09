@@ -77,13 +77,9 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         case 10 :
             upgradeFrom10To11(db);
         case 11 :
-            if (oldVersion >= 11) {
-                upgradeFrom11To12(db);
-            }
+            upgradeFrom11To12(db);
         case 12 :
-            if (oldVersion >= 11) {
-                upgradeFrom12To13(db);
-            }
+            upgradeFrom12To13(db);
         case 13 :
             upgradeFrom13To14(db);
         default :
@@ -143,11 +139,19 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     }
 
     private void upgradeFrom11To12(SQLiteDatabase db) {
-        db.execSQL("alter table station add column is_favorite integer not null default 0 ");
+        try {
+            db.execSQL("alter table station add column is_favorite integer not null default 0 ");
+        }
+        catch (Exception e) {
+        }
     }
 
     private void upgradeFrom12To13(SQLiteDatabase db) {
-        db.execSQL("alter table time_table add column is_favorite integer not null default 0 ");
+        try {
+            db.execSQL("alter table time_table add column is_favorite integer not null default 0 ");
+        }
+        catch (Exception e) {
+        }
     }
 
     private void upgradeFrom13To14(SQLiteDatabase db) {

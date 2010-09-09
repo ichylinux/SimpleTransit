@@ -58,6 +58,7 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.ClipboardManager;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,6 +86,8 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private Stack<TimeTypeAndDate> nextTime = new Stack<TimeTypeAndDate>();
     private LinearLayout searchDetails;
     private ListView results;
+    private int orientationWhenStarted;
+    private boolean showingResultsOnFullScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -343,15 +346,15 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
 
     private int getLayoutId() {
-        int orientation = Preferences.getOrientation(this);
-        if (orientation == ORIENTATION_PORTRAIT) {
+        orientationWhenStarted = Preferences.getOrientation(this);
+        if (orientationWhenStarted == ORIENTATION_PORTRAIT) {
             return R.layout.main_portrait;
         }
-        else if (orientation == ORIENTATION_LANDSCAPE) {
+        else if (orientationWhenStarted == ORIENTATION_LANDSCAPE) {
             return R.layout.main_landscape;
         }
         else {
-            throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientation);
+            throw new IllegalStateException("予期していないレイアウトの向きです。orientation=" + orientationWhenStarted);
         }
     }
 
@@ -565,6 +568,18 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         }
     }
     
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (showingResultsOnFullScreen) {
+                showSearchCondition();
+                return true;
+            }
+        }
+        
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void searchPrevious() {
         TimeTypeAndDate ttd = previousTime.peek();
         query.setTimeType(ttd.getTimeType());
@@ -597,6 +612,32 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         ime.hideSoftInputFromWindow(to.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
     
+    private boolean shouldHideSearchCondition() {
+        return orientationWhenStarted == ORIENTATION_PORTRAIT && Preferences.isResultsOnFullScreen(this);
+    }
+
+    public void hideSearchCondition() {
+        if (shouldHideSearchCondition()) {
+            LinearLayout searchCondition = (LinearLayout) findViewById(R.id.search_condition);
+            searchCondition.setVisibility(View.GONE);
+            LinearLayout searchDetails = (LinearLayout) findViewById(R.id.search_details);
+            if (searchDetails != null) {
+                searchDetails.setVisibility(View.GONE);
+            }
+            showingResultsOnFullScreen = true;
+        }
+    }
+
+    private void showSearchCondition() {
+        LinearLayout searchCondition = (LinearLayout) findViewById(R.id.search_condition);
+        searchCondition.setVisibility(View.VISIBLE);
+        LinearLayout searchDetails = (LinearLayout) findViewById(R.id.search_details);
+        if (searchDetails != null) {
+            searchDetails.setVisibility(View.VISIBLE);
+        }
+        showingResultsOnFullScreen = false;
+    }
+
     private boolean validateQuery() {
         if (StringUtils.isEmpty(query.getFrom())) {
             DialogUtils.showMessage(this, R.string.error_from_required);

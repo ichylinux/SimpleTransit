@@ -46,12 +46,14 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
         TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
         return searcher.search(in);
     }
-
+    
     @Override
     protected void updateView(TransitResult out) {
         getActivity().hideInputMethod();
         
         if (out.isOK()) {
+            getActivity().hideSearchCondition();
+            
             // 検索結果を表示
             new ResultRenderer(getActivity()).render(out);
             

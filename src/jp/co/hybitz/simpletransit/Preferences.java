@@ -54,6 +54,11 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return sp.getBoolean("full_input", false);
     }
 
+    public static boolean isResultsOnFullScreen(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("results_on_full_screen", false);
+    }
+
     public static boolean isUseLatestQueryHistory(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("use_latest_query_history", false);

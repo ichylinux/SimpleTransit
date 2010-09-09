@@ -5,7 +5,7 @@
         android:layout_width="fill_parent" android:layout_above="@+id/layout_search_buttons" android:layout_height="fill_parent">
 	    
 	    <!-- 検索条件 -->
-	    <TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+	    <TableLayout android:id="@+id/search_condition" android:layout_width="fill_parent" android:layout_height="wrap_content">
 	        <TableRow android:layout_width="fill_parent" android:layout_height="wrap_content">
 		        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_from"/>
 		        <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"

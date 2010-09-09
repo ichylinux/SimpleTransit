@@ -137,10 +137,10 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         int i = 0;
-        menu.add(0, MENU_ITEM_PREFERENCES, ++i, "設定");
         if (timeTable != null) {
             menu.add(0, MENU_ITEM_TIME_TABLE, ++i, "駅・時刻表");
         }
+        menu.add(0, MENU_ITEM_PREFERENCES, ++i, "設定");
         menu.add(0, MENU_ITEM_QUIT, ++i, "終了");
         return super.onCreateOptionsMenu(menu);
     }

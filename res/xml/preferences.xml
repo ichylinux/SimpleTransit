@@ -23,6 +23,10 @@
             android:dialogTitle="背景色"
             android:entries="@array/color_entries"
             android:entryValues="@array/color_values" />
+    <CheckBoxPreference
+      android:key="results_on_full_screen"
+      android:title="検索結果の全画面表示"
+      android:summary="縦向き表示の時に検索結果を全画面で表示する場合はチェックを入れます。"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="検索条件の設定">
     <CheckBoxPreference
