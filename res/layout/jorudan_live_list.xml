@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <TextView android:tag="title" android:textSize="18sp" android:layout_width="fill_parent" android:layout_height="fill_parent"/>
+    <TextView android:tag="summary" android:textSize="18sp" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginLeft="20sp"/>
+    <RelativeLayout android:tag="bottom_layout"
+        android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_alignParentBottom="true">
+
+        <TextView android:tag="detail" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginLeft="20sp" android:layout_marginRight="5sp"/>
+    </RelativeLayout>
+</LinearLayout>

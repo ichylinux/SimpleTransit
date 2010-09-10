@@ -19,12 +19,14 @@ package jp.co.hybitz.simpletransit.action;
 
 import java.util.List;
 
+import jp.co.hybitz.jorudanlive.model.JorudanLiveQuery;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.db.TimeTableResultDao;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
+import jp.co.hybitz.simpletransit.jorudanlive.JorudanLiveTask;
 import jp.co.hybitz.simpletransit.memo.MemoListActivity;
 import jp.co.hybitz.simpletransit.timetable.TimeTableActivity;
 import jp.co.hybitz.simpletransit.timetable.TimeTableTask;
@@ -71,6 +73,9 @@ public class OptionMenuHandler implements SimpleTransitConst {
         case MENU_ITEM_TRAVEL_DELAY :
             showTravelDelay();
             return true;
+        case MENU_ITEM_JORUDAN_LIVE :
+            showJorudanLive();
+            return true;
         case MENU_ITEM_TIME_TABLE :
             showTimeTable();
             return true;
@@ -87,6 +92,12 @@ public class OptionMenuHandler implements SimpleTransitConst {
         new TravelDelayTask(activity).execute(query);
     }
     
+    private void showJorudanLive() {
+        JorudanLiveQuery query = new JorudanLiveQuery();
+        query.setIncludeOld(true);
+        new JorudanLiveTask(activity).execute(query);
+    }
+
     private void showTimeTable() {
         TimeTableResultDao dao = new TimeTableResultDao(activity);
         List<AreaEx> areas = dao.getAreas();

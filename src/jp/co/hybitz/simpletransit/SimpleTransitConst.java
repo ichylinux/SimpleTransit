@@ -17,6 +17,7 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import jp.co.hybitz.jorudanlive.model.JorudanLiveResult;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.timetable.model.TimeTableResult;
 import jp.co.hybitz.traveldelay.model.TravelDelayResult;
@@ -40,6 +41,7 @@ public interface SimpleTransitConst {
     public static final int COLOR_BEIGE = 3;
 
     public static final String EXTRA_KEY_ALARM_ONLY = "alarmOnly";
+    public static final String EXTRA_KEY_JORUDAN_LIVE_RESULT = JorudanLiveResult.class.getName();
     public static final String EXTRA_KEY_LOCATION = "location";
     public static final String EXTRA_KEY_START_ALARM = "startAlarm";
     public static final String EXTRA_KEY_TRANSIT = "transit";
@@ -74,6 +76,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 20;
     public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 21;
     public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 22;
+    public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 23;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;
