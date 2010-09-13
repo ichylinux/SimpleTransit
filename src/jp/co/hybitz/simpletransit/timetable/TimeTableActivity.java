@@ -33,6 +33,7 @@ import jp.co.hybitz.simpletransit.timetable.model.StationEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeLineEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableResultEx;
+import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.timetable.model.Area;
 import jp.co.hybitz.timetable.model.Line;
 import jp.co.hybitz.timetable.model.Prefecture;
@@ -43,10 +44,9 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -57,6 +57,7 @@ import android.widget.AdapterView.OnItemClickListener;
  */
 public class TimeTableActivity extends BaseActivity implements SimpleTransitConst {
     private Bitmap[] images;
+    private TimeTableItem currentItem;
     private ParentBackItem backItem;
     private TimeTableResultEx result;
     private TimeTableEx timeTable;
@@ -64,7 +65,6 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     private TextView title;
     private ListView list;
     private TextView lastUpdate;
-    private Button update;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,8 +98,6 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         title = (TextView) findViewById(R.id.time_table_title);
         list = (ListView) findViewById(R.id.time_table_list);
         lastUpdate = (TextView) findViewById(R.id.last_update);
-        update = (Button) findViewById(R.id.update);
-        update.setVisibility(View.GONE);
     }
     
     private void initAction(boolean clickable) {
@@ -112,11 +110,6 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
             });
         }
         registerForContextMenu(list);
-        
-        update.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            }
-        });
     }
     
     @Override
@@ -140,11 +133,47 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         if (timeTable != null) {
             menu.add(0, MENU_ITEM_TIME_TABLE, ++i, "駅・時刻表");
         }
+        else {
+            menu.add(0, MENU_ITEM_REFRESH, ++i, "再読込");
+        }
         menu.add(0, MENU_ITEM_PREFERENCES, ++i, "設定");
         menu.add(0, MENU_ITEM_QUIT, ++i, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
+     */
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (MENU_ITEM_REFRESH == item.getItemId()) {
+            handleRefresh();
+            return true;
+        }
+        
+        return super.onMenuItemSelected(featureId, item);
+    }
+    
+    private void handleRefresh() {
+        TimeTableResultDao dao = new TimeTableResultDao(this);
+        
+        if (currentItem == null) {
+            ToastUtils.toast(this, "まだ時刻表の更新のみの対応です。。");
+        }
+        else if (currentItem.getStation() != null) {
+            dao.deleteTimeTables(currentItem.getStation().getId());
+            currentItem = new TimeTableItem(
+                    currentItem.getArea(), 
+                    currentItem.getPrefecture(), 
+                    currentItem.getLine(), 
+                    currentItem.getStation());
+            updateList(currentItem);
+        }
+        else {
+            ToastUtils.toast(this, "まだ時刻表の更新のみの対応です。。");
+        }
+    }
+    
     private void handleBack(ParentBackItem item) {
         if (item.getArea() == null) {
             showAreas();
@@ -243,6 +272,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     public void showAreas() {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = null;
         backItem = null;
 
         for (AreaEx a : result.getAreas()) {
@@ -258,6 +288,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
 
     public void showPrefectures(AreaEx a) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(a);
         backItem = new ParentBackItem();
 
         adapter.insert(backItem, 0);
@@ -275,6 +306,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     public void showLines(AreaEx a, PrefectureEx p) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(a, p);
         backItem = new ParentBackItem(a);
 
         adapter.insert(backItem, 0);
@@ -292,6 +324,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     public void showStations(AreaEx a, PrefectureEx p, LineEx l) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(a, p, l);
         backItem = new ParentBackItem(a, p);
 
         adapter.insert(backItem, 0);
@@ -309,6 +342,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     public void showTimeTables(AreaEx a, PrefectureEx p, LineEx l, StationEx s) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(a, p, l, s);
         backItem = new ParentBackItem(a, p, l);
 
         adapter.insert(backItem, 0);
@@ -326,6 +360,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     private void showTimeLines(AreaEx a, PrefectureEx p, LineEx l, StationEx s, TimeTableEx tt) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(a, p, l, s, tt);
         backItem = new ParentBackItem(a, p, l, s);
 
         adapter.insert(backItem, 0);
@@ -348,6 +383,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         tt.setTimeLines(dao.getTimeLines(tt.getId()));
 
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        currentItem = new TimeTableItem(null, null, null, s, tt);
         backItem = null;
 
         for (int i = 0; i < tt.getTimeLines().size(); i ++) {

@@ -77,6 +77,7 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 21;
     public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 22;
     public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 23;
+    public static final int MENU_ITEM_REFRESH = Menu.FIRST + 24;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

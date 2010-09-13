@@ -460,20 +460,6 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
     
-    public int deleteLines(long prefectureId) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-            int count = db.delete("line", "prefecture_id=?", new String[]{String.valueOf(prefectureId)});
-            db.setTransactionSuccessful();
-            return count;
-        }
-        finally {
-            db.endTransaction();
-            db.close();
-        }
-    }
-    
     public int updateFavorite(TimeTableEx timeTable) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -505,5 +491,32 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         finally {
             db.close();
         }
+    }
+    
+    public int deleteTimeTables(long stationId) {
+        String[] params = new String[]{String.valueOf(stationId)};
+
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            CursorEx c = (CursorEx) db.query("time_table", new String[]{"_id"}, "station_id=?", params, null, null, null);
+            while (c.moveToNext()) {
+                deleteTimeLines(db, c.getLong("_id"));
+            }
+            c.close();
+
+            int ret = db.delete("time_table", "station_id=?", params);
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+    
+    private int deleteTimeLines(SQLiteDatabase db, long timeTableId) {
+        String[] params = new String[]{String.valueOf(timeTableId)};
+        return db.delete("time_line", "time_table_id=?", params);
     }
 }
