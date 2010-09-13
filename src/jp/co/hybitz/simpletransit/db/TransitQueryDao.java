@@ -154,7 +154,7 @@ public class TransitQueryDao extends AbstractDao {
     public SimpleTransitQuery getLatestTransitQuery() {
         SQLiteDatabase db = getReadableDatabase();
         try {
-            CursorEx c = (CursorEx) db.query("transit_query", null, "used_at > 0", null, null, null, "updated_at desc", "1");
+            CursorEx c = (CursorEx) db.query("transit_query", null, null, null, null, null, "updated_at desc", "1");
 
             SimpleTransitQuery ret = null;
             

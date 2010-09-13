@@ -31,8 +31,8 @@ import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
 import jp.co.hybitz.simpletransit.action.FromToDragListener;
-import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
+import jp.co.hybitz.simpletransit.common.BaseActivity;
 import jp.co.hybitz.simpletransit.common.model.Favorable;
 import jp.co.hybitz.simpletransit.db.TimeTableResultDao;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
@@ -49,7 +49,6 @@ import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.stationapi.model.Station;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -71,14 +70,14 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransit extends Activity implements SimpleTransitConst {
-    private OptionMenuHandler optionMenuHandler = new OptionMenuHandler(this);
+public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     private SimpleTransitQuery query = new SimpleTransitQuery();
     private TimeTypeAndDate selectedTime;
     private TimeTypeAndDate currentTime;
@@ -86,6 +85,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     private Stack<TimeTypeAndDate> nextTime = new Stack<TimeTypeAndDate>();
     private LinearLayout searchDetails;
     private ListView results;
+    private RelativeLayout searchButtons;
     private int orientationWhenStarted;
     private boolean showingResultsOnFullScreen;
 
@@ -153,10 +153,6 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         switch (item.getItemId()) {
         case MENU_ITEM_SEARCH_NEAR_STATIONS :
             searchNearStations();
-            return true;
-        }
-        
-        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
             return true;
         }
         
@@ -249,6 +245,7 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
         setContentView(getLayoutId());
     	
         results = (ListView) findViewById(R.id.results);
+        searchButtons = (RelativeLayout) findViewById(R.id.layout_search_buttons);
 
         CheckBox first = (CheckBox) findViewById(R.id.first);
         first.setTextColor(Preferences.getTextColor(this));
@@ -811,11 +808,12 @@ public class SimpleTransit extends Activity implements SimpleTransitConst {
     }
     
     private void updatePreviousTimeAndNextTimeVisibility() {
-        Button next = (Button) findViewById(R.id.next_time);
-        next.setVisibility(nextTime.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-        
-        Button previous = (Button) findViewById(R.id.previous_time);
-        previous.setVisibility(previousTime.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+        if (nextTime.isEmpty() && previousTime.isEmpty()) {
+            searchButtons.setVisibility(View.GONE);
+        }
+        else {
+            searchButtons.setVisibility(View.VISIBLE);
+        }
     }
     
 }
