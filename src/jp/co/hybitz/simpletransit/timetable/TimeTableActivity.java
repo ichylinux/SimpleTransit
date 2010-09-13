@@ -38,7 +38,9 @@ import jp.co.hybitz.timetable.model.Area;
 import jp.co.hybitz.timetable.model.Line;
 import jp.co.hybitz.timetable.model.Prefecture;
 import jp.co.hybitz.timetable.model.Station;
+import jp.co.hybitz.timetable.model.TimeTable;
 import jp.co.hybitz.timetable.model.TimeTableQuery;
+import jp.co.hybitz.timetable.model.TimeTable.Type;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -47,8 +49,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -65,6 +69,9 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     private TextView title;
     private ListView list;
     private TextView lastUpdate;
+    private RelativeLayout controlButtons;
+    private Button previousType;
+    private Button nextType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,6 +105,9 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         title = (TextView) findViewById(R.id.time_table_title);
         list = (ListView) findViewById(R.id.time_table_list);
         lastUpdate = (TextView) findViewById(R.id.last_update);
+        controlButtons = (RelativeLayout) findViewById(R.id.control_buttons);
+        previousType = (Button) findViewById(R.id.previous_type);
+        nextType = (Button) findViewById(R.id.next_type);
     }
     
     private void initAction(boolean clickable) {
@@ -158,7 +168,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         TimeTableResultDao dao = new TimeTableResultDao(this);
         
         if (currentItem == null) {
-            ToastUtils.toast(this, "まだ時刻表の更新のみの対応です。。");
+            ToastUtils.toast(this, "まだ未対応です。。");
         }
         else if (currentItem.getStation() != null) {
             dao.deleteTimeTables(currentItem.getStation().getId());
@@ -169,8 +179,16 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
                     currentItem.getStation());
             updateList(currentItem);
         }
+        else if (currentItem.getLine() != null) {
+            dao.deleteStations(currentItem.getLine().getId());
+            currentItem = new TimeTableItem(
+                    currentItem.getArea(), 
+                    currentItem.getPrefecture(), 
+                    currentItem.getLine());
+            updateList(currentItem);
+        }
         else {
-            ToastUtils.toast(this, "まだ時刻表の更新のみの対応です。。");
+            ToastUtils.toast(this, "まだ未対応です。。");
         }
     }
     
@@ -270,6 +288,10 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         }
     }
     
+    private CharSequence getLastUpdate(long updateAt) {
+        return Preferences.getText(this, DateUtils.format(result.getAreas().get(0).getUpdatedAt(), "yyyy/MM/dd")) + "更新";
+    }
+    
     public void showAreas() {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         currentItem = null;
@@ -283,7 +305,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, "地域"));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(result.getAreas().get(0).getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(result.getAreas().get(0).getUpdatedAt()));
+        controlButtons.setVisibility(View.GONE);
     }
 
     public void showPrefectures(AreaEx a) {
@@ -301,7 +324,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, a.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(a.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(a.getUpdatedAt()));
+        controlButtons.setVisibility(View.GONE);
     }
     
     public void showLines(AreaEx a, PrefectureEx p) {
@@ -319,7 +343,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, p.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(p.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(p.getUpdatedAt()));
+        controlButtons.setVisibility(View.GONE);
     }
     
     public void showStations(AreaEx a, PrefectureEx p, LineEx l) {
@@ -337,7 +362,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(l.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(l.getUpdatedAt()));
+        controlButtons.setVisibility(View.GONE);
     }
     
     public void showTimeTables(AreaEx a, PrefectureEx p, LineEx l, StationEx s) {
@@ -355,7 +381,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(s.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(s.getUpdatedAt()));
+        controlButtons.setVisibility(View.GONE);
     }
     
     private void showTimeLines(AreaEx a, PrefectureEx p, LineEx l, StationEx s, TimeTableEx tt) {
@@ -375,7 +402,8 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setOnClickListener(new StarListener(images, tt));
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(tt.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(tt.getUpdatedAt()));
+        updateControlButtons(tt);
     }
     
     private void showTimeLines(StationEx s, TimeTableEx tt) {
@@ -397,6 +425,24 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setOnClickListener(new StarListener(images, tt));
         title.setText(Preferences.getText(this, s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
         list.setAdapter(adapter);
-        lastUpdate.setText(Preferences.getText(this, DateUtils.format(tt.getUpdatedAt(), "yyyy/MM/dd")));
+        lastUpdate.setText(getLastUpdate(tt.getUpdatedAt()));
+        updateControlButtons(tt);
+    }
+    
+    private void updateControlButtons(TimeTableEx tt) {
+        if (tt.getType() == Type.WEEKDAY) {
+            previousType.setText(TimeTable.getTypeString(Type.SUNDAY));
+            nextType.setText(TimeTable.getTypeString(Type.SATURDAY));
+        }
+        else if (tt.getType() == Type.SATURDAY) {
+            previousType.setText(TimeTable.getTypeString(Type.WEEKDAY));
+            nextType.setText(TimeTable.getTypeString(Type.SUNDAY));
+        }
+        else if (tt.getType() == Type.SUNDAY) {
+            previousType.setText(TimeTable.getTypeString(Type.SATURDAY));
+            nextType.setText(TimeTable.getTypeString(Type.WEEKDAY));
+        }
+                
+        controlButtons.setVisibility(View.VISIBLE);
     }
 }

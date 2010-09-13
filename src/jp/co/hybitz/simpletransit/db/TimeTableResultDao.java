@@ -493,19 +493,45 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
     
-    public int deleteTimeTables(long stationId) {
-        String[] params = new String[]{String.valueOf(stationId)};
-
+    public int deleteStations(long lineId) {
+        String[] params = new String[]{String.valueOf(lineId)};
+        
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {
-            CursorEx c = (CursorEx) db.query("time_table", new String[]{"_id"}, "station_id=?", params, null, null, null);
+            CursorEx c = (CursorEx) db.query("station", new String[]{"_id"}, "line_id=?", params, null, null, null);
             while (c.moveToNext()) {
-                deleteTimeLines(db, c.getLong("_id"));
+                deleteTimeTables(db, c.getLong("_id"));
             }
             c.close();
 
-            int ret = db.delete("time_table", "station_id=?", params);
+            int ret = db.delete("station", "line_id=?", params);
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    private int deleteTimeTables(SQLiteDatabase db, long stationId) {
+        String[] params = new String[]{String.valueOf(stationId)};
+
+        CursorEx c = (CursorEx) db.query("time_table", new String[]{"_id"}, "station_id=?", params, null, null, null);
+        while (c.moveToNext()) {
+            deleteTimeLines(db, c.getLong("_id"));
+        }
+        c.close();
+
+        return db.delete("time_table", "station_id=?", params);
+    }
+
+    public int deleteTimeTables(long stationId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int ret = deleteTimeTables(db, stationId);
             db.setTransactionSuccessful();
             return ret;
         }

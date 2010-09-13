@@ -127,7 +127,7 @@ class TimeTableItem implements Serializable {
         }
         
         if (line != null) {
-            return line.getName();
+            return line.getCompany() + "　" + line.getName();
         }
         
         if (prefecture != null) {
