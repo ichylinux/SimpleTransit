@@ -29,6 +29,7 @@ import jp.co.hybitz.simpletransit.timetable.model.StationEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeLineEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.timetable.model.TransitTimeEx;
+import jp.co.hybitz.timetable.model.TimeTable;
 import jp.co.hybitz.timetable.model.TransitTime;
 import jp.co.hybitz.timetable.model.TimeTable.Type;
 import android.content.ContentValues;
@@ -92,6 +93,20 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         return ret;
     }
 
+    private LineEx getLine(SQLiteDatabase db, long lineId) {
+        CursorEx c = (CursorEx) db.query("line", null, "_id=?", new String[]{String.valueOf(lineId)}, null, null, null);
+        try {
+            if (c.moveToFirst()) {
+                return loadLine(c);
+            }
+        }
+        finally {
+            c.close();
+        }
+        
+        return null;
+    }
+
     public List<StationEx> getStations(long lineId) {
         List<StationEx> ret = new ArrayList<StationEx>();
         
@@ -144,6 +159,26 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         return ret;
     }
     
+    public TimeTableEx getTimeTable(long stationId, String direction, TimeTable.Type type) {
+        SQLiteDatabase db = getReadableDatabase();
+        CursorEx c = null;
+        try {
+            c = (CursorEx) db.query("time_table", null, "station_id=? and direction=? and type=?",
+                    new String[]{String.valueOf(stationId), direction, String.valueOf(toInt(type))}, null, null, null);
+            if (c.moveToFirst()) {
+                TimeTableEx tt = loadTimeTable(c);
+                tt.setTimeLines(getTimeLines(db, tt.getId()));
+                return tt;
+            }
+        }
+        finally {
+            if (c != null) { c.close(); }
+            db.close();
+        }
+        
+        return null;
+    }
+
     public List<TimeLineEx> getTimeLines(long timeTableId) {
         SQLiteDatabase db = getReadableDatabase();
         try {
@@ -481,7 +516,10 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
             CursorEx c = (CursorEx) db.query("time_table", null, "is_favorite <> 0", null, null, null, "_id asc");
             while (c.moveToNext()) {
                 TimeTableEx tt = loadTimeTable(c);
-                tt.setStation(getStation(db, tt.getStationId()));
+                StationEx station = getStation(db, tt.getStationId());
+                LineEx line = getLine(db, station.getLineId());
+                station.setLine(line);
+                tt.setStation(station);
                 ret.add(tt);
             }
             c.close();

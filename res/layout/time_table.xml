@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-	<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
-        <RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent">
-            <ImageView android:id="@+id/star" android:layout_width="48sp" android:layout_height="48sp" android:padding="10sp"/>
-		    <TextView android:id="@+id/time_table_title"
-		        android:layout_width="fill_parent" android:layout_height="wrap_content" android:textSize="18sp" android:layout_centerVertical="true" android:layout_toRightOf="@+id/star"/>
-        </RelativeLayout>
-	    <ListView android:id="@+id/time_table_list"
-	        android:layout_width="fill_parent"
-	        android:layout_height="fill_parent" android:layout_marginTop="5sp" android:layout_marginBottom="20sp"/>
-	</LinearLayout>
-    <RelativeLayout android:layout_height="wrap_content"
+    <RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:layout_above="@+id/layout_bottom">
+		<LinearLayout android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="wrap_content">
+	        <RelativeLayout android:layout_height="fill_parent" android:layout_width="fill_parent">
+	            <ImageView android:id="@+id/star" android:layout_width="48sp" android:layout_height="48sp" android:padding="10sp"/>
+			    <TextView android:id="@+id/time_table_title"
+			        android:layout_width="fill_parent" android:layout_height="wrap_content" android:textSize="18sp" android:layout_centerVertical="true" android:layout_toRightOf="@+id/star"/>
+	        </RelativeLayout>
+		    <ListView android:id="@+id/time_table_list"
+		        android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginTop="5sp"/>
+		</LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout android:id="@+id/layout_bottom" android:layout_height="wrap_content"
         android:layout_width="fill_parent" android:layout_alignParentBottom="true">
         <LinearLayout
             android:orientation="vertical"
@@ -23,9 +24,9 @@
             </RelativeLayout>
             <RelativeLayout android:id="@+id/control_buttons"
                 android:layout_width="wrap_content" android:layout_height="wrap_content">
-                <Button android:id="@+id/previous_type"
+                <Button android:id="@+id/previous_type" android:text="＜"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentLeft="true" android:minWidth="80sp"/>
-                <Button android:id="@+id/next_type"
+                <Button android:id="@+id/next_type" android:text="＞"
                     android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentRight="true" android:minWidth="80sp"/>
             </RelativeLayout>
         </LinearLayout>

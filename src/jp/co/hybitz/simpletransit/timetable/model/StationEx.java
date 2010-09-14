@@ -25,6 +25,7 @@ import jp.co.hybitz.timetable.model.Station;
 
 public class StationEx extends Entity {
     private long lineId;
+    private LineEx line;
     private Station station;
     private List<TimeTableEx> timeTables = new ArrayList<TimeTableEx>();
 
@@ -46,6 +47,14 @@ public class StationEx extends Entity {
 
     public void setLineId(long lineId) {
         this.lineId = lineId;
+    }
+
+    public LineEx getLine() {
+        return line;
+    }
+
+    public void setLine(LineEx line) {
+        this.line = line;
     }
 
     public String getName() {
