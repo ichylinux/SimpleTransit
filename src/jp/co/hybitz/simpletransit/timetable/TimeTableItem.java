@@ -28,6 +28,13 @@ import jp.co.hybitz.simpletransit.timetable.model.StationEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeLineEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.timetable.model.TransitTimeEx;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.SubscriptSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TextAppearanceSpan;
 
 class TimeTableItem implements Serializable {
     private AreaEx area;
@@ -102,20 +109,34 @@ class TimeTableItem implements Serializable {
         return null;
     }
 
-    public String getTitle() {
+    public CharSequence getTitle() {
         if (timeLine != null) {
             DecimalFormat df = new DecimalFormat("00");
-            StringBuilder sb = new StringBuilder();
+            SpannableStringBuilder sb = new SpannableStringBuilder();
             for (TransitTimeEx t : timeLine.getTimes()) {
                 if (sb.length() > 0) {
                     sb.append("  ");
                 }
                 sb.append(df.format(t.getMinute()));
                 if (StringUtils.isNotEmpty(t.getTransitClass())) {
-                    sb.append(t.getTransitClass());
+                    TextAppearanceSpan small = new TextAppearanceSpan(Typeface.DEFAULT.toString(), Typeface.NORMAL, 18, null, null);
+                    SpannableString text = new SpannableString(t.getTransitClass());
+                    text.setSpan(small, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    SuperscriptSpan up = new SuperscriptSpan();
+                    text.setSpan(up, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sb.append(text);
                 }
+                if (StringUtils.isNotEmpty(t.getBoundFor())) {
+                    TextAppearanceSpan small = new TextAppearanceSpan(Typeface.DEFAULT.toString(), Typeface.NORMAL, 18, null, null);
+                    SpannableString text = new SpannableString(t.getBoundFor());
+                    text.setSpan(small, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    SubscriptSpan down = new SubscriptSpan();
+                    text.setSpan(down, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sb.append(text);
+                }
+
             }
-            return sb.toString();
+            return sb;
         }
         
         if (timeTable != null) {
