@@ -57,10 +57,12 @@ import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.ClipboardManager;
 import android.view.ContextMenu;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -93,9 +95,32 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidExceptionHandler.bind(this, APP_ID);
+        initFirstBoot();
         initView();
         initAction();
         initFavorite();
+    }
+    
+    private void initFirstBoot() {
+        if (!Preferences.isResultsOnFullScreenDefined(this)) {
+            if (isSmallDevice()) {
+                Preferences.setResultsOnFullScreen(this, true);
+            }
+        }
+    }
+    
+    private boolean isSmallDevice() {
+        Display d = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int width = d.getWidth();
+        int height = d.getHeight();
+        if (width <= 320 && height <= 240) {
+            return true;
+        }
+        else if (width <= 240 && height <= 320) {
+            return true;
+        }
+        
+        return false;
     }
     
     @Override
@@ -141,6 +166,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
             menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_REVERSE_LOCATION, 1, "逆経路");
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_LOCATION_CLEAR, 2, "経路をクリア");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_CANCEL, 3, "キャンセル");
 //            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
         }
     }
