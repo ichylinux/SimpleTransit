@@ -25,7 +25,6 @@ import jp.co.hybitz.googletransit.model.TransitResult;
  * @author ichy <ichylinux@gmail.com>
  */
 public class TransitItem {
-
     private TransitResult transitResult;
     private Transit transit;
 
@@ -33,7 +32,7 @@ public class TransitItem {
         this.transitResult = transitResult;
         this.transit = transit;
     }
-    
+
     public TransitResult getTransitResult() {
         return transitResult;
     }

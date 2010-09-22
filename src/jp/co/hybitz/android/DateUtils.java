@@ -19,6 +19,7 @@ package jp.co.hybitz.android;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -57,5 +58,17 @@ public class DateUtils {
         } catch (ParseException e) {
             return null;
         }
+    }
+    
+    public static boolean isToday(Date date) {
+        Calendar c = Calendar.getInstance();
+        int year = c.get(Calendar.YEAR);
+        int month = c.get(Calendar.MONTH);
+        int day = c.get(Calendar.DATE);
+        
+        c.setTime(date);
+        return c.get(Calendar.YEAR) == year
+                && c.get(Calendar.MONTH) == month
+                && c.get(Calendar.DATE) == day;
     }
 }

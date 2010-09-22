@@ -18,6 +18,7 @@
 package jp.co.hybitz.simpletransit.timetable.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import jp.co.hybitz.simpletransit.common.model.Entity;
@@ -70,5 +71,15 @@ public class AreaEx extends Entity {
 
     public void setUrl(String url) {
         area.setUrl(url);
+    }
+    
+    public PrefectureEx getPrefecture(String name) {
+        for (Iterator<PrefectureEx> it = prefectures.iterator(); it.hasNext();) {
+            PrefectureEx p = it.next();
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
     }
 }

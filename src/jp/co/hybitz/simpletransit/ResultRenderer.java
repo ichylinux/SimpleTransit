@@ -19,9 +19,9 @@ package jp.co.hybitz.simpletransit;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import jp.co.hybitz.android.DateUtils;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitResult;
@@ -55,8 +55,8 @@ public class ResultRenderer implements SimpleTransitConst {
 
         ListView results = (ListView) activity.findViewById(R.id.results);
         List<TransitItem> items = new ArrayList<TransitItem>();
-        for (Iterator<Transit> it = result.getTransits().iterator(); it.hasNext();) {
-            Transit transit = it.next();
+        for (int i = 0; i < result.getTransitCount(); i ++) {
+            Transit transit = result.getTransits().get(i);
             items.add(new TransitItem(result, transit));
         }
         results.setAdapter(new ResultArrayAdapter(activity, items));
@@ -171,9 +171,12 @@ public class ResultRenderer implements SimpleTransitConst {
     private String createSummary(TransitResult result) {
         StringBuilder sb = new StringBuilder();
         if (result.getTransitCount() > 0) {
-            sb.append(createTitle(result, true));
-            sb.append("\n");
-            sb.append("検索結果は " + result.getTransitCount() + " 件です。");
+            if (DateUtils.isToday(result.getQueryDate())) {
+                sb.append(createTitle(result, true));
+            }
+            else {
+                sb.append(createTitleWithDate(result));
+            }
         }
         else {
             sb.append(activity.getString(R.string.no_route_found));

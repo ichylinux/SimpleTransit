@@ -18,10 +18,12 @@
 package jp.co.hybitz.simpletransit.timetable.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import jp.co.hybitz.simpletransit.common.model.Entity;
 import jp.co.hybitz.timetable.model.Station;
+import jp.co.hybitz.timetable.model.TimeTable.Type;
 
 public class StationEx extends Entity {
     private long lineId;
@@ -77,7 +79,22 @@ public class StationEx extends Entity {
         return timeTables;
     }
     
+    public void addTimeTable(TimeTableEx timeTable) {
+        timeTables.add(timeTable);
+    }
+    
     public void setTimeTables(List<TimeTableEx> timeTables) {
         this.timeTables = timeTables;
+    }
+
+    public TimeTableEx getTimeTable(String direction, Type type) {
+        for (Iterator<TimeTableEx> it = timeTables.iterator(); it.hasNext();) {
+            TimeTableEx tt = it.next();
+            if (tt.getDirection().equals(direction) && tt.getType() == type) {
+                return tt;
+            }
+        }
+        
+        return null;
     }
 }

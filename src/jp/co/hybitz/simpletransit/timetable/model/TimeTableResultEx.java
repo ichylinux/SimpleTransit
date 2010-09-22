@@ -38,6 +38,10 @@ public class TimeTableResultEx implements Serializable {
     public TimeTableResult getResult() {
         return result;
     }
+    
+    public void addArea(AreaEx area) {
+        areas.add(area);
+    }
 
     public List<AreaEx> getAreas() {
         return areas;

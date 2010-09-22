@@ -77,8 +77,8 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.clearHeader();
-        menu.add(0, MENU_ITEM_DELETE, 0, "削除");
+//        menu.add(0, MENU_ITEM_SET_DISPLAY_NAME, 1, "表示名を設定");
+        menu.add(0, MENU_ITEM_DELETE, 2, "削除");
     }
 
     /**
@@ -152,19 +152,24 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public boolean onContextItemSelected(MenuItem menuItem) {
-        if (menuItem.getItemId() == MENU_ITEM_DELETE) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
-            
-            MemoListItem item = (MemoListItem) getListView().getItemAtPosition(info.position);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
+        MemoListItem item = (MemoListItem) getListView().getItemAtPosition(info.position);
+
+        if (menuItem.getItemId() == MENU_ITEM_SET_DISPLAY_NAME) {
+            DisplayNameSettingDialog dialog = new DisplayNameSettingDialog(this, item.getResult());
+            dialog.show();
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_DELETE) {
             int count = new TransitResultDao(this).deleteTransitResult(item.getResult().getId());
             if (count == 1) {
                 showList();
             }
-            
             return true;
         }
-
-        return super.onContextItemSelected(menuItem);
+        else {
+            return super.onContextItemSelected(menuItem);
+        }
     }
 
     private void showList() {

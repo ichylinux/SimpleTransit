@@ -62,6 +62,62 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         return ret;
     }
     
+    public AreaEx getArea(long areaId, boolean eager) {
+        SQLiteDatabase db = getReadableDatabase();
+        CursorEx c = null;
+        try {
+            c = (CursorEx) db.query("area", null, "_id=?", new String[]{String.valueOf(areaId)}, null, null, null);
+            if (c.moveToFirst()) {
+                AreaEx a = loadArea(c);
+                if (eager) {
+                    a.setPrefectures(getPrefectures(db, a.getId()));
+                }
+                return a;
+            }
+            else {
+                return null;
+            }
+        }
+        finally {
+            if (c != null) {
+                c.close();
+            }
+            db.close();
+        }
+    }
+
+    public List<PrefectureEx> getPrefectures(long areaId) {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            return getPrefectures(db, areaId);
+        }
+        finally {
+            db.close();
+        }
+    }
+
+    public PrefectureEx getPrefecture(long prefectureId) {
+        SQLiteDatabase db = getReadableDatabase();
+        CursorEx c = null;
+        try {
+            String[] args = new String[]{String.valueOf(prefectureId)};
+            c = (CursorEx) db.query("prefecture", null, "_id=?", args, null, null, null);
+            if (c.moveToFirst()) {
+                PrefectureEx p = loadPrefecture(c);
+                return p;
+            }
+            else {
+                return null;
+            }
+        }
+        finally {
+            if (c != null) {
+                c.close();
+            }
+            db.close();
+        }
+    }
+    
     private List<PrefectureEx> getPrefectures(SQLiteDatabase db, long areaId) {
         List<PrefectureEx> ret = new ArrayList<PrefectureEx>();
         
@@ -80,7 +136,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         
         SQLiteDatabase db = getReadableDatabase();
         try {
-            CursorEx c = (CursorEx) db.query("line", null, "prefecture_id=?", new String[]{String.valueOf(prefectureId)}, null, null, "_id asc");
+            CursorEx c = (CursorEx) db.query("line", null, "prefecture_id=?", new String[]{String.valueOf(prefectureId)}, null, null, "display_order");
             while (c.moveToNext()) {
                 ret.add(loadLine(c));
             }
@@ -91,6 +147,28 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
         
         return ret;
+    }
+
+    public LineEx getLine(long lineId) {
+        SQLiteDatabase db = getReadableDatabase();
+        CursorEx c = null;
+        try {
+            String[] args = new String[]{String.valueOf(lineId)};
+            c = (CursorEx) db.query("line", null, "_id=?", args, null, null, null);
+            if (c.moveToFirst()) {
+                LineEx p = loadLine(c);
+                return p;
+            }
+            else {
+                return null;
+            }
+        }
+        finally {
+            if (c != null) {
+                c.close();
+            }
+            db.close();
+        }
     }
 
     private LineEx getLine(SQLiteDatabase db, long lineId) {
@@ -125,40 +203,63 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         return ret;
     }
 
-    private StationEx getStation(SQLiteDatabase db, long stationId) {
-        CursorEx c = (CursorEx) db.query("station", null, "_id=?", new String[]{String.valueOf(stationId)}, null, null, null);
-        try {
-            if (c.moveToFirst()) {
-                return loadStation(c);
-            }
-        }
-        finally {
-            c.close();
-        }
-        
-        return null;
-    }
-
-    public List<TimeTableEx> getTimeTables(long stationId) {
-        List<TimeTableEx> ret = new ArrayList<TimeTableEx>();
-        
+    public StationEx getStation(long stationId, boolean eager) {
         SQLiteDatabase db = getReadableDatabase();
         try {
-            CursorEx c = (CursorEx) db.query("time_table", null, "station_id=?", new String[]{String.valueOf(stationId)}, null, null, "_id asc");
-            while (c.moveToNext()) {
-                TimeTableEx tt = loadTimeTable(c);
-                tt.setTimeLines(getTimeLines(db, tt.getId()));
-                ret.add(tt);
-            }
-            c.close();
+            return getStation(db, stationId, eager);
         }
         finally {
             db.close();
         }
+    }
+
+    private StationEx getStation(SQLiteDatabase db, long stationId, boolean eager) {
+        CursorEx c = (CursorEx) db.query("station", null, "_id=?", new String[]{String.valueOf(stationId)}, null, null, null);
+        try {
+            if (c.moveToFirst()) {
+                StationEx ret = loadStation(c);
+                if (eager) {
+                    ret.setTimeTables(getTimeTables(db, stationId, eager));
+                }
+                return ret;
+            }
+            else {
+                return null;
+            }
+            
+        }
+        finally {
+            c.close();
+        }
+    }
+
+    public List<TimeTableEx> getTimeTables(long stationId, boolean eager) {
+        SQLiteDatabase db = getReadableDatabase();
+        try {
+            return getTimeTables(db, stationId, eager);
+        }
+        finally {
+            db.close();
+        }
+    }
+    
+    private List<TimeTableEx> getTimeTables(SQLiteDatabase db, long stationId, boolean eager) {
+        List<TimeTableEx> ret = new ArrayList<TimeTableEx>();
+        
+        String[] args = new String[]{String.valueOf(stationId)};
+        CursorEx c = (CursorEx) db.query("time_table", null, "station_id=?", args, null, null, "_id asc");
+        while (c.moveToNext()) {
+            TimeTableEx tt = loadTimeTable(c);
+            if (eager) {
+                tt.setTimeLines(getTimeLines(db, tt.getId()));
+            }
+            ret.add(tt);
+        }
+        c.close();
         
         return ret;
     }
-    
+
     public TimeTableEx getTimeTable(long stationId, String direction, TimeTable.Type type) {
         SQLiteDatabase db = getReadableDatabase();
         CursorEx c = null;
@@ -244,6 +345,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         l.setName(c.getString("name"));
         l.setCompany(c.getString("company"));
         l.setUrl(c.getString("url"));
+        l.setDiaplayOrder(c.getInt("display_order"));
         l.setCreatedAt(c.getLong("created_at"));
         l.setUpdatedAt(c.getLong("updated_at"));
         return l;
@@ -264,6 +366,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         TimeTableEx tt = new TimeTableEx();
         tt.setId(c.getLong("_id"));
         tt.setStationId(c.getLong("station_id"));
+        tt.setLineName(c.getString("line_name"));
         tt.setDirection(c.getString("direction"));
         tt.setType(toType(c.getInt("type")));
         tt.setFavorite(c.getBoolean("is_favorite"));
@@ -334,24 +437,9 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
                 cv.put("updated_at", now);
                 
                 long areaId = db.insertOrThrow("area", null, cv);
-                if (areaId < 0) {
-                    return new ArrayList<Long>();
-                }
                 
                 // prefecture
-                for (PrefectureEx p : a.getPrefectures()) {
-                    ContentValues pcv = new ContentValues();
-                    pcv.put("area_id", areaId);
-                    pcv.put("name", p.getName());
-                    pcv.put("url", p.getUrl());
-                    pcv.put("created_at", now);
-                    pcv.put("updated_at", now);
-                    
-                    long prefId = db.insertOrThrow("prefecture", null, pcv);
-                    if (prefId < 0) {
-                        return new ArrayList<Long>();
-                    }
-                }
+                insertPrefectures(db, areaId, a.getPrefectures());
                 
                 areaIdList.add(areaId);
             }
@@ -365,6 +453,38 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
     
+    public List<Long> insertPrefectures(long areaId, List<PrefectureEx> prefectures) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            List<Long> prefectureIdList = insertPrefectures(db, areaId, prefectures);
+            db.setTransactionSuccessful();
+            return prefectureIdList;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public List<Long> insertPrefectures(SQLiteDatabase db, long areaId, List<PrefectureEx> prefectures) {
+        long now = getCurrentDateTime();
+        List<Long> prefectureIdList = new ArrayList<Long>();
+
+        for (PrefectureEx p : prefectures) {
+            ContentValues pcv = new ContentValues();
+            pcv.put("area_id", areaId);
+            pcv.put("name", p.getName());
+            pcv.put("url", p.getUrl());
+            pcv.put("created_at", now);
+            pcv.put("updated_at", now);
+            
+            prefectureIdList.add(db.insertOrThrow("prefecture", null, pcv));
+        }
+        
+        return prefectureIdList;
+    }
+
     public List<Long> insertLines(long prefectureId, List<LineEx> lines) {
         long now = getCurrentDateTime();
         List<Long> lineIdList = new ArrayList<Long>();
@@ -378,6 +498,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
                 cv.put("name", l.getName());
                 cv.put("company", l.getCompany());
                 cv.put("url", l.getUrl());
+                cv.put("display_order", l.getDiaplayOrder());
                 cv.put("created_at", now);
                 cv.put("updated_at", now);
                 
@@ -441,6 +562,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
                 // time_table
                 ContentValues cv = new ContentValues();
                 cv.put("station_id", stationId);
+                cv.put("line_name", tt.getLineName());
                 cv.put("direction", tt.getDirection());
                 cv.put("type", toInt(tt.getType()));
                 cv.put("is_favorite", tt.isFavorite() ? 1 : 0);
@@ -448,39 +570,10 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
                 cv.put("updated_at", now);
                 
                 long timeTableId = db.insertOrThrow("time_table", null, cv);
-                if (timeTableId < 0) {
-                    return new ArrayList<Long>();
-                }
                 
                 // time_line
                 for (TimeLineEx tl : tt.getTimeLines()) {
-                    ContentValues lcv = new ContentValues();
-                    lcv.put("time_table_id", timeTableId);
-                    lcv.put("hour", tl.getHour());
-                    lcv.put("created_at", now);
-                    lcv.put("updated_at", now);
-                    
-                    long timeLineId = db.insertOrThrow("time_line", null, lcv);
-                    if (timeLineId < 0) {
-                        return new ArrayList<Long>();
-                    }
-                    
-                    // transit_time
-                    for (TransitTimeEx t : tl.getTimes()) {
-                        ContentValues tcv = new ContentValues();
-                        tcv.put("time_line_id", timeLineId);
-                        tcv.put("hour", t.getHour());
-                        tcv.put("minute", t.getMinute());
-                        tcv.put("transit_class", t.getTransitClass());
-                        tcv.put("bound_for", t.getBoundFor());
-                        tcv.put("created_at", now);
-                        tcv.put("updated_at", now);
-                        
-                        long transitTimeId = db.insertOrThrow("transit_time", null, tcv);
-                        if (transitTimeId < 0) {
-                            return new ArrayList<Long>();
-                        }
-                    }
+                    insertTimeLine(db, timeTableId, tl);
                 }
                 
                 timeTableIdList.add(timeTableId);
@@ -495,6 +588,227 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
     
+    private long insertTimeLine(SQLiteDatabase db, long timeTableId, TimeLineEx timeLine) {
+        long now = getCurrentDateTime();
+        ContentValues lcv = new ContentValues();
+        lcv.put("time_table_id", timeTableId);
+        lcv.put("hour", timeLine.getHour());
+        lcv.put("created_at", now);
+        lcv.put("updated_at", now);
+
+        long timeLineId = db.insertOrThrow("time_line", null, lcv);
+        
+        // transit_time
+        for (TransitTimeEx t : timeLine.getTimes()) {
+            ContentValues tcv = new ContentValues();
+            tcv.put("time_line_id", timeLineId);
+            tcv.put("hour", t.getHour());
+            tcv.put("minute", t.getMinute());
+            tcv.put("transit_class", t.getTransitClass());
+            tcv.put("bound_for", t.getBoundFor());
+            tcv.put("created_at", now);
+            tcv.put("updated_at", now);
+            
+            db.insertOrThrow("transit_time", null, tcv);
+        }
+        
+        return timeLineId;
+    }
+    
+    public int updateArea(AreaEx area) {
+        long now = getCurrentDateTime();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put("name", area.getName());
+            cv.put("url", area.getUrl());
+            cv.put("updated_at", now);
+            
+            int count = db.update("area", cv, "_id=?", new String[]{String.valueOf(area.getId())});
+            if (count != 1) {
+                return count;
+            }
+            
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int updatePrefecture(PrefectureEx prefecture) {
+        long now = getCurrentDateTime();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put("area_id", prefecture.getAreaId());
+            cv.put("name", prefecture.getName());
+            cv.put("url", prefecture.getUrl());
+            cv.put("updated_at", now);
+            
+            int count = db.update("prefecture", cv, "_id=?", new String[]{String.valueOf(prefecture.getId())});
+            if (count != 1) {
+                return count;
+            }
+            
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int updateLine(LineEx line) {
+        long now = getCurrentDateTime();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // line
+            ContentValues cv = new ContentValues();
+            cv.put("prefecture_id", line.getPrefectureId());
+            cv.put("name", line.getName());
+            cv.put("company", line.getCompany());
+            cv.put("url", line.getUrl());
+            cv.put("display_order", line.getDiaplayOrder());
+            cv.put("updated_at", now);
+            
+            int count = db.update("line", cv, "_id=?", new String[]{String.valueOf(line.getId())});
+            if (count != 1) {
+                return count;
+            }
+            
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int updateStation(StationEx station) {
+        long now = getCurrentDateTime();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // station
+            ContentValues cv = new ContentValues();
+            cv.put("line_id", station.getLineId());
+            cv.put("name", station.getName());
+            cv.put("url", station.getUrl());
+            cv.put("is_favorite", 0);
+            cv.put("updated_at", now);
+            
+            int count = db.update("station", cv, "_id=?", new String[]{String.valueOf(station.getId())});
+            if (count != 1) {
+                return count;
+            }
+            
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int deleteArea(long areaId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int ret = db.delete("area", "_id=?", new String[]{String.valueOf(areaId)});
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int deletePrefecture(long prefectureId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int ret = db.delete("prefecture", "_id=?", new String[]{String.valueOf(prefectureId)});
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int deleteLine(long lineId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int ret = db.delete("line", "_id=?", new String[]{String.valueOf(lineId)});
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int deleteStation(long stationId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            int ret = db.delete("station", "_id=?", new String[]{String.valueOf(stationId)});
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public int updateTimeTable(TimeTableEx timeTable) {
+        long now = getCurrentDateTime();
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // time_table
+            ContentValues cv = new ContentValues();
+            cv.put("station_id", timeTable.getStationId());
+            cv.put("line_name", timeTable.getLineName());
+            cv.put("direction", timeTable.getDirection());
+            cv.put("type", toInt(timeTable.getType()));
+            cv.put("is_favorite", timeTable.isFavorite() ? 1 : 0);
+            cv.put("updated_at", now);
+            
+            int count = db.update("time_table", cv, "_id=?", new String[]{String.valueOf(timeTable.getId())});
+            if (count != 1) {
+                return count;
+            }
+            
+            // time_line
+            deleteTimeLines(db, timeTable.getId());
+            for (TimeLineEx tl : timeTable.getTimeLines()) {
+                insertTimeLine(db, timeTable.getId(), tl);
+            }
+            
+            db.setTransactionSuccessful();
+            return count;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
     public int updateFavorite(TimeTableEx timeTable) {
         SQLiteDatabase db = getWritableDatabase();
         try {
@@ -516,7 +830,7 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
             CursorEx c = (CursorEx) db.query("time_table", null, "is_favorite <> 0", null, null, null, "_id asc");
             while (c.moveToNext()) {
                 TimeTableEx tt = loadTimeTable(c);
-                StationEx station = getStation(db, tt.getStationId());
+                StationEx station = getStation(db, tt.getStationId(), false);
                 LineEx line = getLine(db, station.getLineId());
                 station.setLine(line);
                 tt.setStation(station);
@@ -553,18 +867,6 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
 
-    private int deleteTimeTables(SQLiteDatabase db, long stationId) {
-        String[] params = new String[]{String.valueOf(stationId)};
-
-        CursorEx c = (CursorEx) db.query("time_table", new String[]{"_id"}, "station_id=?", params, null, null, null);
-        while (c.moveToNext()) {
-            deleteTimeLines(db, c.getLong("_id"));
-        }
-        c.close();
-
-        return db.delete("time_table", "station_id=?", params);
-    }
-
     public int deleteTimeTables(long stationId) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
@@ -579,8 +881,47 @@ public class TimeTableResultDao extends AbstractDao implements SimpleTransitCons
         }
     }
     
+    public int deleteTimeTable(long timeTableId) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.beginTransaction();
+        try {
+            deleteTimeLines(db, timeTableId);
+            int ret = db.delete("time_table", "_id=?", new String[]{String.valueOf(timeTableId)});
+            db.setTransactionSuccessful();
+            return ret;
+        }
+        finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    private int deleteTimeTables(SQLiteDatabase db, long stationId) {
+        String[] params = new String[]{String.valueOf(stationId)};
+
+        CursorEx c = (CursorEx) db.query("time_table", new String[]{"_id"}, "station_id=?", params, null, null, null);
+        while (c.moveToNext()) {
+            deleteTimeLines(db, c.getLong("_id"));
+        }
+        c.close();
+
+        return db.delete("time_table", "station_id=?", params);
+    }
+
     private int deleteTimeLines(SQLiteDatabase db, long timeTableId) {
         String[] params = new String[]{String.valueOf(timeTableId)};
+        
+        CursorEx c = (CursorEx) db.query("time_line", new String[]{"_id"}, "time_table_id=?", params, null, null, null);
+        while (c.moveToNext()) {
+            deleteTransitTimes(db, c.getLong("_id"));
+        }
+        c.close();
+        
         return db.delete("time_line", "time_table_id=?", params);
+    }
+    
+    private int deleteTransitTimes(SQLiteDatabase db, long timeLineId) {
+        String[] params = new String[]{String.valueOf(timeLineId)};
+        return db.delete("transit_time", "time_line_id=?", params);
     }
 }

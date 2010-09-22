@@ -45,7 +45,7 @@ class ResultArrayAdapter extends ArrayAdapterEx<TransitItem> implements SimpleTr
     
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         menu.add(0, MENU_ITEM_COPY_TEXT, 1, "テキストをコピー");
-        menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモとして保存");
+        menu.add(0, MENU_ITEM_MEMO_CREATE, 2, "メモに保存");
         menu.add(0, MENU_ITEM_ALARM_CREATE, 3, "アラームをセット");
         menu.add(0, MENU_ITEM_CANCEL, 4, "キャンセル");
     }

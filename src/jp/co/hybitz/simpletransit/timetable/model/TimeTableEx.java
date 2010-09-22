@@ -94,4 +94,12 @@ public class TimeTableEx extends Favorable {
         timeTable.setType(type);
     }
 
+    public String getLineName() {
+        return timeTable.getLineName();
+    }
+
+    public void setLineName(String lineName) {
+        timeTable.setLineName(lineName);
+    }
+
 }

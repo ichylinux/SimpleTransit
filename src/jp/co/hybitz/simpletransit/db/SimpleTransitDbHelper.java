@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 14;
+    private static final int DB_VERSION = 18;
 
     /**
      * コンストラクタ
@@ -50,6 +50,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         createTableStation(db);
         createTableTimeTable(db);
         createTableTimeLine(db);
+        createIndexTimeTableIdOnTimeLine(db);
         createTableTransitTime(db);
     }
 
@@ -82,6 +83,14 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom12To13(db);
         case 13 :
             upgradeFrom13To14(db);
+        case 14 :
+            upgradeFrom14To15(db);
+        case 15 :
+            upgradeFrom15To16(db);
+        case 16 :
+            upgradeFrom16To17(db);
+        case 17 :
+            upgradeFrom17To18(db);
         default :
         }
     }
@@ -162,6 +171,43 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    private void upgradeFrom14To15(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table line add column display_order integer not null default 0 ");
+        }
+        catch (Exception e) {
+        }
+    }
+
+    private void upgradeFrom15To16(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table line add column display_order integer not null default 0 ");
+        }
+        catch (Exception e) {
+        }
+    }
+
+    private void upgradeFrom16To17(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table transit_result add column display_name text ");
+        }
+        catch (Exception e) {
+        }
+        try {
+            db.execSQL("alter table time_table add column line_name text ");
+        }
+        catch (Exception e) {
+        }
+    }
+
+    private void upgradeFrom17To18(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table time_table add column line_name text ");
+        }
+        catch (Exception e) {
+        }
+    }
+
     private void createTableTransitQuery(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
         sb.append("create table transit_query ( ");
@@ -187,6 +233,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         sb.append("transit_from text not null, ");
         sb.append("transit_to text not null, ");
         sb.append("prefecture text, ");
+        sb.append("display_name text, ");
         sb.append("alarm_status integer not null default 0, ");
         sb.append("alarm_at integer not null default 0, ");
         sb.append("created_at integer not null default 0 ");
@@ -251,6 +298,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         sb.append("name text not null, ");
         sb.append("company text, ");
         sb.append("url text not null, ");
+        sb.append("display_order integer not null default 0, ");
         sb.append("created_at integer not null default 0, ");
         sb.append("updated_at integer not null default 0 ");
         sb.append(") ");
@@ -275,6 +323,7 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         StringBuilder sb = new StringBuilder();
         sb.append("create table time_table ( ");
         sb.append("_id integer primary key autoincrement, ");
+        sb.append("line_name text, ");
         sb.append("station_id integer not null, ");
         sb.append("direction text not null, ");
         sb.append("type integer not null, ");
@@ -297,6 +346,12 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         db.execSQL(sb.toString());
     }
     
+    private void createIndexTimeTableIdOnTimeLine(SQLiteDatabase db) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("create index index_time_table_id on time_line( time_table_id ) ");
+        db.execSQL(sb.toString());
+    }
+
     private void createTableTransitTime(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
         sb.append("create table transit_time ( ");

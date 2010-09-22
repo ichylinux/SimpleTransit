@@ -20,6 +20,7 @@ package jp.co.hybitz.simpletransit.station;
 import jp.co.hybitz.android.WebSearchTask;
 import jp.co.hybitz.common.GeoLocation;
 import jp.co.hybitz.common.HttpSearchException;
+import jp.co.hybitz.common.Searcher;
 import jp.co.hybitz.rgeocode.RGeocodeSearcherFactory;
 import jp.co.hybitz.rgeocode.model.RGeocodeQuery;
 import jp.co.hybitz.rgeocode.model.RGeocodeResult;
@@ -47,6 +48,7 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
     private LocationManager locationManager;
     private boolean gpsFinished;
     private Location location;
+    private Searcher<StationApiQuery, StationApiResult> searcher;
 
     public SearchNearStationsTask(SimpleTransit activity) {
         super(activity);
@@ -113,29 +115,36 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
             }
         }
         
-        if (location != null) {
-            GeoLocation gl = new GeoLocation();
-            gl.setLatitude(location.getLatitude());
-            gl.setLongitude(location.getLongitude());
+        if (location == null) {
+            return null;
+        }
 
-            StationApiQuery query = new StationApiQuery();
-            query.setGeoLocation(gl);
-            StationApiResult result = StationApiSearcherFactory.createSearcher().search(query);
-            
-            if (result.isOK()) {
-                try {
-                    RGeocodeQuery rquery = new RGeocodeQuery();
-                    rquery.setGeoLocation(gl);
-                    RGeocodeResult rresult = RGeocodeSearcherFactory.createSearcher().search(rquery);
-                    if (result.isOK()) {
-                        result.setRGeocodeResult(rresult);
-                    }
+        GeoLocation gl = new GeoLocation();
+        gl.setLatitude(location.getLatitude());
+        gl.setLongitude(location.getLongitude());
+        StationApiQuery query = new StationApiQuery();
+        query.setGeoLocation(gl);
+
+        searcher = StationApiSearcherFactory.createSearcher();
+        StationApiResult result = searcher.search(query);
+        
+        if (isCancelled()) {
+            return null;
+        }
+
+        if (result.isOK()) {
+            try {
+                RGeocodeQuery rquery = new RGeocodeQuery();
+                rquery.setGeoLocation(gl);
+                RGeocodeResult rresult = RGeocodeSearcherFactory.createSearcher().search(rquery);
+                if (result.isOK()) {
+                    result.setRGeocodeResult(rresult);
                 }
-                catch (HttpSearchException e) {
-                }
-                
-                return result;
             }
+            catch (HttpSearchException e) {
+            }
+            
+            return result;
         }
 
         return null;
@@ -170,6 +179,9 @@ public class SearchNearStationsTask extends WebSearchTask<Void, StationApiResult
     @Override
     protected void onCancelled() {
         stopGps();
+        if (searcher != null) {
+            searcher.cancel();
+        }
     }
 
     private void stopGps() {

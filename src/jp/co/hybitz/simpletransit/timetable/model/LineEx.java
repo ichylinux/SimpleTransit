@@ -1,6 +1,7 @@
 package jp.co.hybitz.simpletransit.timetable.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import jp.co.hybitz.simpletransit.common.model.Entity;
@@ -8,6 +9,7 @@ import jp.co.hybitz.timetable.model.Line;
 
 public class LineEx extends Entity {
     private long prefectureId;
+    private int diaplayOrder;
     private Line line;
     private List<StationEx> stations = new ArrayList<StationEx>();
     
@@ -25,6 +27,14 @@ public class LineEx extends Entity {
 
     public void setPrefectureId(long prefectureId) {
         this.prefectureId = prefectureId;
+    }
+
+    public int getDiaplayOrder() {
+        return diaplayOrder;
+    }
+
+    public void setDiaplayOrder(int diaplayOrder) {
+        this.diaplayOrder = diaplayOrder;
     }
 
     public Line getLine() {
@@ -65,5 +75,16 @@ public class LineEx extends Entity {
     
     public void setStations(List<StationEx> stations) {
         this.stations = stations;
+    }
+    
+    public StationEx getStation(String name) {
+        for (Iterator<StationEx> it = stations.iterator(); it.hasNext();) {
+            StationEx s = it.next();
+            if (s.getName().equals(name)) {
+                return s;
+            }
+        }
+        
+        return null;
     }
 }

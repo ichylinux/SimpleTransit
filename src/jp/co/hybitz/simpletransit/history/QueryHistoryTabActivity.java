@@ -79,7 +79,7 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
         th.addTab(th.newTabSpec(TAG_FAVORITE).setIndicator("お気に入り").setContent(R.id.query_history_favorite));
         th.addTab(th.newTabSpec(TAG_ALL).setIndicator("検索履歴").setContent(R.id.query_history_all));
         th.addTab(th.newTabSpec(TAG_LOCATION).setIndicator("目的地履歴").setContent(R.id.query_history_location));
-        th.setCurrentTab(0);
+        th.setCurrentTab(1);
     }
     
     private void initAction() {

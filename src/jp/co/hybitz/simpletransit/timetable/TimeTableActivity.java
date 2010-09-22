@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.hybitz.android.DateUtils;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
@@ -75,11 +76,14 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        result = (TimeTableResultEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE_RESULT);
+        timeTable = (TimeTableEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE);
+        
         initView();
 
         if (result != null) {
             initAction(true);
-            showAreas();
+            showAreas(result);
         }
         else if (timeTable != null) {
             initAction(false);
@@ -96,9 +100,6 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
                 BitmapFactory.decodeResource(getResources(), R.drawable.star_off),
                 BitmapFactory.decodeResource(getResources(), R.drawable.star_on),
             };
-        
-        result = (TimeTableResultEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE_RESULT);
-        timeTable = (TimeTableEx) getIntent().getExtras().getSerializable(EXTRA_KEY_TIME_TABLE);
         
         star = (ImageView) findViewById(R.id.star);
         title = (TextView) findViewById(R.id.time_table_title);
@@ -205,33 +206,33 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
             }
         }
         
-        TimeTableResultDao dao = new TimeTableResultDao(this);
-        TimeTableEx tt = dao.getTimeTable(current.getStationId(), current.getDirection(), type);
+        TimeTableEx tt = currentItem.getStation().getTimeTable(current.getDirection(), type);
+        if (tt == null) {
+            TimeTableResultDao dao = new TimeTableResultDao(this);
+            tt = dao.getTimeTable(current.getStationId(), current.getDirection(), type);
+            currentItem.getStation().addTimeTable(tt);
+        }
         showTimeLines(currentItem.getArea(), currentItem.getPrefecture(), currentItem.getLine(), currentItem.getStation(), tt);
     }
     
     private void handleRefresh() {
-        TimeTableResultDao dao = new TimeTableResultDao(this);
-        
         if (currentItem == null) {
+            searchAreas();
+        }
+        else if (currentItem.getTimeTable() != null) {
             ToastUtils.toast(this, "まだ未対応です。。");
         }
         else if (currentItem.getStation() != null) {
-            dao.deleteTimeTables(currentItem.getStation().getId());
-            currentItem = new TimeTableItem(
-                    currentItem.getArea(), 
-                    currentItem.getPrefecture(), 
-                    currentItem.getLine(), 
-                    currentItem.getStation());
-            updateList(currentItem);
+            searchTimeTables(currentItem);
         }
         else if (currentItem.getLine() != null) {
-            dao.deleteStations(currentItem.getLine().getId());
-            currentItem = new TimeTableItem(
-                    currentItem.getArea(), 
-                    currentItem.getPrefecture(), 
-                    currentItem.getLine());
-            updateList(currentItem);
+            searchStations(currentItem);
+        }
+        else if (currentItem.getPrefecture() != null) {
+            searchLines(currentItem);
+        }
+        else if (currentItem.getArea() != null) {
+            searchPrefectures(currentItem);
         }
         else {
             ToastUtils.toast(this, "まだ未対応です。。");
@@ -240,7 +241,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     
     private void handleBack(ParentBackItem item) {
         if (item.getArea() == null) {
-            showAreas();
+            showAreas(result);
         }
         else if (item.getPrefecture() == null) {
             showPrefectures(item.getArea());
@@ -259,6 +260,59 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         }
     }
     
+    private void searchAreas() {
+        TimeTableQuery query = new TimeTableQuery();
+        new TimeTableTask(this).execute(query);
+    }
+
+    private void searchPrefectures(TimeTableItem item) {
+        TimeTableQuery query = new TimeTableQuery();
+        new TimeTableTask(this, item).execute(query);
+    }
+
+    private void searchLines(TimeTableItem item) {
+        TimeTableQuery query = new TimeTableQuery();
+        query.setArea(new Area());
+        query.getArea().setName(item.getArea().getName());
+        query.getArea().setUrl(item.getArea().getUrl());
+        query.setPrefecture(new Prefecture());
+        query.getPrefecture().setName(item.getPrefecture().getName());
+        query.getPrefecture().setUrl(item.getPrefecture().getUrl());
+        new TimeTableTask(this, item).execute(query);
+    }
+    
+    private void searchStations(TimeTableItem item) {
+        TimeTableQuery query = new TimeTableQuery();
+        query.setArea(new Area());
+        query.getArea().setName(item.getArea().getName());
+        query.getArea().setUrl(item.getArea().getUrl());
+        query.setPrefecture(new Prefecture());
+        query.getPrefecture().setName(item.getPrefecture().getName());
+        query.getPrefecture().setUrl(item.getPrefecture().getUrl());
+        query.setLine(new Line());
+        query.getLine().setName(item.getLine().getName());
+        query.getLine().setUrl(item.getLine().getUrl());
+        new TimeTableTask(this, item).execute(query);
+    }
+    
+    private void searchTimeTables(TimeTableItem item) {
+        TimeTableQuery query = new TimeTableQuery();
+        query.setArea(new Area());
+        query.getArea().setName(item.getArea().getName());
+        query.getArea().setUrl(item.getArea().getUrl());
+        query.setPrefecture(new Prefecture());
+        query.getPrefecture().setName(item.getPrefecture().getName());
+        query.getPrefecture().setUrl(item.getPrefecture().getUrl());
+        query.setLine(new Line());
+        query.getLine().setCompany(item.getLine().getCompany());
+        query.getLine().setName(item.getLine().getName());
+        query.getLine().setUrl(item.getLine().getUrl());
+        query.setStation(new Station());
+        query.getStation().setName(item.getStation().getName());
+        query.getStation().setUrl(item.getStation().getUrl());
+        new TimeTableTask(this, item).execute(query);
+    }
+    
     private void updateList(TimeTableItem item) {
         if (item instanceof ParentBackItem) {
             handleBack((ParentBackItem) item);
@@ -270,14 +324,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
             TimeTableResultDao dao = new TimeTableResultDao(this);
             List<LineEx> lines = dao.getLines(item.getPrefecture().getId());
             if (lines.isEmpty()) {
-                TimeTableQuery query = new TimeTableQuery();
-                query.setArea(new Area());
-                query.getArea().setName(item.getArea().getName());
-                query.getArea().setUrl(item.getArea().getUrl());
-                query.setPrefecture(new Prefecture());
-                query.getPrefecture().setName(item.getPrefecture().getName());
-                query.getPrefecture().setUrl(item.getPrefecture().getUrl());
-                new TimeTableTask(this, item).execute(query);
+                searchLines(item);
             }
             else {
                 item.getPrefecture().setLines(lines);
@@ -288,17 +335,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
             TimeTableResultDao dao = new TimeTableResultDao(this);
             List<StationEx> stations = dao.getStations(item.getLine().getId());
             if (stations.isEmpty()) {
-                TimeTableQuery query = new TimeTableQuery();
-                query.setArea(new Area());
-                query.getArea().setName(item.getArea().getName());
-                query.getArea().setUrl(item.getArea().getUrl());
-                query.setPrefecture(new Prefecture());
-                query.getPrefecture().setName(item.getPrefecture().getName());
-                query.getPrefecture().setUrl(item.getPrefecture().getUrl());
-                query.setLine(new Line());
-                query.getLine().setName(item.getLine().getName());
-                query.getLine().setUrl(item.getLine().getUrl());
-                new TimeTableTask(this, item).execute(query);
+                searchStations(item);
             }
             else {
                 item.getLine().setStations(stations);
@@ -307,29 +344,19 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         }
         else if (item.getTimeTable() == null) {
             TimeTableResultDao dao = new TimeTableResultDao(this);
-            List<TimeTableEx> timeTables = dao.getTimeTables(item.getStation().getId());
+            List<TimeTableEx> timeTables = dao.getTimeTables(item.getStation().getId(), false);
             if (timeTables.isEmpty()) {
-                TimeTableQuery query = new TimeTableQuery();
-                query.setArea(new Area());
-                query.getArea().setName(item.getArea().getName());
-                query.getArea().setUrl(item.getArea().getUrl());
-                query.setPrefecture(new Prefecture());
-                query.getPrefecture().setName(item.getPrefecture().getName());
-                query.getPrefecture().setUrl(item.getPrefecture().getUrl());
-                query.setLine(new Line());
-                query.getLine().setName(item.getLine().getName());
-                query.getLine().setUrl(item.getLine().getUrl());
-                query.setStation(new Station());
-                query.getStation().setName(item.getStation().getName());
-                query.getStation().setUrl(item.getStation().getUrl());
-                new TimeTableTask(this, item).execute(query);
+                searchTimeTables(item);
             }
             else {
                 item.getStation().setTimeTables(timeTables);
                 showTimeTables(item.getArea(), item.getPrefecture(), item.getLine(), item.getStation());
             }
         }
-        else {
+        else if (item.getTimeLine() == null) {
+            TimeTableResultDao dao = new TimeTableResultDao(this);
+            List<TimeLineEx> timeLines = dao.getTimeLines(item.getTimeTable().getId());
+            item.getTimeTable().setTimeLines(timeLines);
             showTimeLines(item.getArea(), item.getPrefecture(), item.getLine(), item.getStation(), item.getTimeTable());
         }
     }
@@ -338,7 +365,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         return Preferences.getText(this, "更新日:" + DateUtils.format(updateAt, "yyyy/MM/dd"));
     }
     
-    public void showAreas() {
+    public void showAreas(TimeTableResultEx result) {
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         currentItem = null;
         backItem = null;
@@ -370,7 +397,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, a.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(getLastUpdate(a.getUpdatedAt()));
+        lastUpdate.setText(getLastUpdate(a.getPrefectures().get(0).getUpdatedAt()));
         updateControlButtons(null);
     }
     
@@ -389,7 +416,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, p.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(getLastUpdate(p.getUpdatedAt()));
+        lastUpdate.setText(getLastUpdate(p.getLines().get(0).getUpdatedAt()));
         updateControlButtons(null);
     }
     
@@ -408,7 +435,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(getLastUpdate(l.getUpdatedAt()));
+        lastUpdate.setText(getLastUpdate(l.getStations().get(0).getUpdatedAt()));
         updateControlButtons(null);
     }
     
@@ -427,7 +454,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         star.setVisibility(View.GONE);
         title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName()));
         list.setAdapter(adapter);
-        lastUpdate.setText(getLastUpdate(s.getUpdatedAt()));
+        lastUpdate.setText(getLastUpdate(s.getTimeTables().get(0).getUpdatedAt()));
         updateControlButtons(null);
     }
     
@@ -435,27 +462,34 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
         TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
         currentItem = new TimeTableItem(a, p, l, s, tt);
 
-        int i = 0;
+        boolean hasBack = false;
         if (a != null && p != null) {
             backItem = new ParentBackItem(a, p, l, s);
             adapter.insert(backItem, 0);
-            i ++;
+            hasBack = true;
         }
         else {
             backItem = null;
+        }
+
+        if (tt.getTimeLines().isEmpty()) {
             tt.setTimeLines(new TimeTableResultDao(this).getTimeLines(tt.getId()));
         }
 
-        for (; i < tt.getTimeLines().size(); i ++) {
+        for (int i = 0; i < tt.getTimeLines().size(); i ++) {
             TimeLineEx tl = tt.getTimeLines().get(i);
             TimeTableItem item = new TimeTableItem(a, p, l, s, tt, tl);
-            adapter.insert(item, i);
+            adapter.insert(item, i + (hasBack ? 1 : 0));
         }
 
         star.setVisibility(View.VISIBLE);
         star.setImageBitmap(tt.isFavorite() ? images[1] : images[0]);
         star.setOnClickListener(new StarListener(images, tt));
-        title.setText(Preferences.getText(this, l.getCompany() + "　" + l.getName() + "　" + s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
+        String lineName = tt.getLineName();
+        if (StringUtils.isEmpty(lineName)) {
+            lineName = l.getName();
+        }
+        title.setText(Preferences.getText(this, l.getCompany() + "　" + lineName + "　" + s.getName() + "　" + tt.getDirection() + "　" + tt.getTypeString()));
         list.setAdapter(adapter);
         lastUpdate.setText(getLastUpdate(tt.getUpdatedAt()));
         updateControlButtons(tt);
