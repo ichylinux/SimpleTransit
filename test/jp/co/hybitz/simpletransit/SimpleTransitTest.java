@@ -18,12 +18,11 @@
 package jp.co.hybitz.simpletransit;
 
 import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import jp.co.hybitz.test.TestUtils;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 
 
 /**
@@ -34,7 +33,6 @@ public class SimpleTransitTest extends ActivityInstrumentationTestCase2<SimpleTr
     private EditText from;
     private EditText to;
     private Button search;
-    private ListView results;
     
     public SimpleTransitTest() {
         super("jp.co.hybitz.simpletransit", SimpleTransit.class);
@@ -47,11 +45,10 @@ public class SimpleTransitTest extends ActivityInstrumentationTestCase2<SimpleTr
         from = (EditText) getActivity().findViewById(R.id.from);
         to = (EditText) getActivity().findViewById(R.id.to);
         search = (Button) getActivity().findViewById(R.id.search);
-        results = (ListView) getActivity().findViewById(R.id.results);
     }
 
     public void testInitView() {
-        SimpleTransitQuery query = (SimpleTransitQuery) TestUtils.getFieldValue(getActivity(), "query");
+        TransitQueryEx query = (TransitQueryEx) TestUtils.getFieldValue(getActivity(), "query");
         assertNotNull(query);
         assertEquals(TimeType.DEPARTURE, query.getTimeType());
     }
@@ -66,7 +63,5 @@ public class SimpleTransitTest extends ActivityInstrumentationTestCase2<SimpleTr
             }
         });
         getInstrumentation().waitForIdleSync();
-        
-        assertEquals(3, results.getCount());
     }
 }

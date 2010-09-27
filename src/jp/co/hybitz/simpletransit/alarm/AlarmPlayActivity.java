@@ -25,8 +25,8 @@ import jp.co.hybitz.simpletransit.ResultRenderer;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import android.app.Activity;
 import android.content.ContentUris;
@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -48,15 +49,15 @@ import android.widget.TextView;
 public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
     private MediaPlayer mediaPlayer;
     private Vibrator vibrator;
-    private SimpleTransitResult alarmTransitResult;
+    private TransitResultEx alarmTransitResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     	Preferences.initTheme(this);
         setContentView(R.layout.alarm_play);
-        initActions();
         initView();
+        initActions();
     }
     
     private void initActions() {
@@ -91,7 +92,7 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         }
     }
     
-    private SimpleTransitResult loadTransitResult() {
+    private TransitResultEx loadTransitResult() {
         long id = getTransitResultId();
         if (id < 0) {
             return null;
@@ -104,13 +105,13 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         return getIntent().getLongExtra(EXTRA_KEY_TRANSIT, -1);
     }
     
-    /**
-     * @see android.app.Activity#onDestroy()
-     */
     @Override
-    protected void onDestroy() {
-        stopAlarm(false);
-        super.onDestroy();
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            stopAlarm(false);
+        }
+        
+        return super.onKeyDown(keyCode, event);
     }
 
     private void stopAlarm(boolean force) {
@@ -138,7 +139,7 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
         }
     }
     
-    private void showAlarm(SimpleTransitResult atr) {
+    private void showAlarm(TransitResultEx atr) {
         int textSize = Preferences.getTextSize(this);
         boolean startAlarm = getIntent().getBooleanExtra(EXTRA_KEY_START_ALARM, false);
 
@@ -152,7 +153,7 @@ public class AlarmPlayActivity extends Activity implements SimpleTransitConst {
 
         TextView tvAlarmNotice = (TextView) findViewById(R.id.tv_alarm_notice);
         tvAlarmNotice.setTextSize(textSize);
-        tvAlarmNotice.setVisibility(startAlarm ? View.VISIBLE : View.INVISIBLE);
+        tvAlarmNotice.setVisibility(startAlarm ? View.VISIBLE : View.GONE);
 
         TextView tvAlarmAt = (TextView) findViewById(R.id.tv_alarm_at);
         tvAlarmAt.setTextSize(textSize);

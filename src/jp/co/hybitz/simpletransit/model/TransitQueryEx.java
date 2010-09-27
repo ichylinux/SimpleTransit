@@ -26,15 +26,15 @@ import jp.co.hybitz.simpletransit.common.model.Favorable;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransitQuery extends Favorable {
+public class TransitQueryEx extends Favorable {
     private int useCount;
     private TransitQuery transitQuery;
     
-    public SimpleTransitQuery() {
+    public TransitQueryEx() {
         this(new TransitQuery());
     }
 
-    public SimpleTransitQuery(TransitQuery transitQuery) {
+    public TransitQueryEx(TransitQuery transitQuery) {
         this.transitQuery = transitQuery;
     }
     

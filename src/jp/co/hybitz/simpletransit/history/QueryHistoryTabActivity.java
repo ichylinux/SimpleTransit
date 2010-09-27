@@ -27,7 +27,7 @@ import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.model.Location;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -217,10 +217,10 @@ public class QueryHistoryTabActivity extends TabActivity implements SimpleTransi
         List<QueryHistoryListItem> ret = new ArrayList<QueryHistoryListItem>();
         
         TransitQueryDao dao = new TransitQueryDao(this);
-        List<SimpleTransitQuery> list = favariteOnly ?
+        List<TransitQueryEx> list = favariteOnly ?
                 dao.getTransitQueriesByFavorite() : dao.getTransitQueries();
-        for (Iterator<SimpleTransitQuery> it = list.iterator(); it.hasNext();) {
-            SimpleTransitQuery query = it.next();
+        for (Iterator<TransitQueryEx> it = list.iterator(); it.hasNext();) {
+            TransitQueryEx query = it.next();
             ret.add(new QueryHistoryListItem(query));
         }
         

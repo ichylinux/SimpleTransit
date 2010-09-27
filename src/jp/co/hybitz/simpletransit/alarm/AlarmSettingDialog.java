@@ -30,7 +30,7 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.alarm.model.AlarmSoundItem;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import android.app.Activity;
@@ -122,7 +122,7 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         Time selected = new Time(tp.getCurrentHour(), tp.getCurrentMinute());
         Date alarmTime = TransitUtil.getRelativeDate(selected, true);
 
-        SimpleTransitResult str = new SimpleTransitResult(transitResult);
+        TransitResultEx str = new TransitResultEx(transitResult);
         str.setAlarmStatus(ALARM_STATUS_BEING_SET);
         str.setAlarmAt(DateUtils.toLong(alarmTime));
         long id = new TransitResultDao(activity).createTransitResult(str, transit);
@@ -130,7 +130,7 @@ public class AlarmSettingDialog implements DialogInterface, SimpleTransitConst {
         Intent intent = new Intent(activity, OneTimeAlarm.class);
         intent.putExtra(EXTRA_KEY_START_ALARM, true);
         intent.putExtra(EXTRA_KEY_TRANSIT, id);
-        PendingIntent sender = PendingIntent.getBroadcast(activity, 0, intent, 0);
+        PendingIntent sender = PendingIntent.getBroadcast(activity, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         AlarmManager am = (AlarmManager)activity.getSystemService(Activity.ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, alarmTime.getTime(), sender);
 

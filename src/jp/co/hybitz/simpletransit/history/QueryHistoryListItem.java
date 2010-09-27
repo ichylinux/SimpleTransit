@@ -17,19 +17,19 @@
  */
 package jp.co.hybitz.simpletransit.history;
 
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 class QueryHistoryListItem {
-    SimpleTransitQuery query;
+    TransitQueryEx query;
     
-    public QueryHistoryListItem(SimpleTransitQuery query) {
+    public QueryHistoryListItem(TransitQueryEx query) {
         this.query = query;
     }
     
-    public SimpleTransitQuery getQuery() {
+    public TransitQueryEx getQuery() {
         return query;
     }
 }

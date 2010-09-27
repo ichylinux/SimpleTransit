@@ -18,7 +18,7 @@
 package jp.co.hybitz.simpletransit.history;
 
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import android.content.Context;
 
 /**
@@ -27,16 +27,16 @@ import android.content.Context;
 public class QueryHistoryWorker implements Runnable {
 
     private Context context;
-    private SimpleTransitQuery query;
+    private TransitQueryEx query;
     
-    public QueryHistoryWorker(Context context, SimpleTransitQuery query) {
+    public QueryHistoryWorker(Context context, TransitQueryEx query) {
         this.context = context;
         this.query = query;
     }
     
     public void run() {
         TransitQueryDao dao = new TransitQueryDao(context);
-        SimpleTransitQuery stq = dao.getTransitQuery(query.getFrom(), query.getTo());
+        TransitQueryEx stq = dao.getTransitQuery(query.getFrom(), query.getTo());
         if (stq == null) {
             dao.createTransitQuery(query);
         }

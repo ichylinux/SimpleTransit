@@ -29,11 +29,12 @@ import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.action.OptionMenuHandler;
 import jp.co.hybitz.simpletransit.alarm.AlarmPlayActivity;
 import jp.co.hybitz.simpletransit.db.TransitResultDao;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -77,7 +78,7 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-//        menu.add(0, MENU_ITEM_SET_DISPLAY_NAME, 1, "表示名を設定");
+        menu.add(0, MENU_ITEM_SET_DISPLAY_NAME, 1, "表示名を設定");
         menu.add(0, MENU_ITEM_DELETE, 2, "削除");
     }
 
@@ -96,18 +97,33 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
      * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
      */
     @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onMenuItemSelected(int featureId, MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+        case MENU_ITEM_SET_DISPLAY_NAME :
+            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuItem.getMenuInfo(); 
+            MemoListItem item = (MemoListItem) getItems().get(info.position);
+            updateDisplayName(item.getResult());
+            return true;
         case MENU_ITEM_DELETE_OLD_MEMO :
             deleteOldMemo();
             return true;
         }
 
-        if (optionMenuHandler.onMenuItemSelected(featureId, item)) {
+        if (optionMenuHandler.onMenuItemSelected(featureId, menuItem)) {
             return true;
         }
         
-        return super.onMenuItemSelected(featureId, item);
+        return super.onMenuItemSelected(featureId, menuItem);
+    }
+    
+    private void updateDisplayName(TransitResultEx result) {
+        DisplayNameSettingDialog dialog = new DisplayNameSettingDialog(this, result);
+        dialog.setOnDismissListener(new OnDismissListener() {
+            public void onDismiss(DialogInterface dialog) {
+                showList();
+            }
+        });
+        dialog.show();
     }
 
     private void deleteOldMemo() {
@@ -183,10 +199,10 @@ public class MemoListActivity extends ListActivity implements SimpleTransitConst
         List<MemoListItem> ret = new ArrayList<MemoListItem>();
         
         TransitResultDao dao = new TransitResultDao(this);
-        List<SimpleTransitResult> list = alarmOnly ? dao.getTransitResultsByAlarmStatus(ALARM_STATUS_BEING_SET) : dao.getTransitResults();
+        List<TransitResultEx> list = alarmOnly ? dao.getTransitResultsByAlarmStatus(ALARM_STATUS_BEING_SET) : dao.getTransitResults();
         if (!list.isEmpty()) {
-            for (Iterator<SimpleTransitResult> it = list.iterator(); it.hasNext();) {
-                SimpleTransitResult str = it.next();
+            for (Iterator<TransitResultEx> it = list.iterator(); it.hasNext();) {
+                TransitResultEx str = it.next();
                 ret.add(new MemoListItem(str));
             }
         }

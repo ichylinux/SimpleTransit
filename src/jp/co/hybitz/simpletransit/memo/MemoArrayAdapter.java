@@ -20,6 +20,7 @@ package jp.co.hybitz.simpletransit.memo;
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.ResultRenderer;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
@@ -40,8 +41,13 @@ class MemoArrayAdapter extends ArrayAdapterEx<MemoListItem> implements SimpleTra
     @Override
     protected void updateView(View view, MemoListItem item) {
         TextView title = (TextView) view.findViewWithTag("title");
-        title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult(), false));
         title.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        if (StringUtils.isNotEmpty(item.getResult().getDisplayName())) {
+            title.setText(item.getResult().getDisplayName());
+        }
+        else {
+            title.setText(ResultRenderer.createTitle(item.getResult().getTransitResult(), false));
+        }
 
         View bottomLayout = view.findViewWithTag("bottom_layout");
         bottomLayout.setBackgroundResource(Preferences.getBackgroundResource(getContext()));

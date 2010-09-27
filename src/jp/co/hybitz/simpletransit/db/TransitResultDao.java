@@ -30,7 +30,7 @@ import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.googletransit.model.Transit;
 import jp.co.hybitz.googletransit.model.TransitDetail;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -115,8 +115,8 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         }
     }
 
-    public List<SimpleTransitResult> getTransitResultsByAlarmStatus(int alarmStatus) {
-        List<SimpleTransitResult> ret = new ArrayList<SimpleTransitResult>();
+    public List<TransitResultEx> getTransitResultsByAlarmStatus(int alarmStatus) {
+        List<TransitResultEx> ret = new ArrayList<TransitResultEx>();
         
         SQLiteDatabase db = getReadableDatabase();
         try {
@@ -134,8 +134,8 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         return ret;
     }
     
-    public List<SimpleTransitResult> getTransitResults() {
-        List<SimpleTransitResult> ret = new ArrayList<SimpleTransitResult>();
+    public List<TransitResultEx> getTransitResults() {
+        List<TransitResultEx> ret = new ArrayList<TransitResultEx>();
         
         SQLiteDatabase db = getReadableDatabase();
         try {
@@ -152,9 +152,10 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         return ret;
     }
 
-    private SimpleTransitResult loadSimpleTransitResult(SQLiteDatabase db, CursorEx c) {
-        SimpleTransitResult ret = new SimpleTransitResult();
+    private TransitResultEx loadSimpleTransitResult(SQLiteDatabase db, CursorEx c) {
+        TransitResultEx ret = new TransitResultEx();
         ret.setId(c.getLong("_id"));
+        ret.setDisplayName(c.getString("display_name"));
         ret.setQueryDate(DateUtils.toDate(c.getLong("query_date")));
         ret.setTimeType(toTimeType(c.getString("time_type")));
         ret.setAlarmStatus(c.getInt("alarm_status"));
@@ -174,7 +175,7 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         return ret;
     }
 
-    public SimpleTransitResult getTransitResult(long id) {
+    public TransitResultEx getTransitResult(long id) {
         SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_result", null, "_id=?", new String[]{String.valueOf(id)}, null, null, null);
@@ -183,7 +184,7 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
             }
             
             c.moveToFirst();
-            SimpleTransitResult ret = loadSimpleTransitResult(db, c);
+            TransitResultEx ret = loadSimpleTransitResult(db, c);
             c.close();
             return ret;
         }
@@ -261,6 +262,18 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         }
     }
     
+    public int updateDisplayName(long transitResultId, String displayName) {
+        SQLiteDatabase db = getWritableDatabase();
+        try {
+            ContentValues values = new ContentValues();
+            values.put("display_name", displayName);
+            return db.update("transit_result", values, "_id=?", new String[]{String.valueOf(transitResultId)});
+        }
+        finally {
+            db.close();
+        }
+    }
+    
     public int deleteTransitResult(long id) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
@@ -298,7 +311,7 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         }
     }
 
-    public long createTransitResult(SimpleTransitResult tr, Transit t) {
+    public long createTransitResult(TransitResultEx tr, Transit t) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
         try {

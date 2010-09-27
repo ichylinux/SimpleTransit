@@ -19,7 +19,7 @@ package jp.co.hybitz.simpletransit.action;
 
 import jp.co.hybitz.simpletransit.db.TransitQueryDao;
 import jp.co.hybitz.simpletransit.history.QueryHistoryTabActivity;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
@@ -29,9 +29,9 @@ import android.widget.ImageView;
  */
 public class StarListener implements View.OnClickListener {
     private Bitmap[] images;
-    private SimpleTransitQuery query;
+    private TransitQueryEx query;
     
-    public StarListener(Bitmap[] images, SimpleTransitQuery query) {
+    public StarListener(Bitmap[] images, TransitQueryEx query) {
         this.images = images;
         this.query = query;
     }

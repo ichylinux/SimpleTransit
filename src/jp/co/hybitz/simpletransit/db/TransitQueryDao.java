@@ -27,7 +27,7 @@ import java.util.Map;
 import jp.co.hybitz.android.CursorEx;
 import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.Location;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -41,10 +41,10 @@ public class TransitQueryDao extends AbstractDao {
         super(context);
     }
 
-    public List<SimpleTransitQuery> getTransitQueries() {
+    public List<TransitQueryEx> getTransitQueries() {
         SQLiteDatabase db = getReadableDatabase();
         try {
-            List<SimpleTransitQuery> ret = new ArrayList<SimpleTransitQuery>(); 
+            List<TransitQueryEx> ret = new ArrayList<TransitQueryEx>(); 
 
             CursorEx c = (CursorEx) db.query("transit_query", null, null, null, null, null, "use_count desc");
             while (c.moveToNext()) {
@@ -98,10 +98,10 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
 
-    public List<SimpleTransitQuery> getTransitQueriesByFavorite() {
+    public List<TransitQueryEx> getTransitQueriesByFavorite() {
         SQLiteDatabase db = getReadableDatabase();
         try {
-            List<SimpleTransitQuery> ret = new ArrayList<SimpleTransitQuery>(); 
+            List<TransitQueryEx> ret = new ArrayList<TransitQueryEx>(); 
 
             CursorEx c = (CursorEx) db.query("transit_query", null, "is_favorite <> 0", null, null, null, "use_count desc");
             while (c.moveToNext()) {
@@ -116,8 +116,8 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
 
-    private SimpleTransitQuery loadTransitQuery(CursorEx c) {
-        SimpleTransitQuery ret = new SimpleTransitQuery();
+    private TransitQueryEx loadTransitQuery(CursorEx c) {
+        TransitQueryEx ret = new TransitQueryEx();
         ret.setId(c.getLong("_id"));
         ret.setFrom(c.getString("transit_from"));
         ret.setTo(c.getString("transit_to"));
@@ -129,14 +129,14 @@ public class TransitQueryDao extends AbstractDao {
         return ret;
     }
 
-    public SimpleTransitQuery getTransitQuery(String from, String to) {
+    public TransitQueryEx getTransitQuery(String from, String to) {
         SQLiteDatabase db = getReadableDatabase();
         try {
             String[] params = new String[]{from, to}; 
             CursorEx c = (CursorEx) db.query("transit_query", null, 
                     "transit_from=? and transit_to=?", params, null, null, null);
 
-            SimpleTransitQuery ret = null;
+            TransitQueryEx ret = null;
             
             if (c.getCount() > 0) {
                 c.moveToFirst();
@@ -151,12 +151,12 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
     
-    public SimpleTransitQuery getLatestTransitQuery() {
+    public TransitQueryEx getLatestTransitQuery() {
         SQLiteDatabase db = getReadableDatabase();
         try {
             CursorEx c = (CursorEx) db.query("transit_query", null, null, null, null, null, "updated_at desc", "1");
 
-            SimpleTransitQuery ret = null;
+            TransitQueryEx ret = null;
             
             if (c.getCount() > 0) {
                 c.moveToFirst();
@@ -171,7 +171,7 @@ public class TransitQueryDao extends AbstractDao {
         }
     }
 
-    public long createTransitQuery(SimpleTransitQuery tq) {
+    public long createTransitQuery(TransitQueryEx tq) {
         SQLiteDatabase db = getWritableDatabase();
         try {
             long now = getCurrentDateTime();

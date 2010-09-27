@@ -6,14 +6,10 @@
 	              android:layout_width="wrap_content" 
 	              android:layout_height="wrap_content"
 	              android:layout_gravity="center" android:layout_centerInParent="true">
-	    <TextView android:id="@+id/title"
-	        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-	    <TextView android:id="@+id/query_date"
-	        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	    <EditText android:id="@+id/display_name"
 	        android:minWidth="200sp"
 	        android:layout_width="wrap_content" android:layout_height="wrap_content"/>
-		<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+		<LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center">
 		    <Button android:text="決定" android:id="@+id/ok" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="90sp"/>
 	   		<Button android:text="キャンセル" android:id="@+id/cancel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="90sp"/>
 		</LinearLayout>

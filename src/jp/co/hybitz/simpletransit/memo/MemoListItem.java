@@ -17,19 +17,19 @@
  */
 package jp.co.hybitz.simpletransit.memo;
 
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
 class MemoListItem {
-    SimpleTransitResult result;
+    TransitResultEx result;
     
-    public MemoListItem(SimpleTransitResult result) {
+    public MemoListItem(TransitResultEx result) {
         this.result = result;
     }
     
-    public SimpleTransitResult getResult() {
+    public TransitResultEx getResult() {
         return result;
     }
 }

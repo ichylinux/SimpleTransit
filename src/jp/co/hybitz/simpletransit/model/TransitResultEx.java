@@ -29,19 +29,20 @@ import jp.co.hybitz.googletransit.model.TransitResult;
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class SimpleTransitResult implements Serializable {
+public class TransitResultEx implements Serializable {
 
     private long id;
+    private String displayName;
     private int alarmStatus;
     private long alarmAt;
     private long createdAt;
     private TransitResult transitResult;
 
-    public SimpleTransitResult() {
+    public TransitResultEx() {
         this(new TransitResult());
     }
     
-    public SimpleTransitResult(TransitResult transitResult) {
+    public TransitResultEx(TransitResult transitResult) {
         this.transitResult = transitResult;
     }
     
@@ -55,6 +56,14 @@ public class SimpleTransitResult implements Serializable {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public int getAlarmStatus() {

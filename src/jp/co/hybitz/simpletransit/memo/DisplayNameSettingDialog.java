@@ -17,38 +17,52 @@
  */
 package jp.co.hybitz.simpletransit.memo;
 
-import jp.co.hybitz.android.DialogBase;
-import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.db.TransitResultDao;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
+import android.app.Dialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 
 /**
  * @author ichy <ichylinux@gmail.com>
  */
-public class DisplayNameSettingDialog extends DialogBase implements SimpleTransitConst {
-	private SimpleTransitResult result;
+public class DisplayNameSettingDialog extends Dialog implements SimpleTransitConst {
+	private TransitResultEx result;
+	private EditText displayName;
 	
-	public DisplayNameSettingDialog(Context context, SimpleTransitResult result) {
+	public DisplayNameSettingDialog(Context context, TransitResultEx result) {
 	    super(context);
 	    this.result = result;
 	}
 	
 	@Override
-	protected int getLayoutId() {
-	    return R.layout.display_name_setting_dialog;
-	}
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initView();
+    }
 
-	@Override
-	protected void onCreate() {
-		setTitle(Preferences.getText(getContext(), "表示名を設定"));
+	private void initView() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.display_name_setting_dialog);
+		
+		displayName = (EditText) findViewById(R.id.display_name);
+		displayName.setText(result.getDisplayName());
 
 		Button ok = (Button) findViewById(R.id.ok);
         ok.setOnClickListener(new View.OnClickListener() {
         	public void onClick(View v) {
+        	    String text = displayName.getText().toString();
+        	    
+        	    TransitResultDao dao = new TransitResultDao(getContext());
+        	    if (dao.updateDisplayName(result.getId(), text) == 1) {
+        	        result.setDisplayName(text);
+        	    }
         		dismiss();
 			}
 		});
@@ -59,6 +73,5 @@ public class DisplayNameSettingDialog extends DialogBase implements SimpleTransi
 				cancel();
 			}
 		});
-		
 	}
 }

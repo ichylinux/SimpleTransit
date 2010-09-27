@@ -25,7 +25,7 @@ import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.SimpleTransit;
 import jp.co.hybitz.simpletransit.SimpleTransitConst;
 import jp.co.hybitz.simpletransit.common.model.Favorable;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import jp.co.hybitz.simpletransit.timetable.TimeTableActivity;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import android.content.Intent;
@@ -54,8 +54,8 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements S
         textView.setText(getText(item));
         textView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (item instanceof SimpleTransitQuery) {
-                    SimpleTransitQuery query = (SimpleTransitQuery) item;
+                if (item instanceof TransitQueryEx) {
+                    TransitQueryEx query = (TransitQueryEx) item;
                     activity.updateFromAndTo(query.getFrom(), query.getTo());
                 }
                 else if (item instanceof TimeTableEx) {
@@ -71,7 +71,7 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements S
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
         Favorable item = getItem(info.position);
-        if (item instanceof SimpleTransitQuery) {
+        if (item instanceof TransitQueryEx) {
             menu.add(0, MENU_ITEM_SET_FAVORITE, 1, "経路を設定");
             menu.add(0, MENU_ITEM_SET_FAVORITE_REVERSE, 2, "逆経路を設定");
             menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
@@ -84,8 +84,8 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements S
     }
     
     private String getText(Favorable f) {
-        if (f instanceof SimpleTransitQuery) {
-            SimpleTransitQuery query = (SimpleTransitQuery) f;
+        if (f instanceof TransitQueryEx) {
+            TransitQueryEx query = (TransitQueryEx) f;
             return query.getFromTo();
         }
         else if (f instanceof TimeTableEx) {

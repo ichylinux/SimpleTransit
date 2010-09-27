@@ -40,8 +40,8 @@ import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.favorite.FavoriteArrayAdapter;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
 import jp.co.hybitz.simpletransit.model.Location;
-import jp.co.hybitz.simpletransit.model.SimpleTransitQuery;
-import jp.co.hybitz.simpletransit.model.SimpleTransitResult;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
 import jp.co.hybitz.simpletransit.station.SearchNearStationsTask;
@@ -80,7 +80,7 @@ import android.widget.TextView;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
-    private SimpleTransitQuery query = new SimpleTransitQuery();
+    private TransitQueryEx query = new TransitQueryEx();
     private TimeTypeAndDate selectedTime;
     private TimeTypeAndDate currentTime;
     private Stack<TimeTypeAndDate> previousTime = new Stack<TimeTypeAndDate>();
@@ -214,7 +214,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
-            	SimpleTransitQuery q = (SimpleTransitQuery) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
+            	TransitQueryEx q = (TransitQueryEx) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
                 query.setFrom(q.getFrom());
                 query.setTo(q.getTo());
                 updateQueryView();
@@ -319,7 +319,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
 
     private void initQuery() {
         if (Preferences.isUseLatestQueryHistory(this)) {
-            SimpleTransitQuery latest = new TransitQueryDao(this).getLatestTransitQuery();
+            TransitQueryEx latest = new TransitQueryDao(this).getLatestTransitQuery();
             if (latest != null) {
                 updateFromAndTo(latest.getFrom(), latest.getTo());
             }
@@ -434,10 +434,10 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         return (TransitItem) lv.getItemAtPosition(info.position);
     }
     
-    private SimpleTransitQuery getSelectedTransitQuery(MenuItem menuItem) {
+    private TransitQueryEx getSelectedTransitQuery(MenuItem menuItem) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuItem.getMenuInfo(); 
         ListView lv = (ListView) findViewById(R.id.results);
-        return (SimpleTransitQuery) lv.getItemAtPosition(info.position);
+        return (TransitQueryEx) lv.getItemAtPosition(info.position);
     }
 
     private Object getSelectedItem(MenuItem menuItem) {
@@ -471,18 +471,18 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         else if (menuItem.getItemId() == MENU_ITEM_MEMO_CREATE) {
             TransitItem ti = getSelectedTransitItem(menuItem);
 
-            SimpleTransitResult str = new SimpleTransitResult(ti.getTransitResult());
+            TransitResultEx str = new TransitResultEx(ti.getTransitResult());
             new TransitResultDao(this).createTransitResult(str, ti.getTransit());
             ToastUtils.toast(this, "メモに保存しました。");
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE) {
-            SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
+            TransitQueryEx stq = getSelectedTransitQuery(menuItem);
             updateFromAndTo(stq.getFrom(), stq.getTo());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE_REVERSE) {
-            SimpleTransitQuery stq = getSelectedTransitQuery(menuItem);
+            TransitQueryEx stq = getSelectedTransitQuery(menuItem);
             updateFromAndTo(stq.getTo(), stq.getFrom());
             return true;
         }
