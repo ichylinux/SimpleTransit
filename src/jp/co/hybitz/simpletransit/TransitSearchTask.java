@@ -20,12 +20,14 @@ package jp.co.hybitz.simpletransit;
 import jp.co.hybitz.android.WebSearchTask;
 import jp.co.hybitz.common.HttpSearchException;
 import jp.co.hybitz.common.Platform;
-import jp.co.hybitz.googletransit.TransitSearcher;
-import jp.co.hybitz.googletransit.TransitSearcherFactory;
-import jp.co.hybitz.googletransit.model.TransitQuery;
-import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.common.Searcher;
 import jp.co.hybitz.simpletransit.action.MaybeListener;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
+import jp.co.hybitz.transit.goo.GooTransitSearcherFactory;
+import jp.co.hybitz.transit.google.GoogleTransitSearcher;
+import jp.co.hybitz.transit.google.GoogleTransitSearcherFactory;
+import jp.co.hybitz.transit.model.TransitQuery;
+import jp.co.hybitz.transit.model.TransitResult;
 import android.view.View;
 import android.widget.Button;
 
@@ -43,21 +45,38 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
 
     @Override
     protected TransitResult search(TransitQuery in) throws HttpSearchException {
-        TransitSearcher searcher = TransitSearcherFactory.createSearcher(Platform.ANDROID);
-        return searcher.search(in);
+        if (searchType == SEARCH_TYPE_STATIONS) {
+            Searcher<TransitQuery, TransitResult> searcher = GooTransitSearcherFactory.createSearcher();
+            return searcher.search(in);
+        }
+        else {
+            GoogleTransitSearcher searcher = GoogleTransitSearcherFactory.createSearcher(Platform.ANDROID);
+            return searcher.search(in);
+        }
     }
     
     @Override
     protected void updateView(TransitResult out) {
         getActivity().hideInputMethod();
         
-        if (out.isOK()) {
+        if (!out.isOK()) {
+            showResponseCode(out.getResponseCode());
+            return;
+        }
+
+        if (searchType == SEARCH_TYPE_STATIONS) {
+            // 駅候補を表示
+            new ResultRenderer(getActivity()).renderStations(out);
+            // 前の時刻と次の時刻を設定
+            getActivity().updatePreviousTimeAndNextTime(searchType, out);
+        }
+        else {
             getActivity().hideSearchCondition();
             
             // 検索結果を表示
             new ResultRenderer(getActivity()).render(out);
             
-            // 前の時刻と次の時刻を取得
+            // 前の時刻と次の時刻を設定
             getActivity().updatePreviousTimeAndNextTime(searchType, out);
             
             // もしかしてを更新
@@ -66,9 +85,6 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
             if (isNew() && out.getTransitCount() > 0) {
                 getActivity().saveHistory();
             }
-        }
-        else {
-            showResponseCode(out.getResponseCode());
         }
     }
     

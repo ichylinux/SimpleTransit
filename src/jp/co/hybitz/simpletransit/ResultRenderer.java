@@ -22,10 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.hybitz.android.DateUtils;
-import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.Transit;
-import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.transit.model.Station;
+import jp.co.hybitz.transit.model.TimeType;
+import jp.co.hybitz.transit.model.Transit;
+import jp.co.hybitz.transit.model.TransitResult;
 import android.app.Activity;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -62,6 +63,27 @@ public class ResultRenderer implements SimpleTransitConst {
         results.setAdapter(new ResultArrayAdapter(activity, items));
     }
     
+    void renderStations(TransitResult result) {
+        TextView summary = (TextView) activity.findViewById(R.id.tv_summary);
+        summary.setTextSize(Preferences.getTextSize(activity));
+        summary.setText("駅候補");
+
+        ListView results = (ListView) activity.findViewById(R.id.results);
+        List<StationItem> items = new ArrayList<StationItem>();
+        for (Station from : result.getFromStations()) {
+            items.add(new StationItem(true, from));
+        }
+        
+        if (items.size() > 0) {
+            items.add(new StationItem(false, null));
+        }
+
+        for (Station from : result.getToStations()) {
+            items.add(new StationItem(false, from));
+        }
+        results.setAdapter(new StationArrayAdapter(activity, items));
+    }
+
     public static String createTitle(TransitResult result, boolean withTime) {
         String prefecture = result.getPrefecture() == null ? "" : "（" + result.getPrefecture() + "）";
 

@@ -22,7 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import jp.co.hybitz.googletransit.model.TimeType;
+import jp.co.hybitz.transit.model.TimeType;
 
 /**
  * @author ichy <ichylinux@gmail.com>

@@ -73,12 +73,14 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 17;
     public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 18;
     public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
-    public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 20;
-    public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 21;
-    public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 22;
-    public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 23;
-    public static final int MENU_ITEM_REFRESH = Menu.FIRST + 24;
-    public static final int MENU_ITEM_SET_DISPLAY_NAME = Menu.FIRST + 25;
+    public static final int MENU_ITEM_SEARCH = Menu.FIRST + 20;
+    public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 21;
+    public static final int MENU_ITEM_SEARCH_STATIONS = Menu.FIRST + 22;
+    public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 23;
+    public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 24;
+    public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 25;
+    public static final int MENU_ITEM_REFRESH = Menu.FIRST + 26;
+    public static final int MENU_ITEM_SET_DISPLAY_NAME = Menu.FIRST + 27;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;
@@ -95,4 +97,5 @@ public interface SimpleTransitConst {
     public static final int SEARCH_TYPE_NEW = 1;
     public static final int SEARCH_TYPE_NEXT = 2;
     public static final int SEARCH_TYPE_PREVIOUS = 3;
+    public static final int SEARCH_TYPE_STATIONS = 4;
 }

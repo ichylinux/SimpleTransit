@@ -17,9 +17,9 @@
  */
 package jp.co.hybitz.simpletransit.action;
 
-import jp.co.hybitz.googletransit.model.Maybe;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
+import jp.co.hybitz.transit.model.Maybe;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;

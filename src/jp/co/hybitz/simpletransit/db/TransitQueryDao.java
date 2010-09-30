@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 import jp.co.hybitz.android.CursorEx;
-import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.TransitQueryEx;
+import jp.co.hybitz.transit.model.TimeType;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

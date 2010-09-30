@@ -17,9 +17,9 @@
  */
 package jp.co.hybitz.simpletransit;
 
-import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import jp.co.hybitz.test.TestUtils;
+import jp.co.hybitz.transit.model.TimeType;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.Button;
 import android.widget.EditText;

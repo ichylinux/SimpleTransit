@@ -60,7 +60,7 @@ public class TimeTableTask extends WebSearchTask<TimeTableQuery, TimeTableResult
     
     @Override
     protected TimeTableResult search(TimeTableQuery query) throws HttpSearchException {
-        TimeTableResult result = TimeTableSearcherFactory.createSearcher(Platform.LOOSE_HTML).search(query);
+        TimeTableResult result = TimeTableSearcherFactory.createSearcher(Platform.HTML).search(query);
 
         if (isCancelled()) {
             return null;

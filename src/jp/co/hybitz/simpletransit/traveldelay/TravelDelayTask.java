@@ -36,7 +36,7 @@ public class TravelDelayTask extends WebSearchTask<TravelDelayQuery, TravelDelay
 
     @Override
     protected TravelDelayResult search(TravelDelayQuery in) throws HttpSearchException {
-        TravelDelaySearcher searcher = TravelDelaySearcherFactory.createSearcher(Platform.LOOSE_HTML);
+        TravelDelaySearcher searcher = TravelDelaySearcherFactory.createSearcher(Platform.HTML);
         TravelDelayResult result = searcher.search(in);
 
         if (isCancelled()) {

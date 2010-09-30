@@ -20,8 +20,8 @@ package jp.co.hybitz.simpletransit;
 import java.util.Calendar;
 
 import jp.co.hybitz.android.DialogBase;
-import jp.co.hybitz.googletransit.model.TimeType;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
+import jp.co.hybitz.transit.model.TimeType;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;

@@ -22,9 +22,9 @@ import java.util.Date;
 import java.util.List;
 
 import jp.co.hybitz.common.model.Time;
-import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.Transit;
-import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.transit.model.TimeType;
+import jp.co.hybitz.transit.model.Transit;
+import jp.co.hybitz.transit.model.TransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>

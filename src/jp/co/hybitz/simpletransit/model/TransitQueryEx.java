@@ -19,9 +19,9 @@ package jp.co.hybitz.simpletransit.model;
 
 import java.util.Date;
 
-import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.TransitQuery;
 import jp.co.hybitz.simpletransit.common.model.Favorable;
+import jp.co.hybitz.transit.model.TimeType;
+import jp.co.hybitz.transit.model.TransitQuery;
 
 /**
  * @author ichy <ichylinux@gmail.com>

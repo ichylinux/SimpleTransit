@@ -17,9 +17,9 @@
  */
 package jp.co.hybitz.simpletransit.model;
 
-import jp.co.hybitz.googletransit.model.Transit;
-import jp.co.hybitz.googletransit.model.TransitDetail;
-import jp.co.hybitz.googletransit.model.TransitResult;
+import jp.co.hybitz.transit.model.Transit;
+import jp.co.hybitz.transit.model.TransitDetail;
+import jp.co.hybitz.transit.model.TransitResult;
 
 /**
  * @author ichy <ichylinux@gmail.com>

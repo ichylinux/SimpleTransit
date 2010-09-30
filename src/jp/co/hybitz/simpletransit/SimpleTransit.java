@@ -26,9 +26,6 @@ import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.ContextMenuAware;
 import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.common.model.Time;
-import jp.co.hybitz.googletransit.TransitUtil;
-import jp.co.hybitz.googletransit.model.TimeType;
-import jp.co.hybitz.googletransit.model.TransitResult;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
 import jp.co.hybitz.simpletransit.action.FromToDragListener;
 import jp.co.hybitz.simpletransit.alarm.AlarmSettingDialog;
@@ -40,15 +37,18 @@ import jp.co.hybitz.simpletransit.db.TransitResultDao;
 import jp.co.hybitz.simpletransit.favorite.FavoriteArrayAdapter;
 import jp.co.hybitz.simpletransit.history.QueryHistoryWorker;
 import jp.co.hybitz.simpletransit.model.Location;
-import jp.co.hybitz.simpletransit.model.TransitQueryEx;
-import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import jp.co.hybitz.simpletransit.model.TimeTypeAndDate;
 import jp.co.hybitz.simpletransit.model.TransitItem;
+import jp.co.hybitz.simpletransit.model.TransitQueryEx;
+import jp.co.hybitz.simpletransit.model.TransitResultEx;
 import jp.co.hybitz.simpletransit.station.SearchNearStationsTask;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableEx;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.stationapi.model.Station;
+import jp.co.hybitz.transit.TransitUtil;
+import jp.co.hybitz.transit.model.TimeType;
+import jp.co.hybitz.transit.model.TransitResult;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -168,6 +168,12 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_LOCATION_CLEAR, 2, "経路をクリア");
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_CANCEL, 3, "キャンセル");
 //            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
+        }
+        else if (v.getId() == R.id.search) {
+            menu.setHeaderTitle(Preferences.getText(this, "検索対象を選択"));
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH, 1, "検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_STATIONS, 2, "駅候補を検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_NEAR_STATIONS, 3, "最寄駅を検索");
         }
     }
     
@@ -409,6 +415,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
                 searchNew();
             }
         });
+        registerForContextMenu(search);
         
         Button previous = (Button) findViewById(R.id.previous_time);
         previous.setOnClickListener(new OnClickListener() {
@@ -486,10 +493,18 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
             updateFromAndTo(stq.getTo(), stq.getFrom());
             return true;
         }
-        else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
-        }
         else if (menuItem.getItemId() == MENU_ITEM_REVERSE_LOCATION) {
             updateFromAndTo(query.getTo(), query.getFrom());
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SEARCH) {
+            searchNew();
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SEARCH_STATIONS) {
+            searchStations();
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FROM) {
@@ -502,6 +517,10 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
                 updateFrom(((TimeTableEx)item).getStation().getName());
                 return true;
             }
+            else if (item instanceof StationItem) {
+                updateFrom(((StationItem)item).getStation().getName());
+                return true;
+            }
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_TO) {
             Object item = getSelectedItem(menuItem);
@@ -511,6 +530,10 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
             }
             else if (item instanceof TimeTableEx) {
                 updateTo(((TimeTableEx)item).getStation().getName());
+                return true;
+            }
+            else if (item instanceof StationItem) {
+                updateTo(((StationItem)item).getStation().getName());
                 return true;
             }
         }
@@ -623,6 +646,11 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         search(SEARCH_TYPE_NEW);
     }
     
+    private void searchStations() {
+        updateQuery();
+        search(SEARCH_TYPE_STATIONS);
+    }
+
     public void saveHistory() {
         new Thread(new QueryHistoryWorker(this, query)).start();
     }
@@ -728,10 +756,15 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     
     public void updatePreviousTimeAndNextTime(int searchType, TransitResult result) {
         if (result == null || result.getTransitCount() == 0) {
+            if (searchType == SEARCH_TYPE_STATIONS || searchType == SEARCH_TYPE_NEW) {
+                nextTime.clear();
+                previousTime.clear();
+            }
+
             updatePreviousTimeAndNextTimeVisibility();
             return;
         }
-        
+
         if (searchType == SEARCH_TYPE_NEW) {
             nextTime.clear();
             previousTime.clear();
