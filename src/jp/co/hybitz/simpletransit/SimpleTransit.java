@@ -24,6 +24,7 @@ import java.util.Stack;
 
 import jp.benishouga.common.AndroidExceptionHandler;
 import jp.co.hybitz.android.ContextMenuAware;
+import jp.co.hybitz.common.Engine;
 import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.common.model.Time;
 import jp.co.hybitz.simpletransit.action.FirstAndLastCheckBoxListener;
@@ -80,11 +81,13 @@ import android.widget.TextView;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
+    private Engine engine = Engine.GOOGLE;
     private TransitQueryEx query = new TransitQueryEx();
     private TimeTypeAndDate selectedTime;
     private TimeTypeAndDate currentTime;
     private Stack<TimeTypeAndDate> previousTime = new Stack<TimeTypeAndDate>();
     private Stack<TimeTypeAndDate> nextTime = new Stack<TimeTypeAndDate>();
+    private Button search;
     private LinearLayout searchDetails;
     private ListView results;
     private RelativeLayout searchButtons;
@@ -171,9 +174,10 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (v.getId() == R.id.search) {
             menu.setHeaderTitle(Preferences.getText(this, "検索対象を選択"));
-            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH, 1, "検索");
-            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_STATIONS, 2, "駅候補を検索");
-            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_NEAR_STATIONS, 3, "最寄駅を検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_BY_GOOGLE, 1, "Googleトランジットで検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_BY_GOO, 2, "goo路線で検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_STATIONS, 3, "駅候補を検索");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_NEAR_STATIONS, 4, "最寄駅を検索");
         }
     }
     
@@ -275,7 +279,8 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     private void initView() {
     	Preferences.initTheme(this);
         setContentView(getLayoutId());
-    	
+
+        search = (Button) findViewById(R.id.search);
         results = (ListView) findViewById(R.id.results);
         searchButtons = (RelativeLayout) findViewById(R.id.layout_search_buttons);
 
@@ -287,8 +292,6 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         TextView timeView = (TextView) findViewById(R.id.time);
         timeView.setTextSize(16);
 
-        query.setTimeType(TimeType.DEPARTURE);
-        
         CheckBox express = (CheckBox) findViewById(R.id.express);
         express.setTextColor(Preferences.getTextColor(this));
         CheckBox airline = (CheckBox) findViewById(R.id.airline);
@@ -324,6 +327,8 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     }
 
     private void initQuery() {
+        query.setTimeType(TimeType.DEPARTURE);
+        
         if (Preferences.isUseLatestQueryHistory(this)) {
             TransitQueryEx latest = new TransitQueryDao(this).getLatestTransitQuery();
             if (latest != null) {
@@ -339,6 +344,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         searchDetails = (LinearLayout) findViewById(R.id.search_details);
         
         initSort();
+        updateUseAirline();
         
         if (!Preferences.isFullInput(this)) {
             removeSearchDetails();
@@ -409,7 +415,6 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         CheckBox last = (CheckBox) findViewById(R.id.last);
         last.setOnCheckedChangeListener(flListener);
         
-        Button search = (Button) findViewById(R.id.search);
         search.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 searchNew();
@@ -499,7 +504,15 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
         }
-        else if (menuItem.getItemId() == MENU_ITEM_SEARCH) {
+        else if (menuItem.getItemId() == MENU_ITEM_SEARCH_BY_GOO) {
+            engine = Engine.GOO;
+            updateUseAirline();
+            searchNew();
+            return true;
+        }
+        else if (menuItem.getItemId() == MENU_ITEM_SEARCH_BY_GOOGLE) {
+            engine = Engine.GOOGLE;
+            updateUseAirline();
             searchNew();
             return true;
         }
@@ -583,6 +596,28 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
         
+        if (engine == Engine.GOO) {
+            query.setFromCode(null);
+            query.setToCode(null);
+            
+            ListView results = (ListView) findViewById(R.id.results);
+            if (results.getAdapter() instanceof StationArrayAdapter) {
+                for (int i = 0; i < results.getCount(); i ++) {
+                    StationItem item = (StationItem) results.getItemAtPosition(i);
+                    if (item.getStation() == null) {
+                        continue;
+                    }
+                    
+                    if (item.getStation().getName().equals(query.getFrom())) {
+                        query.setFromCode(item.getStation().getCode());
+                    }
+                    if (item.getStation().getName().equals(query.getTo())) {
+                        query.setToCode(item.getStation().getCode());
+                    }
+                }
+            }
+        }
+        
         if (first.isChecked()) {
             currentTime = new TimeTypeAndDate(TimeType.FIRST, new Date());
         }
@@ -643,6 +678,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     
     private void searchNew() {
         updateQuery();
+        query.setEngine(engine);
         search(SEARCH_TYPE_NEW);
     }
     
@@ -873,6 +909,17 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         else {
             searchButtons.setVisibility(View.VISIBLE);
         }
+    }
+    
+    private void updateUseAirline() {
+        CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
+        if (engine == Engine.GOOGLE) {
+            airline.setVisibility(View.VISIBLE);
+        }
+        else if (engine == Engine.GOO) {
+            airline.setVisibility(View.GONE);
+        }
+            
     }
     
 }

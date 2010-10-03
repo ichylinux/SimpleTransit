@@ -40,8 +40,16 @@ public class StationArrayAdapter extends ArrayAdapterEx<StationItem> implements 
 
     @Override
     protected void updateView(View view, final StationItem item) {
-        view.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        view.setOnClickListener(new OnClickListener() {
+
+        TextView name = (TextView) view.findViewWithTag("name");
+        name.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        if (item.getStation() != null) {
+            name.setText(item.getStation().getName());
+        }
+        else {
+            name.setText(null);
+        }
+        name.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 Station s = item.getStation();
                 if (s == null) {
@@ -58,16 +66,11 @@ public class StationArrayAdapter extends ArrayAdapterEx<StationItem> implements 
             }
         });
 
-        TextView name = (TextView) view.findViewWithTag("name");
-        name.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        if (item.getStation() != null) {
-            name.setText(item.getStation().getName());
-        }
-
         View bottomLayout = view.findViewWithTag("bottom_layout");
         bottomLayout.setVisibility(View.GONE);
     }
     
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
         StationItem item = getItem(info.position);

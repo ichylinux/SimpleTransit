@@ -200,7 +200,13 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
         while (c.moveToNext()) {
             Transit t = new Transit();
             long transitId = c.getLong("_id");
-            t.setDurationAndFare(c.getString("duration_and_fare"));
+            String durationAndFare = c.getString("duration_and_fare");
+            if (StringUtils.isNotEmpty(durationAndFare)) {
+                String[] split = durationAndFare.split("-");
+                t.setDuration(split[0].trim());
+                t.setFare(split[1].trim());
+            }
+
             for (Iterator<TransitDetail> it = getTransitDetails(db, transitId).iterator(); it.hasNext();) {
                 TransitDetail td = it.next();
                 t.addDetail(td);
@@ -338,7 +344,7 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
             // transit
             ContentValues tv = new ContentValues();
             tv.put("transit_result_id", trId);
-            tv.put("duration_and_fare", t.getDurationAndFare());
+            tv.put("duration_and_fare", t.getDuration() + " - " + t.getFare());
             long tId = db.insertOrThrow("transit", null, tv);
             if (tId < 0) {
                 return -1;
@@ -355,8 +361,10 @@ public class TransitResultDao extends AbstractDao implements SimpleTransitConst 
                 if (!td.isWalking()) {
                     tdv.put("departure_time", td.getDeparture().getTime().getTimeAsString());
                     tdv.put("departure_place", td.getDeparture().getPlace());
-                    tdv.put("arrival_time", td.getArrival().getTime().getTimeAsString());
-                    tdv.put("arrival_place", td.getArrival().getPlace());
+                    if (td.getArrival() != null) {
+                        tdv.put("arrival_time", td.getArrival().getTime().getTimeAsString());
+                        tdv.put("arrival_place", td.getArrival().getPlace());
+                    }
                 }
                 
                 db.insertOrThrow("transit_detail", null, tdv);

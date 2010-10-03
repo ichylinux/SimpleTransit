@@ -43,14 +43,15 @@ public class TransitItem {
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder();
+
         try {
             String prefectureWithParen = transitResult.getPrefecture() == null ? "" : "（" + transitResult.getPrefecture() + "）";
             
-            StringBuilder sb = new StringBuilder();
     
-            sb.append(transit.getDurationAndFare());
+            sb.append(transit.getDuration() + " - " + transit.getFare());
             if (transit.getTransferCount() > 0) {
-                sb.append(" - 乗り換え" + transit.getTransferCount() + "回");
+                sb.append(" - 乗換" + transit.getTransferCount() + "回");
             }
             sb.append("\n");
     
@@ -63,8 +64,16 @@ public class TransitItem {
                     sb.append("\n");
                     sb.append(detail.getDeparture().getTime()).append("発　");
                     sb.append(detail.getDeparture().getPlace().replaceAll(prefectureWithParen, "")).append("\n");
-                    sb.append(detail.getArrival().getTime()).append("着　");
-                    sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
+                    if (detail.getArrival() != null) {
+                        sb.append(detail.getArrival().getTime()).append("着　");
+                        sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
+                    }
+                    else {
+                        // 通過駅は無視する
+                        detail = transit.getDetails().get(++i);
+                        sb.append(detail.getArrival().getTime()).append("着　");
+                        sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
+                    }
                 }
     
                 if (i < transit.getDetails().size() - 1) {
@@ -74,7 +83,7 @@ public class TransitItem {
             return sb.toString();
         }
         catch (RuntimeException e) {
-            throw new IllegalStateException(transitResult.getFrom() + " => " + transitResult.getTo(), e);
+            throw new IllegalStateException(sb.toString(), e);
         }
     }
 }

@@ -44,7 +44,7 @@
     <CheckBoxPreference
       android:key="use_airline"
       android:title="飛行機"
-      android:summary="飛行機を使用する場合はチェックを入れます。"/>
+      android:summary="飛行機を使用する場合はチェックを入れます。（goo路線は常に有効）"/>
     <ListPreference
             android:key="sort"
             android:title="表示順"

@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit.model;
 
 import java.util.Date;
 
+import jp.co.hybitz.common.Engine;
 import jp.co.hybitz.simpletransit.common.model.Favorable;
 import jp.co.hybitz.transit.model.TimeType;
 import jp.co.hybitz.transit.model.TransitQuery;
@@ -48,6 +49,30 @@ public class TransitQueryEx extends Favorable {
 
     public TransitQuery getTransitQuery() {
         return transitQuery;
+    }
+
+    public Engine getEngine() {
+        return transitQuery.getEngine();
+    }
+
+    public String getFromCode() {
+        return transitQuery.getFromCode();
+    }
+
+    public String getToCode() {
+        return transitQuery.getToCode();
+    }
+
+    public void setEngine(Engine engine) {
+        transitQuery.setEngine(engine);
+    }
+
+    public void setFromCode(String fromCode) {
+        transitQuery.setFromCode(fromCode);
+    }
+
+    public void setToCode(String toCode) {
+        transitQuery.setToCode(toCode);
     }
 
     public Date getDate() {

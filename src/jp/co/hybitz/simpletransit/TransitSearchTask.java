@@ -23,9 +23,8 @@ import jp.co.hybitz.common.Platform;
 import jp.co.hybitz.common.Searcher;
 import jp.co.hybitz.simpletransit.action.MaybeListener;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
-import jp.co.hybitz.transit.goo.GooTransitSearcherFactory;
-import jp.co.hybitz.transit.google.GoogleTransitSearcher;
-import jp.co.hybitz.transit.google.GoogleTransitSearcherFactory;
+import jp.co.hybitz.transit.TransitSearcherFactory;
+import jp.co.hybitz.transit.goo.GooStationSearcherFactory;
 import jp.co.hybitz.transit.model.TransitQuery;
 import jp.co.hybitz.transit.model.TransitResult;
 import android.view.View;
@@ -46,11 +45,11 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
     @Override
     protected TransitResult search(TransitQuery in) throws HttpSearchException {
         if (searchType == SEARCH_TYPE_STATIONS) {
-            Searcher<TransitQuery, TransitResult> searcher = GooTransitSearcherFactory.createSearcher();
+            Searcher<TransitQuery, TransitResult> searcher = GooStationSearcherFactory.createSearcher();
             return searcher.search(in);
         }
         else {
-            GoogleTransitSearcher searcher = GoogleTransitSearcherFactory.createSearcher(Platform.ANDROID);
+            Searcher<TransitQuery, TransitResult> searcher = TransitSearcherFactory.createSearcher(in.getEngine(), Platform.ANDROID);
             return searcher.search(in);
         }
     }
@@ -65,6 +64,12 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
         }
 
         if (searchType == SEARCH_TYPE_STATIONS) {
+            // 駅候補を表示
+            new ResultRenderer(getActivity()).renderStations(out);
+            // 前の時刻と次の時刻を設定
+            getActivity().updatePreviousTimeAndNextTime(searchType, out);
+        }
+        else if (out.getFromStations().size() > 0 || out.getToStations().size() > 0) {
             // 駅候補を表示
             new ResultRenderer(getActivity()).renderStations(out);
             // 前の時刻と次の時刻を設定
