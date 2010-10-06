@@ -319,11 +319,11 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         summary.setTextSize(Preferences.getTextSize(this));
         summary.setText("\nお気に入り");
         
-        ListView fab = (ListView) findViewById(R.id.results);
-        fab.setAdapter(new FavoriteArrayAdapter(this, list));
-        fab.requestFocus();
+        ListView fav = (ListView) findViewById(R.id.results);
+        fav.setAdapter(new FavoriteArrayAdapter(this, list));
+        fav.requestFocus();
         hideInputMethod();
-        registerForContextMenu(fab);
+        registerForContextMenu(fav);
     }
 
     private void initQuery() {

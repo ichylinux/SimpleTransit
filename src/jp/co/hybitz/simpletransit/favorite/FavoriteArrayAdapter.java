@@ -49,7 +49,7 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements S
 
     @Override
     protected void updateView(View view, final Favorable item) {
-        TextView textView = (TextView) view;
+        TextView textView = (TextView) view.findViewWithTag("title");
         textView.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         textView.setText(getText(item));
         textView.setOnClickListener(new OnClickListener() {
