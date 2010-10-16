@@ -56,7 +56,7 @@ public class FavoriteArrayAdapter extends ArrayAdapterEx<Favorable> implements S
             public void onClick(View v) {
                 if (item instanceof TransitQueryEx) {
                     TransitQueryEx query = (TransitQueryEx) item;
-                    activity.updateFromAndTo(query.getFrom(), query.getTo());
+                    activity.updateLocations(query.getFrom(), query.getTo(), query.getStopOver());
                 }
                 else if (item instanceof TimeTableEx) {
                     TimeTableEx tt = (TimeTableEx) item;

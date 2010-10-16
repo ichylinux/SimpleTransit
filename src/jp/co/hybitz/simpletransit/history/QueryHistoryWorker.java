@@ -36,7 +36,7 @@ public class QueryHistoryWorker implements Runnable {
     
     public void run() {
         TransitQueryDao dao = new TransitQueryDao(context);
-        TransitQueryEx stq = dao.getTransitQuery(query.getFrom(), query.getTo());
+        TransitQueryEx stq = dao.getTransitQuery(query.getFrom(), query.getTo(), query.getStopOver());
         if (stq == null) {
             dao.createTransitQuery(query);
         }

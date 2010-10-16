@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import jp.co.hybitz.android.CursorEx;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.simpletransit.model.Location;
 import jp.co.hybitz.simpletransit.model.TransitQueryEx;
 import jp.co.hybitz.transit.model.TimeType;
@@ -65,11 +66,14 @@ public class TransitQueryDao extends AbstractDao {
             Map<String, Location> map = new HashMap<String, Location>(); 
 
             CursorEx c = (CursorEx) db.query("transit_query",
-                    new String[]{"transit_from, transit_to, use_count"}, null, null, null, null, null);
+                    new String[]{"transit_from, transit_to, transit_stopover, use_count"}, null, null, null, null, null);
             while (c.moveToNext()) {
-                String[] locations = new String[]{c.getString("transit_from"), c.getString("transit_to")};
+                String[] locations = new String[]{c.getString("transit_from"), c.getString("transit_to"), c.getString("transit_stopover")};
                 for (int i = 0; i < locations.length; i ++) {
                     String location = locations[i];
+                    if (StringUtils.isEmpty(location)) {
+                        continue;
+                    }
                     
                     Location l = map.get(location);
                     if (l == null) {
@@ -121,6 +125,7 @@ public class TransitQueryDao extends AbstractDao {
         ret.setId(c.getLong("_id"));
         ret.setFrom(c.getString("transit_from"));
         ret.setTo(c.getString("transit_to"));
+        ret.setStopOver(c.getString("transit_stopover"));
         ret.setTimeType(TimeType.DEPARTURE);
         ret.setUseCount(c.getInt("use_count"));
         ret.setFavorite(c.getBoolean("is_favorite"));
@@ -129,12 +134,14 @@ public class TransitQueryDao extends AbstractDao {
         return ret;
     }
 
-    public TransitQueryEx getTransitQuery(String from, String to) {
+    public TransitQueryEx getTransitQuery(String from, String to, String stopOver) {
+        stopOver = StringUtils.isNotEmpty(stopOver) ? stopOver : "";
+
         SQLiteDatabase db = getReadableDatabase();
         try {
-            String[] params = new String[]{from, to}; 
+            String[] params = new String[]{from, to, stopOver}; 
             CursorEx c = (CursorEx) db.query("transit_query", null, 
-                    "transit_from=? and transit_to=?", params, null, null, null);
+                    "transit_from=? and transit_to=? and transit_stopover=?", params, null, null, null);
 
             TransitQueryEx ret = null;
             
@@ -178,6 +185,7 @@ public class TransitQueryDao extends AbstractDao {
             ContentValues values = new ContentValues();
             values.put("transit_from", tq.getFrom());
             values.put("transit_to", tq.getTo());
+            values.put("transit_stopover", StringUtils.isNotEmpty(tq.getStopOver()) ? tq.getStopOver() : "");
             values.put("created_at", now);
             values.put("updated_at", now);
             return db.insertOrThrow("transit_query", null, values);

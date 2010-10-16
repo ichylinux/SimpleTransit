@@ -31,7 +31,6 @@ import android.widget.ArrayAdapter;
  * @author ichy <ichylinux@gmail.com>
  */
 public abstract class ArrayAdapterEx<T> extends ArrayAdapter<T> implements ContextMenuAware {
-
     private LayoutInflater inflater;
     private int textViewResourceId;
     private List<T> items;

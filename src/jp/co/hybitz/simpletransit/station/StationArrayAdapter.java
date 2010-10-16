@@ -37,7 +37,7 @@ import android.widget.TextView;
 public class StationArrayAdapter extends ArrayAdapterEx<Station> implements SimpleTransitConst {
 
     public StationArrayAdapter(SimpleTransit context, List<Station> items) {
-        super(context, R.layout.station_list, items);
+        super(context, R.layout.near_station_list, items);
     }
 
     @Override
@@ -67,8 +67,12 @@ public class StationArrayAdapter extends ArrayAdapterEx<Station> implements Simp
     }
     
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        menu.add(0, MENU_ITEM_SET_FROM, 1, "出発地に設定");
-        menu.add(0, MENU_ITEM_SET_TO, 2, "到着地に設定");
-        menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+        int order = 0;
+        menu.add(0, MENU_ITEM_SET_FROM, ++order, "出発地に設定");
+        menu.add(0, MENU_ITEM_SET_TO, ++order, "到着地に設定");
+        if (Preferences.isUseStopOver(getContext())) {
+            menu.add(0, MENU_ITEM_SET_STOPOVER, ++order, "経由地に設定");
+        }
+        menu.add(0, MENU_ITEM_CANCEL, ++order, "キャンセル");
     }
 }

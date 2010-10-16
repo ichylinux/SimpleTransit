@@ -71,16 +71,25 @@ public class ResultRenderer implements SimpleTransitConst {
         ListView results = (ListView) activity.findViewById(R.id.results);
         List<StationItem> items = new ArrayList<StationItem>();
         for (Station from : result.getFromStations()) {
-            items.add(new StationItem(true, from));
+            items.add(new StationItem(StationItem.STATION_TYPE_FROM, from));
         }
         
-        if (items.size() > 0) {
-            items.add(new StationItem(false, null));
+        if (items.size() > 0 && ! result.getToStations().isEmpty()) {
+            items.add(new StationItem());
         }
 
         for (Station from : result.getToStations()) {
-            items.add(new StationItem(false, from));
+            items.add(new StationItem(StationItem.STATION_TYPE_TO, from));
         }
+        
+        if (items.size() > 0 && ! result.getStopOverStations().isEmpty()) {
+            items.add(new StationItem());
+        }
+        
+        for (Station stopOver : result.getStopOverStations()) {
+            items.add(new StationItem(StationItem.STATION_TYPE_STOPOVER, stopOver));
+        }
+
         results.setAdapter(new StationArrayAdapter(activity, items));
     }
 

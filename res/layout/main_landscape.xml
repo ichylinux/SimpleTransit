@@ -3,7 +3,7 @@
     android:layout_above="@+id/layout_search_buttons" android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
     
     <!-- 検索条件 -->
-    <ScrollView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="190sp" >
+    <ScrollView android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="198sp" >
 	    <LinearLayout android:id="@+id/layout_search"
 	        android:orientation="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent">
 	        
@@ -17,6 +17,12 @@
 	            <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
 	                android:maxLines="1" android:singleLine="true" android:id="@+id/to" android:layout_width="fill_parent"/>
 	        </LinearLayout>
+            <LinearLayout android:id="@+id/row_stopover"
+                android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@+string/label_stopover"/>
+                <EditText android:layout_height="wrap_content" android:minWidth="160sp" android:maxWidth="160sp"
+                    android:maxLines="1" android:singleLine="true" android:id="@+id/stopover" android:layout_width="fill_parent"/>
+            </LinearLayout>
 	        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
 	            <TextView android:text="@+string/label_time"
 	                android:layout_width="wrap_content" 
@@ -28,7 +34,7 @@
 	                android:layout_margin="2sp" android:layout_width="fill_parent" android:layout_height="wrap_content"/>
 	        </LinearLayout>
 	        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
-		        <CheckBox android:text="@+string/checkbox_first" android:layout_marginLeft="30sp" android:id="@+id/first" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+		        <CheckBox android:text="@+string/checkbox_first" android:id="@+id/first" android:layout_marginLeft="30sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 		        <CheckBox android:text="@+string/checkbox_last" android:layout_marginLeft="10sp" android:id="@+id/last" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
 	        </LinearLayout>
 	        <LinearLayout android:id="@+id/search_details"

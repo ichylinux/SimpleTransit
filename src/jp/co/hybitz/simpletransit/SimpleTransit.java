@@ -81,7 +81,7 @@ import android.widget.TextView;
  * @author ichy <ichylinux@gmail.com>
  */
 public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
-    private Engine engine = Engine.GOOGLE;
+    private Engine engine;
     private TransitQueryEx query = new TransitQueryEx();
     private TimeTypeAndDate selectedTime;
     private TimeTypeAndDate currentTime;
@@ -172,6 +172,11 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_CANCEL, 3, "キャンセル");
 //            menu.add(0, MENU_ITEM_SELECT_LOCATION, 2, "履歴から選択");
         }
+        else if (v.getId() == R.id.stopover) {
+            menu.setHeaderTitle(Preferences.getText(this, "テキストを編集"));
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_LOCATION_CLEAR, 1, "経路をクリア");
+            menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_CANCEL, 2, "キャンセル");
+        }
         else if (v.getId() == R.id.search) {
             menu.setHeaderTitle(Preferences.getText(this, "検索対象を選択"));
             menu.add(Menu.CATEGORY_SYSTEM, MENU_ITEM_SEARCH_BY_GOOGLE, 1, "Googleトランジットで検索");
@@ -205,28 +210,33 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE_PREFERENCE) {
-                if (findViewById(R.id.search_details) == null) {
-                    CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
-                    CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
-                    express.setChecked(Preferences.isUseExpress(this));
-                    airline.setChecked(Preferences.isUseAirline(this));
-                    initSort();
-                    
-                    if (Preferences.isFullInput(this)) {
-                        addSearchDetails();
-                    }
+            engine = Preferences.getEngine(this);
+            updateStopOver();
+            updateUseAirline();
+
+            if (findViewById(R.id.search_details) == null) {
+                CheckBox express = (CheckBox) searchDetails.findViewById(R.id.express);
+                CheckBox airline = (CheckBox) searchDetails.findViewById(R.id.airline);
+                express.setChecked(Preferences.isUseExpress(this));
+                airline.setChecked(Preferences.isUseAirline(this));
+                initSort();
+                
+                if (Preferences.isFullInput(this)) {
+                    addSearchDetails();
                 }
-                else {
-                    if (!Preferences.isFullInput(this)) {
-                        removeSearchDetails();
-                    }
+            }
+            else {
+                if (!Preferences.isFullInput(this)) {
+                    removeSearchDetails();
                 }
+            }
         }
         else if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
             	TransitQueryEx q = (TransitQueryEx) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
                 query.setFrom(q.getFrom());
                 query.setTo(q.getTo());
+                query.setStopOver(q.getStopOver());
                 updateQueryView();
             }
             else if (resultCode == RESULT_CODE_FROM_SELECTED) {
@@ -280,7 +290,9 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     	Preferences.initTheme(this);
         setContentView(getLayoutId());
 
+        engine = Preferences.getEngine(this);
         search = (Button) findViewById(R.id.search);
+        searchDetails = (LinearLayout) findViewById(R.id.search_details);
         results = (ListView) findViewById(R.id.results);
         searchButtons = (RelativeLayout) findViewById(R.id.layout_search_buttons);
 
@@ -329,10 +341,11 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     private void initQuery() {
         query.setTimeType(TimeType.DEPARTURE);
         
+        // 前回の検索条件を復元
         if (Preferences.isUseLatestQueryHistory(this)) {
             TransitQueryEx latest = new TransitQueryDao(this).getLatestTransitQuery();
             if (latest != null) {
-                updateFromAndTo(latest.getFrom(), latest.getTo());
+                updateLocations(latest.getFrom(), latest.getTo(), latest.getStopOver());
             }
         }
         
@@ -341,13 +354,23 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         CheckBox airline = (CheckBox) findViewById(R.id.airline);
         airline.setChecked(Preferences.isUseAirline(this));
         
-        searchDetails = (LinearLayout) findViewById(R.id.search_details);
-        
         initSort();
         updateUseAirline();
-        
+        updateStopOver();
+
         if (!Preferences.isFullInput(this)) {
             removeSearchDetails();
+        }
+    }
+    
+    private void updateStopOver() {
+        View row = findViewById(R.id.row_stopover);
+
+        if (Preferences.isUseStopOver(this) && engine == Engine.GOO) {
+            row.setVisibility(View.VISIBLE);
+        }
+        else {
+            row.setVisibility(View.GONE);
         }
     }
     
@@ -365,9 +388,15 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
     }
     
-    public void updateFromAndTo(String from, String to) {
+    public void updateLocations(String from, String to, String stopOver) {
         query.setFrom(from);
         query.setTo(to);
+        if (Preferences.isUseStopOver(this)) {
+            query.setStopOver(stopOver);
+        }
+        else {
+            query.setStopOver(null);
+        }
         updateQueryView();
     }
     
@@ -378,6 +407,11 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
 
     public void updateTo(String to) {
         query.setTo(to);
+        updateQueryView();
+    }
+
+    public void updateStopOver(String stopOver) {
+        query.setStopOver(stopOver);
         updateQueryView();
     }
 
@@ -397,10 +431,12 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     private void initAction() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
-        from.setOnTouchListener(new FromToDragListener(from, to));
         to.setOnTouchListener(new FromToDragListener(to, from));
         registerForContextMenu(from);
         registerForContextMenu(to);
+
+        EditText stopOver = (EditText) findViewById(R.id.stopover);
+        registerForContextMenu(stopOver);
         
     	TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
@@ -490,28 +526,30 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE) {
             TransitQueryEx stq = getSelectedTransitQuery(menuItem);
-            updateFromAndTo(stq.getFrom(), stq.getTo());
+            updateLocations(stq.getFrom(), stq.getTo(), stq.getStopOver());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SET_FAVORITE_REVERSE) {
             TransitQueryEx stq = getSelectedTransitQuery(menuItem);
-            updateFromAndTo(stq.getTo(), stq.getFrom());
+            updateLocations(stq.getTo(), stq.getFrom(), stq.getStopOver());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_REVERSE_LOCATION) {
-            updateFromAndTo(query.getTo(), query.getFrom());
+            updateLocations(query.getTo(), query.getFrom(), query.getStopOver());
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SELECT_LOCATION) {
         }
         else if (menuItem.getItemId() == MENU_ITEM_SEARCH_BY_GOO) {
             engine = Engine.GOO;
+            updateStopOver();
             updateUseAirline();
             searchNew();
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_SEARCH_BY_GOOGLE) {
             engine = Engine.GOOGLE;
+            updateStopOver();
             updateUseAirline();
             searchNew();
             return true;
@@ -550,8 +588,23 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
                 return true;
             }
         }
+        else if (menuItem.getItemId() == MENU_ITEM_SET_STOPOVER) {
+            Object item = getSelectedItem(menuItem);
+            if (item instanceof Station) {
+                updateStopOver(((Station)item).getName());
+                return true;
+            }
+            else if (item instanceof TimeTableEx) {
+                updateStopOver(((TimeTableEx)item).getStation().getName());
+                return true;
+            }
+            else if (item instanceof StationItem) {
+                updateStopOver(((StationItem)item).getStation().getName());
+                return true;
+            }
+        }
         else if (menuItem.getItemId() == MENU_ITEM_LOCATION_CLEAR) {
-            updateFromAndTo(null, null);
+            updateLocations(null, null, null);
             return true;
         }
         else if (menuItem.getItemId() == MENU_ITEM_CANCEL) {
@@ -583,22 +636,32 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     private void updateQueryView() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
+        EditText stopOver = (EditText) findViewById(R.id.stopover);
         from.setText(query.getFrom());
         to.setText(query.getTo());
+        stopOver.setText(query.getStopOver());
     }
 
     private void updateQuery() {
         EditText from = (EditText) findViewById(R.id.from);
         EditText to = (EditText) findViewById(R.id.to);
+        EditText stopOver = (EditText) findViewById(R.id.stopover);
         CheckBox first = (CheckBox) findViewById(R.id.first);
         CheckBox last = (CheckBox) findViewById(R.id.last);
 
         query.setFrom(from.getText().toString());
         query.setTo(to.getText().toString());
+        if (Preferences.isUseStopOver(this)) {
+            query.setStopOver(stopOver.getText().toString());
+        }
+        else {
+            query.setStopOver(null);
+        }
         
         if (engine == Engine.GOO) {
             query.setFromCode(null);
             query.setToCode(null);
+            query.setStopOverCode(null);
             
             ListView results = (ListView) findViewById(R.id.results);
             if (results.getAdapter() instanceof StationArrayAdapter) {
@@ -613,6 +676,9 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
                     }
                     if (item.getStation().getName().equals(query.getTo())) {
                         query.setToCode(item.getStation().getCode());
+                    }
+                    if (item.getStation().getName().equals(query.getStopOver())) {
+                        query.setStopOverCode(item.getStation().getCode());
                     }
                 }
             }
@@ -741,7 +807,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     }
     
     private void removeSearchDetails() {
-        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) { 
+        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) {
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
             view.removeView(searchDetails);
         }
@@ -760,7 +826,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     }
     
     private void addSearchDetails() {
-        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) { 
+        if (Preferences.getOrientation(this) == ORIENTATION_PORTRAIT) {
             LinearLayout view = (LinearLayout) findViewById(R.id.layout_top);
             if (view != null) {
                 view.addView(searchDetails, 1);

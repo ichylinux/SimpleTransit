@@ -29,14 +29,25 @@
       android:summary="縦向き表示の時に検索結果を全画面で表示する場合はチェックを入れます。"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="検索条件の設定">
-    <CheckBoxPreference
-      android:key="full_input"
-      android:title="検索条件フル表示"
-      android:summary="指定可能なすべての検索条件を初期表示する場合はチェックを入れます。"/>
+    <ListPreference
+      android:key="engine"
+      android:title="検索エンジン"
+      android:summary="利用する検索エンジンを選択します。"
+      android:dialogTitle="検索エンジン"
+      android:entries="@array/engine_entries"
+      android:entryValues="@array/engine_values" />
     <CheckBoxPreference
       android:key="use_latest_query_history"
       android:title="前回の検索条件"
       android:summary="前回の出発地と到着地を初期値として使用する場合はチェックを入れます。"/>
+    <CheckBoxPreference
+      android:key="use_stopover"
+      android:title="経由"
+      android:summary="経由を指定したい場合はチェックを入れます。（gooのみ有効）"/>
+    <CheckBoxPreference
+      android:key="full_input"
+      android:title="検索オプションを表示"
+      android:summary="指定可能な検索オプションを表示する場合はチェックを入れます。"/>
     <CheckBoxPreference
       android:key="use_express"
       android:title="有料特急"
@@ -44,7 +55,7 @@
     <CheckBoxPreference
       android:key="use_airline"
       android:title="飛行機"
-      android:summary="飛行機を使用する場合はチェックを入れます。（goo路線は常に有効）"/>
+      android:summary="飛行機を使用する場合はチェックを入れます。（gooは常に有効）"/>
     <ListPreference
             android:key="sort"
             android:title="表示順"
@@ -54,7 +65,7 @@
             android:entryValues="@array/sort_values" />
     <CheckBoxPreference
       android:key="use_maybe"
-      android:title="もしかして機能"
+      android:title="もしかして"
       android:summary="もしかして機能を使用する場合はチェックを入れます。"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="アラームの設定">

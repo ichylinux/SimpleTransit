@@ -91,6 +91,22 @@ public class TransitQueryEx extends Favorable {
         return transitQuery.getTo();
     }
 
+    public String getStopOver() {
+        return transitQuery.getStopOver();
+    }
+
+    public String getStopOverCode() {
+        return transitQuery.getStopOverCode();
+    }
+
+    public void setStopOver(String stopOver) {
+        transitQuery.setStopOver(stopOver);
+    }
+
+    public void setStopOverCode(String stopOverCode) {
+        transitQuery.setStopOverCode(stopOverCode);
+    }
+
     public boolean isUseAirline() {
         return transitQuery.isUseAirline();
     }

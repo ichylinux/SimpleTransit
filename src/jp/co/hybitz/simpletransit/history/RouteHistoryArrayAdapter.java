@@ -20,6 +20,7 @@ package jp.co.hybitz.simpletransit.history;
 import java.util.List;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
+import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.simpletransit.Preferences;
 import jp.co.hybitz.simpletransit.R;
 import jp.co.hybitz.simpletransit.action.StarListener;
@@ -52,15 +53,23 @@ class RouteHistoryArrayAdapter extends ArrayAdapterEx<QueryHistoryListItem> {
         
         ImageView star = (ImageView) view.findViewWithTag("star");
         star.setImageBitmap(item.getQuery().isFavorite() ? images[1] : images[0]);
-        star.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         star.setOnClickListener(new StarListener(images, item.getQuery()));
         
         TextView fromTo = (TextView) view.findViewWithTag("from_to");
         fromTo.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         fromTo.setText(item.getQuery().getFromTo());
 
+        TextView stopOver = (TextView) view.findViewWithTag("stopover");
+        if (StringUtils.isNotEmpty(item.getQuery().getStopOver())) {
+            stopOver.setText("　" + item.getQuery().getStopOver() + "経由");
+            stopOver.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
+        }
+        else {
+            stopOver.setVisibility(View.INVISIBLE);
+        }
+
         TextView useCount = (TextView) view.findViewWithTag("use_count");
         useCount.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
-        useCount.setText("利用回数： " + item.getQuery().getUseCount() + "回");
+        useCount.setText("利用回数: " + item.getQuery().getUseCount() + "回");
     }
 }

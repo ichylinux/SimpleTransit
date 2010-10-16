@@ -40,7 +40,6 @@ public class StationArrayAdapter extends ArrayAdapterEx<StationItem> implements 
 
     @Override
     protected void updateView(View view, final StationItem item) {
-
         TextView name = (TextView) view.findViewWithTag("name");
         name.setBackgroundResource(Preferences.getBackgroundResource(getContext()));
         if (item.getStation() != null) {
@@ -57,17 +56,19 @@ public class StationArrayAdapter extends ArrayAdapterEx<StationItem> implements 
                 }
                 
                 SimpleTransit st = (SimpleTransit) getContext();
-                if (item.isFrom()) {
+                switch (item.getStationType()) {
+                case StationItem.STATION_TYPE_FROM :
                     st.updateFrom(s.getName());
-                }
-                else {
+                    break;
+                case StationItem.STATION_TYPE_TO :
                     st.updateTo(s.getName());
+                    break;
+                case StationItem.STATION_TYPE_STOPOVER :
+                    st.updateStopOver(s.getName());
+                    break;
                 }
             }
         });
-
-        View bottomLayout = view.findViewWithTag("bottom_layout");
-        bottomLayout.setVisibility(View.GONE);
     }
     
     @Override
@@ -75,9 +76,13 @@ public class StationArrayAdapter extends ArrayAdapterEx<StationItem> implements 
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
         StationItem item = getItem(info.position);
         if (item.getStation() != null) {
-            menu.add(0, MENU_ITEM_SET_FROM, 1, "出発地に設定");
-            menu.add(0, MENU_ITEM_SET_TO, 2, "到着地に設定");
-            menu.add(0, MENU_ITEM_CANCEL, 3, "キャンセル");
+            int order = 0;
+            menu.add(0, MENU_ITEM_SET_FROM, ++order, "出発地に設定");
+            menu.add(0, MENU_ITEM_SET_TO, ++order, "到着地に設定");
+            if (Preferences.isUseStopOver(getContext())) {
+                menu.add(0, MENU_ITEM_SET_STOPOVER, ++order, "経由地に設定");
+            }
+            menu.add(0, MENU_ITEM_CANCEL, ++order, "キャンセル");
         }
     }
 }

@@ -27,7 +27,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SimpleTransitDbHelper extends SQLiteOpenHelper {
     private static final String DB_NAME = "simple_transit.db";
-    private static final int DB_VERSION = 18;
+    private static final int DB_VERSION = 19;
 
     /**
      * コンストラクタ
@@ -91,6 +91,8 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
             upgradeFrom16To17(db);
         case 17 :
             upgradeFrom17To18(db);
+        case 18 :
+            upgradeFrom18To19(db);
         default :
         }
     }
@@ -208,12 +210,21 @@ public class SimpleTransitDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    private void upgradeFrom18To19(SQLiteDatabase db) {
+        try {
+            db.execSQL("alter table transit_query add column transit_stopover text not null default '' ");
+        }
+        catch (Exception e) {
+        }
+    }
+
     private void createTableTransitQuery(SQLiteDatabase db) {
         StringBuilder sb = new StringBuilder();
         sb.append("create table transit_query ( ");
         sb.append("_id integer primary key autoincrement, ");
         sb.append("transit_from text not null, ");
         sb.append("transit_to text not null, ");
+        sb.append("transit_stopover text not null default '', ");
         sb.append("is_favorite integer not null default 0, ");
         sb.append("use_count integer not null default 0, ");
         sb.append("used_at integer not null default 0, ");

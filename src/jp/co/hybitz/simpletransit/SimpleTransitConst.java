@@ -40,6 +40,9 @@ public interface SimpleTransitConst {
     public static final int COLOR_WHITE = 2;
     public static final int COLOR_BEIGE = 3;
 
+    public static final int ENGINE_GOOGLE = 1;
+    public static final int ENGINE_GOO = 2;
+    
     public static final String EXTRA_KEY_ALARM_ONLY = "alarmOnly";
     public static final String EXTRA_KEY_JORUDAN_LIVE_RESULT = JorudanLiveResult.class.getName();
     public static final String EXTRA_KEY_LOCATION = "location";
@@ -66,22 +69,23 @@ public interface SimpleTransitConst {
     public static final int MENU_ITEM_CANCEL = Menu.FIRST + 10;
     public static final int MENU_ITEM_COPY_TEXT = Menu.FIRST + 11;
     public static final int MENU_ITEM_SET_FROM = Menu.FIRST + 12;
-    public static final int MENU_ITEM_SET_TO = Menu.FIRST + 13;
-    public static final int MENU_ITEM_SET_FAVORITE = Menu.FIRST + 14;
-    public static final int MENU_ITEM_SET_FAVORITE_REVERSE = Menu.FIRST + 15;
-    public static final int MENU_ITEM_SELECT_LOCATION = Menu.FIRST + 16;
-    public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 17;
-    public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 18;
-    public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 19;
-    public static final int MENU_ITEM_SEARCH_BY_GOO = Menu.FIRST + 20;
-    public static final int MENU_ITEM_SEARCH_BY_GOOGLE = Menu.FIRST + 21;
-    public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 22;
-    public static final int MENU_ITEM_SEARCH_STATIONS = Menu.FIRST + 23;
-    public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 24;
-    public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 25;
-    public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 26;
-    public static final int MENU_ITEM_REFRESH = Menu.FIRST + 27;
-    public static final int MENU_ITEM_SET_DISPLAY_NAME = Menu.FIRST + 28;
+    public static final int MENU_ITEM_SET_STOPOVER = Menu.FIRST + 13;
+    public static final int MENU_ITEM_SET_TO = Menu.FIRST + 14;
+    public static final int MENU_ITEM_SET_FAVORITE = Menu.FIRST + 15;
+    public static final int MENU_ITEM_SET_FAVORITE_REVERSE = Menu.FIRST + 16;
+    public static final int MENU_ITEM_SELECT_LOCATION = Menu.FIRST + 17;
+    public static final int MENU_ITEM_REVERSE_LOCATION = Menu.FIRST + 18;
+    public static final int MENU_ITEM_TRAVEL_DELAY = Menu.FIRST + 19;
+    public static final int MENU_ITEM_DELETE_OLD_MEMO = Menu.FIRST + 20;
+    public static final int MENU_ITEM_SEARCH_BY_GOO = Menu.FIRST + 21;
+    public static final int MENU_ITEM_SEARCH_BY_GOOGLE = Menu.FIRST + 22;
+    public static final int MENU_ITEM_SEARCH_NEAR_STATIONS = Menu.FIRST + 23;
+    public static final int MENU_ITEM_SEARCH_STATIONS = Menu.FIRST + 24;
+    public static final int MENU_ITEM_TIME_TABLE = Menu.FIRST + 25;
+    public static final int MENU_ITEM_LOCATION_CLEAR = Menu.FIRST + 26;
+    public static final int MENU_ITEM_JORUDAN_LIVE = Menu.FIRST + 27;
+    public static final int MENU_ITEM_REFRESH = Menu.FIRST + 28;
+    public static final int MENU_ITEM_SET_DISPLAY_NAME = Menu.FIRST + 29;
     
     public static final int ORIENTATION_PORTRAIT = 1;
     public static final int ORIENTATION_LANDSCAPE = 2;

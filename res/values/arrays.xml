@@ -43,4 +43,12 @@
         <item>fare</item>
         <item>num</item>
     </string-array>
+    <string-array name="engine_entries">
+        <item>Google</item>
+        <item>goo</item>
+    </string-array>
+    <string-array name="engine_values">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

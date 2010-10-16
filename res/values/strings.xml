@@ -20,6 +20,7 @@
     <string name="error_socket_exception">通信ができませんでした。</string>
     <string name="error_unknow_host_exception">サービスに接続できませんでした。</string>
     <string name="label_from">出発</string>
+    <string name="label_stopover">経由</string>
     <string name="label_time">時刻</string>
     <string name="label_to">到着</string>
     <string name="no_route_found">該当するルートが見つかりませんでした。</string>

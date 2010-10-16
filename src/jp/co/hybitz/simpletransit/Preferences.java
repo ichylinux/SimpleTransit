@@ -19,6 +19,7 @@ package jp.co.hybitz.simpletransit;
 
 import java.io.IOException;
 
+import jp.co.hybitz.common.Engine;
 import jp.co.hybitz.common.StringUtils;
 import jp.co.hybitz.csv.CsvException;
 import jp.co.hybitz.csv.CsvReader;
@@ -54,6 +55,19 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
         return sp.getBoolean("full_input", false);
     }
 
+    public static Engine getEngine(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        int engine = Integer.parseInt(sp.getString("engine", String.valueOf(ENGINE_GOOGLE)));
+        switch (engine) {
+        case ENGINE_GOOGLE :
+            return Engine.GOOGLE;
+        case ENGINE_GOO :
+            return Engine.GOO;
+        default :
+            return Engine.GOOGLE;
+        }
+    }
+
     public static boolean isResultsOnFullScreen(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("results_on_full_screen", false);
@@ -72,6 +86,11 @@ public class Preferences extends PreferenceActivity implements SimpleTransitCons
     public static boolean isUseLatestQueryHistory(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getBoolean("use_latest_query_history", false);
+    }
+
+    public static boolean isUseStopOver(Context context) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getBoolean("use_stopover", false);
     }
 
     public static boolean isUseExpress(Context context) {
