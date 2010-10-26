@@ -64,6 +64,7 @@ public class TransitItem {
                     sb.append("\n");
                     sb.append(detail.getDeparture().getTime()).append("発　");
                     sb.append(detail.getDeparture().getPlace().replaceAll(prefectureWithParen, "")).append("\n");
+                    
                     if (detail.getArrival() != null) {
                         sb.append(detail.getArrival().getTime()).append("着　");
                         sb.append(detail.getArrival().getPlace().replaceAll(prefectureWithParen, ""));
