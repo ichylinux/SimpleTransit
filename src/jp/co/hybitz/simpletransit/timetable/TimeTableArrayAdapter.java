@@ -17,7 +17,7 @@
  */
 package jp.co.hybitz.simpletransit.timetable;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import jp.co.hybitz.android.ArrayAdapterEx;
 import jp.co.hybitz.simpletransit.Preferences;
@@ -31,8 +31,8 @@ import android.widget.TextView;
  */
 class TimeTableArrayAdapter extends ArrayAdapterEx<TimeTableItem> implements SimpleTransitConst {
 
-    public TimeTableArrayAdapter(Context context, int textViewResourceId, List<TimeTableItem> items) {
-        super(context, textViewResourceId, items);
+    public TimeTableArrayAdapter(Context context, int textViewResourceId) {
+        super(context, textViewResourceId, new ArrayList<TimeTableItem>());
     }
 
     @Override

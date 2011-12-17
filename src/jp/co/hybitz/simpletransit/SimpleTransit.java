@@ -144,13 +144,12 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         menu.add(0, MENU_ITEM_QUERY_HISTORY, 1, "検索履歴");
         menu.add(0, MENU_ITEM_MEMO, 2, "メモ");
         menu.add(0, MENU_ITEM_ALARM, 3, "アラーム");
-        menu.add(0, MENU_ITEM_TRAVEL_DELAY, 4, "運行情報");
+        menu.add(0, MENU_ITEM_VOICE, 4, "音声入力");
         menu.add(0, MENU_ITEM_TIME_TABLE, 5, "駅・時刻表");
         menu.add(0, MENU_ITEM_JORUDAN_LIVE, 6, "ジョルダンライブ！");
-        menu.add(0, MENU_ITEM_VOICE, 7, "音声入力");
-        menu.add(0, MENU_ITEM_SEARCH_NEAR_STATIONS, 8, "最寄駅検索");
-        menu.add(0, MENU_ITEM_PREFERENCES, 9, "設定");
-        menu.add(0, MENU_ITEM_QUIT, 10, "終了");
+//        menu.add(0, MENU_ITEM_TRAVEL_DELAY, 7, "運行情報");
+        menu.add(0, MENU_ITEM_PREFERENCES, 8, "設定");
+        menu.add(0, MENU_ITEM_QUIT, 9, "終了");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -233,7 +232,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (requestCode == REQUEST_CODE_SELECT_TRANSIT_QUERY) {
             if (resultCode == RESULT_CODE_ROUTE_SELECTED) {
-            	TransitQueryEx q = (TransitQueryEx) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
+                TransitQueryEx q = (TransitQueryEx) data.getExtras().getSerializable(EXTRA_KEY_TRANSIT_QUERY);
                 query.setFrom(q.getFrom());
                 query.setTo(q.getTo());
                 query.setStopOver(q.getStopOver());
@@ -252,31 +251,31 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         }
         else if (requestCode == REQUEST_CODE_VOICE_INPUT) {
             if (resultCode == RESULT_OK) {
-            	String from = query.getFrom();
-            	String to = query.getTo();
-            	if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
-            		from = to = null;
-            	}
-            	
+                String from = query.getFrom();
+                String to = query.getTo();
+                if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
+                    from = to = null;
+                }
+                
                 List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 for (int i = 0; i < results.size(); i ++) {
-                	String result = results.get(i);
-                	String[] split = result.split(" ");
-                	for (int j = 0; j < split.length; j ++) {
-                		if (StringUtils.isEmpty(from)) {
-                			from = split[j];
-                		}
-                		else if (StringUtils.isEmpty(to)) {
-                			to = split[j];
-                		}
-                		else {
-                			break;
-                		}
-                	}
-                	
-                	if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
-                		break;
-                	}
+                    String result = results.get(i);
+                    String[] split = result.split(" ");
+                    for (int j = 0; j < split.length; j ++) {
+                        if (StringUtils.isEmpty(from)) {
+                            from = split[j];
+                        }
+                        else if (StringUtils.isEmpty(to)) {
+                            to = split[j];
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    
+                    if (StringUtils.isNotEmpty(from) && StringUtils.isNotEmpty(to)) {
+                        break;
+                    }
                 }
                 
                 query.setFrom(from);
@@ -287,7 +286,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     }
     
     private void initView() {
-    	Preferences.initTheme(this);
+        Preferences.initTheme(this);
         setContentView(getLayoutId());
 
         engine = Preferences.getEngine(this);
@@ -438,7 +437,7 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
         EditText stopOver = (EditText) findViewById(R.id.stopover);
         registerForContextMenu(stopOver);
         
-    	TextView time = (TextView) findViewById(R.id.time);
+        TextView time = (TextView) findViewById(R.id.time);
         time.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
                 showTimeDialog();
@@ -616,16 +615,16 @@ public class SimpleTransit extends BaseActivity implements SimpleTransitConst {
     }
 
     private void showTimeDialog() {
-    	final TimeDialog dialog = new TimeDialog(this);
-    	dialog.setOnDismissListener(new OnDismissListener() {
-			public void onDismiss(DialogInterface di) {
-			    selectedTime = dialog.getTimeTypeAndDate();
+        final TimeDialog dialog = new TimeDialog(this);
+        dialog.setOnDismissListener(new OnDismissListener() {
+            public void onDismiss(DialogInterface di) {
+                selectedTime = dialog.getTimeTypeAndDate();
                 renderSelectedTime();
-			}
-		});
-    	
-   	    dialog.setTimeTypeAndDate(selectedTime);
-    	dialog.show();
+            }
+        });
+        
+        dialog.setTimeTypeAndDate(selectedTime);
+        dialog.show();
     }
     
     private void renderSelectedTime() {

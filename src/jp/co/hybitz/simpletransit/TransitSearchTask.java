@@ -17,6 +17,10 @@
  */
 package jp.co.hybitz.simpletransit;
 
+import java.io.IOException;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import jp.co.hybitz.android.WebSearchTask;
 import jp.co.hybitz.common.HttpSearchException;
 import jp.co.hybitz.common.Platform;
@@ -25,6 +29,7 @@ import jp.co.hybitz.simpletransit.action.MaybeListener;
 import jp.co.hybitz.simpletransit.util.DialogUtils;
 import jp.co.hybitz.transit.TransitSearcherFactory;
 import jp.co.hybitz.transit.goo.GooStationSearcherFactory;
+import jp.co.hybitz.transit.google.MobileParser20111218;
 import jp.co.hybitz.transit.model.TransitQuery;
 import jp.co.hybitz.transit.model.TransitResult;
 import android.view.View;
@@ -43,14 +48,14 @@ class TransitSearchTask extends WebSearchTask<TransitQuery, TransitResult> imple
     }
 
     @Override
-    protected TransitResult search(TransitQuery in) throws HttpSearchException {
+    protected TransitResult search(TransitQuery query) throws HttpSearchException {
         if (searchType == SEARCH_TYPE_STATIONS) {
             Searcher<TransitQuery, TransitResult> searcher = GooStationSearcherFactory.createSearcher();
-            return searcher.search(in);
+            return searcher.search(query);
         }
         else {
-            Searcher<TransitQuery, TransitResult> searcher = TransitSearcherFactory.createSearcher(in.getEngine(), Platform.ANDROID);
-            return searcher.search(in);
+            Searcher<TransitQuery, TransitResult> searcher = TransitSearcherFactory.createSearcher(query.getEngine(), Platform.ANDROID);
+            return searcher.search(query);
         }
     }
     

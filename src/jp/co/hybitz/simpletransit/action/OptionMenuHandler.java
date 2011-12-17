@@ -33,6 +33,7 @@ import jp.co.hybitz.simpletransit.timetable.TimeTableTask;
 import jp.co.hybitz.simpletransit.timetable.model.AreaEx;
 import jp.co.hybitz.simpletransit.timetable.model.TimeTableResultEx;
 import jp.co.hybitz.simpletransit.traveldelay.TravelDelayTask;
+import jp.co.hybitz.simpletransit.traveldelay.TravelDelayUtils;
 import jp.co.hybitz.simpletransit.util.ToastUtils;
 import jp.co.hybitz.timetable.model.TimeTableQuery;
 import jp.co.hybitz.traveldelay.model.TravelDelayQuery;
@@ -89,6 +90,7 @@ public class OptionMenuHandler implements SimpleTransitConst {
     
     private void showTravelDelay() {
         TravelDelayQuery query = new TravelDelayQuery();
+        query.setMobile(TravelDelayUtils.isMobile());
         new TravelDelayTask(activity).execute(query);
     }
     

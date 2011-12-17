@@ -17,7 +17,6 @@
  */
 package jp.co.hybitz.simpletransit.timetable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import jp.co.hybitz.android.DateUtils;
@@ -366,7 +365,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
     
     public void showAreas(TimeTableResultEx result) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = null;
         backItem = null;
 
@@ -383,7 +382,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
 
     public void showPrefectures(AreaEx a) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = new TimeTableItem(a);
         backItem = new ParentBackItem();
 
@@ -402,7 +401,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
     
     public void showLines(AreaEx a, PrefectureEx p) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = new TimeTableItem(a, p);
         backItem = new ParentBackItem(a);
 
@@ -421,7 +420,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
     
     public void showStations(AreaEx a, PrefectureEx p, LineEx l) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = new TimeTableItem(a, p, l);
         backItem = new ParentBackItem(a, p);
 
@@ -440,7 +439,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
     
     public void showTimeTables(AreaEx a, PrefectureEx p, LineEx l, StationEx s) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = new TimeTableItem(a, p, l, s);
         backItem = new ParentBackItem(a, p, l);
 
@@ -459,7 +458,7 @@ public class TimeTableActivity extends BaseActivity implements SimpleTransitCons
     }
     
     private void showTimeLines(AreaEx a, PrefectureEx p, LineEx l, StationEx s, TimeTableEx tt) {
-        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list, new ArrayList<TimeTableItem>());
+        TimeTableArrayAdapter adapter = new TimeTableArrayAdapter(this, R.layout.time_table_list);
         currentItem = new TimeTableItem(a, p, l, s, tt);
 
         boolean hasBack = false;
